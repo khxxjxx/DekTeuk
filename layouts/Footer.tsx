@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 
 const FooterDiv = styled.footer`
   display: flex;
-  padding: 5rem 2rem 2rem 2rem;
+  padding: 2rem 2rem 2rem 2rem;
   border-top: 1px solid #eaeaea;
   justify-content: center;
   align-items: center;
