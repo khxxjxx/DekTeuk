@@ -1,34 +1,65 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# (Devily)
 
-## Getting Started
+- 한국 개발자들이 자유롭게 소통하고 질문하는 커뮤니티입니다.
 
-First, run the development server:
+## 프로젝트 구성 안내
 
-```bash
-npm run dev
-# or
-yarn dev
-```
+- `bullet point 에 적힌 내용을 수정해 주시면 됩니다.`
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- `초기 기획은 언제든 수정될 수 있으니 웹서비스 결과를 내는데 초점을 두시기 바랍니다.`
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+## 1. 프로젝트 소개
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+**엔드유저에게 보이는 웹서비스에 대한 소개**
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+- 기술 스택 (React.js, MongoDB 등)
+- 웹서비스에 대한 자세한 개요
 
-## Learn More
+## 2. 프로젝트 기획 의도
 
-To learn more about Next.js, take a look at the following resources:
+**어떤 의도로 프로젝트를 기획했는지에 대한 설명**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- 프로젝트 아이디어 동기
+- 해당 서비스를 통해 해결하고 싶었던 문제를 구체적으로 명시
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+## 3. 서비스 주요 기능 설명
 
-## Deploy on Vercel
+**웹서비스의 유용성, 편의성 및 시각화의 실용성에 대한 설명**
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- 주요 기능 (주된 활용성) 및 서브 기능 소개
+- 프로젝트만의 차별점, 기대 효과
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## 4. 프로젝트 구성도
+
+- 프로젝트 구조도
+- 와이어프레임 e.g) figma
+- 스토리보드
+
+## 5. 프로젝트 팀원 역할 분담
+
+| 이름  | 담당 업무            |
+| ----- | -------------------- |
+| 멤버1 | 팀장/프론트엔드 개발 |
+| 멤버2 | 백엔드 개발          |
+
+**멤버별 responsibility**
+
+1. 프론트엔드 담당
+
+- 기획 단계: 구체적인 설계와 지표에 따른 프로젝트 제안서 작성
+- 개발 단계: 팀원간의 일정 등 조율 + 프론트 or 백엔드 개발
+- 수정 단계: 기획, 스크럼 진행, 코치님 피드백 반영해서 수정, 발표 준비
+
+2. 백엔드 담당
+
+- 기획 단계: 큰 주제에서 문제 해결 아이디어 도출, 와이어프레임 작성
+- 개발 단계: 와이어프레임을 기반으로 구현, UI 디자인 완성
+- 수정 단계: 피드백 반영해서 프론트 디자인 수정
+
+## 6. 버전
+
+- 0.1.0
+
+## 7. FAQ
+
+- 자주 받는 질문 정리
