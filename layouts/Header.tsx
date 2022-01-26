@@ -61,7 +61,7 @@ const Header: React.FC = () => {
   };
 
   return (
-    <>
+    <div style={{ position: 'fixed', zIndex: 9999, width: '100%' }}>
       <SwipeableDrawer
         anchor="top"
         open={visibleDrawer}
@@ -87,7 +87,7 @@ const Header: React.FC = () => {
           </UserMenuWrapper>
         </MenuItem>
       </Menu>
-    </>
+    </div>
   );
 };
 

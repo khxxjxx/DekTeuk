@@ -25,6 +25,9 @@ const TextFieldCustom = styled(TextField)`
     margin-right: 46px;
   }
   width: 100%;
+  $ > div > div {
+    border-radius: 20px;
+  }
 `;
 const ArrowButtonDivStyled = styled.div`
   height: 56px;
