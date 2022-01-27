@@ -4,7 +4,7 @@ import Layout from '@layouts/Layout';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { TextField } from '@mui/material';
 import styled from '@emotion/styled';
-import useInputHook from '@hooks/useInputHook';
+import useInputHook from 'hooks/useInputHook';
 import HomePost from '@components/HomePost';
 import Link from 'next/link';
 
