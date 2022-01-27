@@ -24,7 +24,8 @@
       "@public/*": ["public/*"],
       "@styles/*": ["styles/*"],
       "@utils/*": ["utils/*"],
-      "@hooks/*": ["hooks/*"]
+      "@hooks/*": ["hooks/*"],
+      "typeRoots": ["./interface"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
