@@ -1,53 +1,74 @@
-import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import { addPost, getPost } from '../pages/api/list';
 import Link from 'next/link';
-
 import styled from '@emotion/styled';
 
 const dummyList = [
   {
     id: 0,
     title: '타스가 어려웡',
-    author: '김희진',
-    profile:
-      'https://www.urbanbrush.net/web/wp-content/uploads/edd/2018/12/urbanbrush-20181213142535248709.png',
+    author: {
+      id: 6,
+      name: '김희진',
+      profile:
+        'https://www.urbanbrush.net/web/wp-content/uploads/edd/2019/03/urbanbrush-20190304071823893331.png',
+    },
   },
   {
     id: 1,
     title: '타스가 넘나리 어려웡',
-    author: '김희진',
-    profile:
-      'https://www.urbanbrush.net/web/wp-content/uploads/edd/2019/03/urbanbrush-20190304071823893331.png',
+    author: {
+      id: 7,
+      name: '김희진',
+      profile:
+        'https://www.urbanbrush.net/web/wp-content/uploads/edd/2019/03/urbanbrush-20190304071823893331.png',
+    },
   },
   {
     id: 2,
     title: '리액트 다 까먹었다!!!!',
-    author: '김김희진',
-    profile:
-      'https://www.urbanbrush.net/web/wp-content/uploads/edd/2019/03/urbanbrush-20190304071823893331.png',
+    author: {
+      id: 8,
+      name: '김김희진',
+      profile:
+        'https://www.urbanbrush.net/web/wp-content/uploads/edd/2019/03/urbanbrush-20190304071823893331.png',
+    },
   },
   {
     id: 3,
     title: '하나도 기억이 안난다!!',
-    author: 'Jin',
-    profile:
-      'https://www.urbanbrush.net/web/wp-content/uploads/edd/2019/03/urbanbrush-20190304071823893331.png',
+    author: {
+      id: 9,
+      name: 'jin',
+      profile:
+        'https://www.urbanbrush.net/web/wp-content/uploads/edd/2019/03/urbanbrush-20190304071823893331.png',
+    },
   },
 ];
 
 const List = () => {
-  const router = useRouter();
+  const [posts, setPosts] = useState<Post[]>([]);
+  useEffect(() => {
+    const fetch = async () => {
+      const data = await getPost();
+      setPosts(data!);
+    };
+    fetch();
+  }, []);
 
   return (
     <ListsStyle>
-      {dummyList.map((list) => (
-        <ListStyle key={list.id}>
-          <Link href={`/post/${list.id}`} passHref>
-            <Title>{list.title}</Title>
+      {posts.map(({ id, title, author }, idx) => (
+        <ListStyle key={idx}>
+          <Link href={`/post/${id}`} passHref>
+            <Title>{title}</Title>
           </Link>
-          <Profile>
-            <ProfileImg src={list.profile} />
-            <ProfileName>{list.author}</ProfileName>
-          </Profile>
+          <Link href={`/user${author.name}`} passHref>
+            <Profile>
+              <ProfileImg src={author.profile} />
+              <ProfileName>{author.name}</ProfileName>
+            </Profile>
+          </Link>
         </ListStyle>
       ))}
     </ListsStyle>
@@ -59,6 +80,7 @@ export default List;
 const ListsStyle = styled.div`
   padding: 40px 0;
   height: 85%;
+  overflow: scroll;
 `;
 
 const ListStyle = styled.div`
