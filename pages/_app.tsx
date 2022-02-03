@@ -28,7 +28,6 @@ function MyApp({ Component, pageProps, router }: AppProps) {
     </QueryClientProvider>
   );
 }
-
 MyApp.getInitialProps = async () => {
   const queryClient = new QueryClient({
     defaultOptions: {
