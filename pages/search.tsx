@@ -12,57 +12,6 @@ import { getMyInfo, searchInfiniteFunction } from '@utils/function';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import { FormEvent, useEffect, useState } from 'react';
 
-// const HeaderSearch: React.FC = () => {
-//   const { data: myInfo } = useQuery('user', getMyInfo);
-//   const [searchValue, setSearchValue] = useState('');
-//   const queryClient = useQueryClient();
-//   const searchInfiniteQuery = useInfiniteQuery(
-//     'infinite-search',
-//     async ({ pageParam = 0 }) => {
-//       return await searchInfiniteFunction(searchValue, pageParam);
-//     },
-//     {
-//       getNextPageParam: (props) => {
-//         return props.nextPage;
-//       },
-//     },
-//   );
-//   const onSubmitSearchForm = async (e: FormEvent) => {
-//     e.preventDefault(); // form 액션으로 인한 refresh 방지
-//     const value = (
-//       e.currentTarget.querySelector(
-//         'input[name="search-value"]',
-//       ) as HTMLInputElement
-//     ).value; // form 내 input value
-//     if (!value) return; // value가 없을 시 return
-//     document
-//       .querySelector('#main-content')
-//       ?.scrollTo({ top: 0, behavior: 'smooth' }); // 새로 검색 시 상단스크롤
-//     setSearchValue(value); // value값 변경
-//   };
-//   useEffect(() => {
-//     (async () => {
-//       await queryClient.resetQueries('infinite-search');
-//       // await searchInfiniteQuery.refetch();
-//     })();
-//   }, [searchValue]);
-//   useEffect(() => {
-//     return () => queryClient.removeQueries('infinite-search');
-//   }, []);
-//   return (
-//     <SearchWrapperStyled>
-//       <SearchFormStyled onSubmit={onSubmitSearchForm}>
-//         <SearchOutlinedIconStyled fontSize="medium" />
-//         <InputStyled
-//           name="search-value"
-//           type="text"
-//           placeholder="검색어, #태그로 검색"
-//         />
-//       </SearchFormStyled>
-//     </SearchWrapperStyled>
-//   );
-// };
-
 const Search = ({ searchValue = '' }: { searchValue: string }) => {
   const {
     data: searchInfiniteResult,
@@ -98,7 +47,7 @@ const Search = ({ searchValue = '' }: { searchValue: string }) => {
     return (
       <SearchResultsWrapperDiv>
         {(renderData as Array<TopicPost | RoungePost>)?.map((post, i) => {
-          if (i === (renderData as Array<TopicPost | RoungePost>).length - 10) {
+          if (i >= (renderData as Array<TopicPost | RoungePost>).length - 10) {
             return post.postType === 'topic' ? (
               <TopicCard topicCardData={post} key={post.postId} ref={ref} />
             ) : (

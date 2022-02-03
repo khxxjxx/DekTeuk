@@ -3,11 +3,7 @@ import { useRouter } from 'next/router';
 import HeaderHome from '@components/Headers/Home';
 import HeaderSkeleton from '@components/Headers/Skeleton';
 import HeaderChatting from '@components/Headers/Chatting';
-export const HeaderWrapperDivStyled = styled.div`
-  position: fixed;
-  zindex: 9999;
-  width: 100vw;
-`;
+
 const Header: React.FC = () => {
   const router = useRouter();
   const headerKey = router.pathname.split('/')[1];
@@ -22,3 +18,8 @@ const Header: React.FC = () => {
   );
 };
 export default Header;
+export const HeaderWrapperDivStyled = styled.div`
+  position: fixed;
+  zindex: 9999;
+  width: 100vw;
+`;

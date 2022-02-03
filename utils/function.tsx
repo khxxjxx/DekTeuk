@@ -1,7 +1,11 @@
 import { TopicPost, RoungePost } from '../interface/CardInterface';
 import delay from '@utils/delay';
+import { app, auth } from '@firebase/firebase';
 
 export const getMyInfo = async () => {
+  // console.log(app);
+  // console.log(auth);
+  console.log(auth.currentUser);
   // console.log('getMyInfo Called!');
   await delay(0);
   // return null;
@@ -16,6 +20,9 @@ export const getMyInfo = async () => {
     ],
   };
 };
+
+export const getTimelinePosts = async () => {};
+
 export const searchInfiniteFunction = async (
   searchValue: string,
   pageParam: number,
@@ -82,66 +89,6 @@ export const searchInfiniteFunction = async (
   }
   // console.log(lastIndex);
   return { result: dummyPosts, nextPage: pageParam + 1 };
-};
-
-export const searchFunction = async (
-  value: string,
-  lastIndex: number | undefined,
-) => {
-  await delay(0);
-  // console.log(value);
-  const dummyRoungePost: RoungePost = {
-    postId: 'r8q394uf90q23urq89pd3oil',
-    postType: 'rounge',
-    rounge: '외식·음료',
-    title: '라운지 글 제목',
-    content: '블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 ',
-    commentsCount: 0,
-    author: { nickname: '닉네임', jobSector: '외식·음료' },
-    likeCount: 0,
-    createdAt: Date.now().toString(),
-  };
-  const dummyTopicPost: TopicPost = {
-    postId: 'r8qur390wjfioajwfeio394uf90q23urq89pd3oil',
-    postType: 'topic',
-    topic: '블라블라블라블라',
-    title: '토픽 글 제목',
-    content: '블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 ',
-    commentsCount: 0,
-    author: { nickname: '닉네임', jobSector: '외식·음료' },
-    likeCount: 0,
-    createdAt: Date.now().toString(),
-  };
-  const dummyTopicPosts = [];
-  const dummyRoungePosts = [];
-
-  for (let i = 0; i < 10; i++) {
-    const newTopicPost: TopicPost = {
-      ...dummyTopicPost,
-      postId: dummyTopicPost.postId + Math.floor(Math.random() * 1000000),
-      createdAt: (
-        parseInt(dummyTopicPost.createdAt) -
-        Math.floor(Math.random() * 30000) * 1000
-      ).toString(),
-    };
-    dummyTopicPosts.push(newTopicPost);
-
-    const newRoungePost: RoungePost = {
-      ...dummyRoungePost,
-      postId: dummyTopicPost.postId + Math.floor(Math.random() * 1000000),
-      createdAt: (
-        parseInt(dummyRoungePost.createdAt) -
-        Math.floor(Math.random() * 30000) * 1000
-      ).toString(),
-    };
-    dummyRoungePosts.push(newRoungePost);
-  }
-  const dummyPosts: Array<TopicPost | RoungePost> = [...dummyTopicPosts];
-  for (let i = 0; i < 10; i++) {
-    dummyPosts.splice(Math.floor(Math.random() * 10), 0, dummyRoungePosts[i]);
-  }
-  // console.log(lastIndex);
-  return dummyPosts;
 };
 
 export const getDateTime = (dateNumberString: string): string => {
