@@ -192,6 +192,7 @@ const SearchPageWrapperDiv = styled.div`
 `;
 const SearchResultsWrapperDiv = styled.div`
   width: 100%;
+  padding-bottom: 68px;
 `;
 
 const SearchWrapperStyled = styled.div`

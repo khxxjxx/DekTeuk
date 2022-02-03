@@ -87,10 +87,6 @@ export const RoungeCard = forwardRef(
     ref?: ForwardedRef<any>,
   ) => {
     const { ref: cardRef, inView } = useInView();
-    // console.log(Object.keys(roungeCardData));
-    if (inView) {
-      console.log('isInView!!');
-    }
     return (
       <Link href={`/rounge/posts/${roungeCardData.postId}`}>
         <CardWrapper ref={cardRef}>
