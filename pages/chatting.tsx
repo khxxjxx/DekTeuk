@@ -11,10 +11,10 @@ const ChattingPageWrapperDiv = styled.div`
   flex-direction: column;
   align-items: center;
   text-align: left;
-  height: 100%;
   width: 100%;
   border-top: solid 1px rgb(59, 59, 61);
   border-bottom: solid 1px rgb(59, 59, 61);
+  margin-bottom: 60px;
 `;
 const ChattingHeaderMenuWrapperDivStyled = styled.div`
   width: 100%;
@@ -36,16 +36,24 @@ const ChattingHeaderMenuWrapperDivStyled = styled.div`
       : '& .public-chatting{color:#fff}'}
 `;
 const DividerStyled = styled.div`
-  width: 50%;
-  height: 2px;
-  background-color: #fff;
+  width: 100%;
   border-radius: 10px;
-  position: relative;
   margin-top: -1px;
   margin-right: auto;
-  left: 0;
-  transition: 0.5s;
-  ${(property) => property.property === 'public' && 'left: 50%;'}
+  display: flex;
+  & div.divider-center {
+    height: 2px;
+    background-color: #fff;
+    width: 50%;
+  }
+  & div.divider-start {
+    transition: 0.5s;
+    width: ${({ property }) => (property === 'public' ? '50%' : 0)};
+  }
+  & div.divider-end {
+    transition: 0.5s;
+    width: ${({ property }) => (property === 'public' ? 0 : '50%')};
+  }
 `;
 const Chatting = () => {
   const [chatMode, setChatMode] = useState('my');
@@ -70,7 +78,11 @@ const Chatting = () => {
             퍼블릭
           </div>
         </ChattingHeaderMenuWrapperDivStyled>
-        <DividerStyled property={chatMode} className={`${chatMode}`} />
+        <DividerStyled property={chatMode}>
+          <div className="divider-start" />
+          <div className="divider-center" />
+          <div className="divider-end" />
+        </DividerStyled>
         {chatMode === 'my' && (
           <div>
             <MoodBadIcon fontSize="large" />
@@ -79,10 +91,9 @@ const Chatting = () => {
         )}
         {chatMode === 'public' && (
           <div>
-            <div>채팅1</div>
-            <div>채팅1</div>
-            <div>채팅1</div>
-            <div>채팅1</div>
+            {new Array(100).fill(0).map((v, i) => (
+              <div key={i}>채팅1</div>
+            ))}
           </div>
         )}
       </ChattingPageWrapperDiv>

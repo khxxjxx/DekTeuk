@@ -21,7 +21,7 @@ export const searchInfiniteFunction = async (
   pageParam: number,
 ) => {
   const value = searchValue;
-  console.log(searchValue, pageParam);
+  // console.log(searchValue, pageParam);
   if (!value) {
     return { result: [], nextPage: 1 };
   }
