@@ -46,7 +46,7 @@ const LoggedInUDrawer = () => {
   return (
     <>
       <ListItem disablePadding>
-        <Link href="/user/mypage">
+        <Link href="/user/mypage" passHref={true}>
           <ListItemButton>
             <ListItemIcon>
               <ManageAccountsIconStyled />
@@ -57,7 +57,7 @@ const LoggedInUDrawer = () => {
       </ListItem>
       <DividerStyled />
       <ListItem disablePadding>
-        <Link href="/user/logout">
+        <Link href="/user/logout" passHref={true}>
           <ListItemButton>
             <ListItemIcon>
               <LogoutIconStyled />
@@ -73,7 +73,7 @@ const NotLoggedInUDrawer = () => {
   return (
     <>
       <ListItem disablePadding>
-        <Link href="/user/login">
+        <Link href="/user/login" passHref={true}>
           <ListItemButton>
             <ListItemIcon>
               <LoginIconStyled />
@@ -84,7 +84,7 @@ const NotLoggedInUDrawer = () => {
       </ListItem>
       <DividerStyled />
       <ListItem disablePadding>
-        <Link href="/user/signup">
+        <Link href="/user/signup" passHref={true}>
           <ListItemButton>
             <ListItemIcon>
               <GroupIconStyled />
@@ -121,7 +121,7 @@ const DrawerCategories = ({ categories }: { categories: Array<category> }) => {
         <div key={item.title}>
           <DividerStyled />
           <ListItem disablePadding>
-            <Link href={`/list/${item.title}`}>
+            <Link href={`/list/${item.title}`} passHref={true}>
               <ListItemButton>
                 <ListItemIcon>
                   {item.title === '질문게시판' && <QuestionAnswerIconStyled />}

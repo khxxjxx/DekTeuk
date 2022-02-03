@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { useRouter } from 'next/router';
 const ErrorPageWrapperDiv = styled.div`
-  margin-top: 20px;
+  margin-top: 80vh;
   text-align: center;
 `;
 const ErrorPageContentWrapperDiv = styled.div`
@@ -61,11 +61,11 @@ const ErrorPagePrevPageButtonStyled = styled.div`
   text-align: center;
   cursor: pointer;
 `;
-export default function () {
+export default function NotFoundPage(): JSX.Element {
   const router = useRouter();
   return (
     <ErrorPageWrapperDiv>
-      <h2>Davily</h2>
+      <h2>PageName</h2>
       <ErrorPageContentWrapperDiv>
         <div>
           <svg

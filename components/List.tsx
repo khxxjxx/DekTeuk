@@ -10,8 +10,6 @@ const dummyList = [
     author: {
       id: 6,
       name: '김희진',
-      profile:
-        'https://www.urbanbrush.net/web/wp-content/uploads/edd/2019/03/urbanbrush-20190304071823893331.png',
     },
   },
   {
