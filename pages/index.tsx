@@ -16,7 +16,9 @@ const Home: NextPage = () => {
   useEffect(() => {
     router.push('/list/timeline');
   }, []);
-  const { data: myInfo } = useQuery('user', getMyInfo);
+  const { data: myInfo } = useQuery('user', getMyInfo, {
+    refetchOnWindowFocus: false,
+  });
   // console.log('IndexPage Home Component console.log myInfo', myInfo);
   return <div></div>;
 };

@@ -7,39 +7,58 @@ import Footer from '@layouts/Footer';
 import { HeaderWrapperDivStyled } from '@layouts/Header';
 import { AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/router';
-import { useInfiniteQuery, useQuery, useQueryClient } from 'react-query';
+// import { useInfiniteQuery, useQuery, useQueryClient } from 'react-query';
 import { getMyInfo, searchInfiniteFunction } from '@utils/function';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import { FormEvent, useEffect, useState } from 'react';
-
+export interface SearchResult {
+  result: Array<TopicPost | RoungePost>;
+  nextPage: number;
+}
 const Search = ({ searchValue = '' }: { searchValue: string }) => {
-  const {
-    data: searchInfiniteResult,
-    fetchNextPage,
-    isFetching,
-    remove: infiniteSearchQueryRemove,
-  } = useInfiniteQuery(
-    ['infinite-search', searchValue],
-    async ({ pageParam = 0 }) =>
-      await searchInfiniteFunction(searchValue, pageParam),
-    {
-      getNextPageParam: ({ nextPage }) => nextPage,
-      refetchOnWindowFocus: false,
-    },
-  );
-
+  const [searchResults, setSearchResults] = useState<Array<SearchResult>>([]);
+  useEffect(() => {
+    (async () => {
+      const results = await searchInfiniteFunction(searchValue, 0);
+      // console.log(results);
+      setSearchResults([results]);
+    })();
+  }, [searchValue]);
+  // const {
+  //   data: searchInfiniteResult,
+  //   fetchNextPage,
+  //   isFetching,
+  //   remove: infiniteSearchQueryRemove,
+  // } = useInfiniteQuery(
+  //   ['infinite-search', searchValue],
+  //   async ({ pageParam = 0 }) =>
+  //     await searchInfiniteFunction(searchValue, pageParam),
+  //   {
+  //     getNextPageParam: ({ nextPage }) => nextPage,
+  //     refetchOnWindowFocus: false,
+  //   },
+  // );
   const { ref, inView } = useInView();
+
   useEffect(() => {
     if (inView) {
-      fetchNextPage(); // inView 시 nextPage 불러옴
+      // fetchNextPage(); // inView 시 nextPage 불러옴
+      (async () => {
+        const nextResult = await searchInfiniteFunction(
+          searchValue,
+          searchResults[searchResults.length - 1].nextPage,
+        );
+        setSearchResults([...searchResults, nextResult]);
+      })();
     }
   }, [inView]);
-  useEffect(() => {
-    return () => infiniteSearchQueryRemove(); // unmount 시 query 삭제
-  }, []);
+  // useEffect(() => {
+  //   return () => infiniteSearchQueryRemove(); // unmount 시 query 삭제
+  // }, []);
 
-  const renderData =
-    searchInfiniteResult?.pages.flatMap((value: any) => value.result) ?? [];
+  // const renderData =
+  //   searchInfiniteResult?.pages.flatMap((value: any) => value.result) ?? [];
+  const renderData = searchResults.flatMap((value: any) => value.result) ?? [];
   // console.log(renderData[1]?.content);
   // console.log(renderData?.length);
 
@@ -69,18 +88,21 @@ const Search = ({ searchValue = '' }: { searchValue: string }) => {
 };
 const WrappedSearch = () => {
   const router = useRouter();
-  const { data: myInfo } = useQuery('user', getMyInfo);
+  // const { data: myInfo } = useQuery('user', getMyInfo, {
+  //   refetchOnWindowFocus: false,
+  // });
+
   const [searchValue, setSearchValue] = useState('');
-  const queryClient = useQueryClient();
-  const searchInfiniteQuery = useInfiniteQuery(
-    ['infinite-search', searchValue],
-    async ({ pageParam = 0 }) =>
-      await searchInfiniteFunction(searchValue, pageParam),
-    {
-      getNextPageParam: ({ nextPage }) => nextPage,
-      refetchOnWindowFocus: false,
-    },
-  );
+  // const queryClient = useQueryClient();
+  // const searchInfiniteQuery = useInfiniteQuery(
+  //   ['infinite-search', searchValue],
+  //   async ({ pageParam = 0 }) =>
+  //     await searchInfiniteFunction(searchValue, pageParam),
+  //   {
+  //     getNextPageParam: ({ nextPage }) => nextPage,
+  //     refetchOnWindowFocus: false,
+  //   },
+  // );
   const onSubmitSearchForm = async (e: FormEvent) => {
     e.preventDefault(); // form 액션으로 인한 refresh 방지
     const value = (
@@ -92,7 +114,7 @@ const WrappedSearch = () => {
     document
       .querySelector('#main-content')
       ?.scrollTo({ top: 0, behavior: 'smooth' }); // 새로 검색 시 상단스크롤
-    searchInfiniteQuery.remove();
+    // searchInfiniteQuery.remove();
     setSearchValue(value); // value값 변경
   };
   return (

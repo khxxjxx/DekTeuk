@@ -5,10 +5,11 @@ import { app, auth } from '@firebase/firebase';
 export const getMyInfo = async () => {
   // console.log(app);
   // console.log(auth);
-  console.log(auth.currentUser);
+  // console.log(auth.currentUser);
   // console.log('getMyInfo Called!');
   await delay(0);
   // return null;
+  parseInt(Date.now().toString()) - Math.floor(Math.random() * 30000) * 1000;
   return {
     nickname: '닉네임입니다',
     jobSector: '외식·음료',
@@ -18,10 +19,140 @@ export const getMyInfo = async () => {
       { title: '외식·음료', url: 'food-service' },
       { title: '매장관리·판매', url: 'store-service' },
     ],
+    myChatting: [
+      {
+        roomName: '채팅방1',
+        roomId: 'r8qur390wjfioajwfeio399r3q4esrtscw',
+        isGroup: true,
+        lastMessage: { content: '푸하하', updatedAt: '' },
+        unreadCount: 0,
+      },
+      {
+        roomName: '채팅방2',
+        roomId: 'r8qur390wjfioajwfeio399qr23rqr23ew',
+        isGroup: true,
+        lastMessage: { content: '호호', updatedAt: '' },
+        unreadCount: 10,
+      },
+      {
+        roomName: '채팅방3',
+        roomId: 'r8qur390wjfioajwfeio399t78t7u7yfyh',
+        isGroup: false,
+        lastMessage: { content: '헤응', updatedAt: '' },
+        unreadCount: 4,
+      },
+    ],
+    notification: true,
   };
 };
 
 export const getTimelinePosts = async () => {};
+
+export const getHomePostsInfiniteFunction = async (
+  list: string,
+  pageParam: number,
+) => {
+  await delay(800);
+  const dummyRoungePost: RoungePost = {
+    postId: 'r8q394uf90q23urq89pd3oil',
+    postType: 'rounge',
+    rounge: '외식·음료',
+    title: '라운지 글 제목',
+    content:
+      `조회하고 있는 list는 ${list}이고` +
+      `전달된 pageParam은 ${pageParam}입니다` +
+      '블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 ',
+    commentsCount: Math.floor(Math.random() * 5),
+    author: { nickname: '닉네임', jobSector: '외식·음료' },
+    likeCount: Math.floor(Math.random() * 5),
+    createdAt: Date.now().toString(),
+  };
+  const dummyTopicPost: TopicPost = {
+    postId: 'r8qur390wjfioajwfeio394uf90q23urq89pd3oil',
+    postType: 'topic',
+    topic: '블라블라블라블라',
+    title: '토픽 글 제목',
+    content:
+      `조회하고 있는 list는 ${list}이고` +
+      `전달된 pageParam은 ${pageParam}입니다` +
+      '블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 ',
+    commentsCount: Math.floor(Math.random() * 5),
+    author: { nickname: '닉네임', jobSector: '외식·음료' },
+    likeCount: Math.floor(Math.random() * 5),
+    createdAt: Date.now().toString(),
+  };
+
+  const generateTenTopicPosts = () => {
+    const dummyTopicPosts = [];
+    for (let i = 0; i < 10; i++) {
+      const newTopicPost: TopicPost = {
+        ...dummyTopicPost,
+        postId: dummyTopicPost.postId + Math.floor(Math.random() * 1000000),
+        createdAt: (
+          parseInt(dummyTopicPost.createdAt) -
+          Math.floor(Math.random() * 30000) * 1000
+        ).toString(),
+      };
+      dummyTopicPosts.push(newTopicPost);
+    }
+    return dummyTopicPosts;
+  };
+  const generateTenRoungePosts = () => {
+    const dummyRoungePosts = [];
+    for (let i = 0; i < 10; i++) {
+      const newRoungePost: RoungePost = {
+        ...dummyRoungePost,
+        postId: dummyRoungePost.postId + Math.floor(Math.random() * 1000000),
+        createdAt: (
+          parseInt(dummyRoungePost.createdAt) -
+          Math.floor(Math.random() * 30000) * 1000
+        ).toString(),
+      };
+      dummyRoungePosts.push(newRoungePost);
+    }
+    return dummyRoungePosts;
+  };
+  const dummyTopicPosts = generateTenTopicPosts();
+  const dummyRoungePosts = generateTenRoungePosts();
+  const dummyPosts: Array<TopicPost | RoungePost> = []; // 배열복사
+  switch (list) {
+    case 'timeline':
+      dummyPosts.push(...generateTenTopicPosts());
+      for (let i = 0; i < 10; i++) {
+        dummyPosts.splice(
+          Math.floor(Math.random() * 10),
+          0,
+          dummyRoungePosts[i],
+        );
+      }
+      break;
+    case 'topic':
+      dummyPosts.push(...generateTenTopicPosts());
+      const newDummyTopicPosts = generateTenTopicPosts();
+      for (let i = 0; i < 10; i++) {
+        dummyPosts.splice(
+          Math.floor(Math.random() * 10),
+          0,
+          newDummyTopicPosts[i],
+        );
+      }
+      break;
+    default:
+      dummyPosts.push(...generateTenRoungePosts());
+      const newDummyRoungePosts = generateTenRoungePosts();
+      for (let i = 0; i < 10; i++) {
+        dummyPosts.splice(
+          Math.floor(Math.random() * 10),
+          0,
+          newDummyRoungePosts[i],
+        );
+      }
+      break;
+  }
+
+  // console.log(lastIndex);
+  return { result: dummyPosts, nextPage: pageParam + 1 };
+};
 
 export const searchInfiniteFunction = async (
   searchValue: string,
@@ -39,6 +170,7 @@ export const searchInfiniteFunction = async (
     rounge: '외식·음료',
     title: '라운지 글 제목',
     content:
+      `전달된 pageParam은 ${pageParam} ` +
       searchValue +
       '블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 ',
     commentsCount: Math.floor(Math.random() * 5),
@@ -52,6 +184,7 @@ export const searchInfiniteFunction = async (
     topic: '블라블라블라블라',
     title: '토픽 글 제목',
     content:
+      `전달된 pageParam은 ${pageParam} ` +
       searchValue +
       '블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 ',
     commentsCount: Math.floor(Math.random() * 5),

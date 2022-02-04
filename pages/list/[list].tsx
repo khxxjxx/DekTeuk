@@ -1,18 +1,23 @@
-import styled from '@emotion/styled';
 import { useEffect, useState } from 'react';
-import Header from '@layouts/Header';
-import Footer from '@layouts/Footer';
-import ListTitle from '@components/ListTitle';
-import List from '@components/List';
-import InputBox from '@components/InputBox';
-import Pagination from '@components/Pagination';
 import { useRouter } from 'next/router';
 import { useQuery } from 'react-query';
-import { getMyInfo } from '@utils/function';
+import { getMyInfo, getHomePostsInfiniteFunction } from '@utils/function';
 import Layout from '@layouts/Layout';
+import styled from '@emotion/styled';
+import { TopicPost, RoungePost } from '../../interface/CardInterface';
+import { SearchResult } from '@pages/search';
+import { RoungeCard, TopicCard } from '@components/Card';
+import { useInView } from 'react-intersection-observer';
+import { LinearProgress } from '@mui/material';
+
 const ListPage = () => {
   const router = useRouter();
-  const { data: myInfo } = useQuery('user', getMyInfo);
+  const [results, setResults] = useState<Array<SearchResult>>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { ref, inView } = useInView();
+  const { data: myInfo } = useQuery('user', getMyInfo, {
+    refetchOnWindowFocus: false,
+  });
   useEffect(() => {
     if (
       myInfo?.validRounges.findIndex(
@@ -20,14 +25,78 @@ const ListPage = () => {
       ) === -1
     ) {
       router.push('/404');
+    } else {
+      (async () => {
+        setIsLoading(true);
+        const result = await getHomePostsInfiniteFunction(
+          router.asPath.split('/')[2],
+          0,
+        );
+        setIsLoading(false);
+        setResults([result]);
+      })();
     }
-  }, []);
+    return () => {
+      setResults([]);
+    };
+  }, [router.asPath]);
+  useEffect(() => {
+    if (inView) {
+      (async () => {
+        const nextResult = await getHomePostsInfiniteFunction(
+          router.asPath.split('/')[2],
+          results[results.length - 1].nextPage,
+        );
+        setResults([...results, nextResult]);
+      })();
+    }
+  }, [inView]);
+  const renderData = results.flatMap((value: any) => value.result) ?? [];
+  // console.log(renderData[1]?.content);
+  // console.log(renderData?.length);
+  if (isLoading && results.length === 0) {
+    return (
+      <Layout>
+        <LinearProgress />
+      </Layout>
+    );
+  }
   return (
     <>
       <Layout>
-        <div>{router.query.list}</div>
+        <TimelinePageWrapperDiv>
+          <TimelineResultsWrapperDiv>
+            {(renderData as Array<TopicPost | RoungePost>)?.map((post, i) => {
+              if (
+                i >=
+                (renderData as Array<TopicPost | RoungePost>).length - 10
+              ) {
+                return post.postType === 'topic' ? (
+                  <TopicCard topicCardData={post} key={post.postId} ref={ref} />
+                ) : (
+                  <RoungeCard
+                    roungeCardData={post}
+                    key={post.postId}
+                    ref={ref}
+                  />
+                );
+              }
+              return post.postType === 'topic' ? (
+                <TopicCard topicCardData={post} key={post.postId} />
+              ) : (
+                <RoungeCard roungeCardData={post} key={post.postId} />
+              );
+            })}
+          </TimelineResultsWrapperDiv>
+        </TimelinePageWrapperDiv>
       </Layout>
     </>
   );
 };
 export default ListPage;
+
+const TimelinePageWrapperDiv = styled.div``;
+const TimelineResultsWrapperDiv = styled.div`
+  width: 100%;
+  padding-bottom: 68px;
+`;

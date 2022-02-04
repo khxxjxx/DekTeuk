@@ -42,6 +42,12 @@ const CardTitleStyled = styled.div`
   font-size: 1.5rem;
 `;
 const CardContentStyled = styled.div`
+  height: 2rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   font-size: 0.8rem;
   color: rgb(118, 118, 120);
 `;

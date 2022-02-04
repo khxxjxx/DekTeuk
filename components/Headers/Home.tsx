@@ -39,7 +39,9 @@ const SwiperStyled = styled(Swiper)`
   }
 `;
 const HeaderHome: React.FC = () => {
-  const { data: myInfo } = useQuery('user', getMyInfo);
+  const { data: myInfo } = useQuery('user', getMyInfo, {
+    refetchOnWindowFocus: false,
+  });
   const router = useRouter();
   const headerLinks: { url: string; title: string }[] = [];
   if (myInfo?.validRounges)

@@ -1,5 +1,7 @@
 import styled from '@emotion/styled';
 import AddCommentOutlinedIcon from '@mui/icons-material/AddCommentOutlined';
+import { getMyInfo } from '@utils/function';
+import { useQuery } from 'react-query';
 const ChattingWrapperDivStyled = styled.div`
   background-color: rgba(28, 28, 30, 1);
   height: 60px;
@@ -20,6 +22,10 @@ const AddCommentOutlinedIconStyled = styled(AddCommentOutlinedIcon)`
   cursor: pointer;
 `;
 const HeaderChatting: React.FC = () => {
+  const { data: myInfo } = useQuery('user', getMyInfo, {
+    refetchOnWindowFocus: false,
+  });
+
   return (
     <>
       <ChattingWrapperDivStyled>

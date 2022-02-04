@@ -4,6 +4,9 @@ import { CircularProgress } from '@mui/material';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Layout from '@layouts/Layout';
+import { useQuery } from 'react-query';
+import { getMyInfo } from '@utils/function';
+import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 const ChattingPageWrapperDiv = styled.div`
   background-color: rgba(28, 28, 30, 1);
   color: rgb(81, 81, 83);
@@ -55,8 +58,16 @@ const DividerStyled = styled.div`
     width: ${({ property }) => (property === 'public' ? 0 : '50%')};
   }
 `;
+
 const Chatting = () => {
   const [chatMode, setChatMode] = useState('my');
+  const { data: myInfo } = useQuery('user', getMyInfo, {
+    refetchOnWindowFocus: false,
+  });
+
+  ('대화 내역이 없습니다.');
+  ('대화내역들 렌더링');
+  ('로그인 후 이용해주세요');
   return (
     <Layout>
       <ChattingPageWrapperDiv>
@@ -83,17 +94,86 @@ const Chatting = () => {
           <div className="divider-center" />
           <div className="divider-end" />
         </DividerStyled>
-        {chatMode === 'my' && (
-          <div>
-            <MoodBadIcon fontSize="large" />
-            대화 내역이 없습니다.
-          </div>
-        )}
-        {chatMode === 'public' && (
-          <div>
-            {new Array(100).fill(0).map((v, i) => (
-              <div key={i}>채팅1</div>
-            ))}
+        {myInfo ? (
+          <>
+            {chatMode === 'my' && (
+              <>
+                {myInfo.myChatting.length > 0 ? (
+                  <div>
+                    {myInfo.myChatting.map((chat) => (
+                      <div
+                        key={chat.roomId}
+                        style={{ display: 'flex', alignItems: 'center' }}
+                      >
+                        {chat.isGroup ? (
+                          <div
+                            style={{
+                              display: 'grid',
+                              gridTemplateColumns: '1fr 1fr',
+                            }}
+                          >
+                            <EmojiEmotionsIcon
+                              style={{ color: 'rgb(114,125,147)' }}
+                            />
+                            <EmojiEmotionsIcon
+                              style={{ color: 'rgb(129,198,205)' }}
+                            />
+                            <EmojiEmotionsIcon
+                              style={{ color: 'rgb(161,163,212)' }}
+                            />
+                            <EmojiEmotionsIcon
+                              style={{ color: 'rgb(228,242,132)' }}
+                            />
+                          </div>
+                        ) : (
+                          <div>
+                            <EmojiEmotionsIcon />
+                          </div>
+                        )}
+                        <div>{chat.roomName}</div>
+                        <div>{chat.lastMessage.content}</div>
+                        <div>{chat.unreadCount}</div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div
+                    style={{
+                      height: 'calc(100vh - 166px)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <div>
+                      <MoodBadIcon fontSize="large" />
+                    </div>
+                    <div>대화 내역이 없습니다.</div>
+                  </div>
+                )}
+              </>
+            )}
+            {chatMode === 'public' && (
+              <div>
+                {new Array(100).fill(0).map((v, i) => (
+                  <div key={i}>채팅1</div>
+                ))}
+              </div>
+            )}
+          </>
+        ) : (
+          <div style={{ height: 'calc(100vh - 166px)' }}>
+            <div
+              style={{
+                position: 'relative',
+                left: '50%',
+                top: '50%',
+                transform: 'translate(-50%, -50%)',
+              }}
+            >
+              로그인 후 이용해주세요
+            </div>
           </div>
         )}
       </ChattingPageWrapperDiv>
