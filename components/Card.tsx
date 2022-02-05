@@ -31,6 +31,7 @@ const TopicWrapperDivStyled = styled.div`
     padding: 2px 6px 2px 6px;
   }
 `;
+
 const CardDividerStyled = styled.div`
   width: calc(100% + 48px);
   background-color: rgb(39, 39, 41);
