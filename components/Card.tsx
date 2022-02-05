@@ -19,6 +19,7 @@ const CardWrapper = styled.div`
 const OneDepthNestedLink = styled(Link)`
   z-index: 1;
 `;
+
 const TopicWrapperDivStyled = styled.div`
   display: flex;
   & div {
