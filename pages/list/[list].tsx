@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { useQuery } from 'react-query';
-import { getMyInfo, getHomePostsInfiniteFunction } from '@utils/function';
+import { getHomePostsInfiniteFunction } from '@utils/function';
 import Layout from '@layouts/Layout';
 import styled from '@emotion/styled';
 import { TopicPost, RoungePost } from '../../interface/CardInterface';
@@ -106,12 +105,6 @@ const ListPage = () => {
     </>
   );
 };
-// ListPage.getServerSideProps = wrapper.getServerSideProps(() => {
-//   console.log('@@@@@@@@@@@@@@');
-//   console.log('@@@@@@@@@@@@@@');
-//   console.log('@@@@@@@@@@@@@@');
-//   console.log('@@@@@@@@@@@@@@');
-// });
 export const getServerSideProps = wrapper.getServerSideProps(
   (store) =>
     async ({ req }): Promise<any> => {

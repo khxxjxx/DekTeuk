@@ -12,7 +12,7 @@ import { getMyInfo } from '@utils/function';
 //@ts-ignore
 import { UserState } from '@interface';
 import wrapper from 'store/configureStore';
-import { userSlice } from 'store/reducer';
+import { getUser, userSlice } from 'store/reducer';
 
 // const initialUserState: UserState = {
 //   user: {
@@ -49,7 +49,13 @@ import { userSlice } from 'store/reducer';
 function MyApp({ Component, pageProps }: AppProps) {
   return <Component {...pageProps} />;
 }
-
+export const getServerSideProps = wrapper.getServerSideProps(
+  (store) =>
+    async ({ req }): Promise<any> => {
+      // console.log(req.cookies);
+      await store.dispatch(getUser());
+    },
+);
 // MyApp.getInitialProps = wrapper.getInitialAppProps(async () => {
 //   console.log('@@@@@@@@');
 //   // console.log(ctx);

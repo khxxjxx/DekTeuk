@@ -1,6 +1,4 @@
 import styled from '@emotion/styled';
-import { useQuery } from 'react-query';
-import { getMyInfo } from '@utils/function';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Swiper as TypesSwiper } from 'swiper/types';
 import 'swiper/css/pagination';
@@ -48,7 +46,7 @@ const HeaderHome: React.FC = () => {
   const { user: myInfo }: UserInfo = useSelector<UserState>(
     (state) => state.user,
   );
-  console.log(myInfo);
+  // console.log(myInfo);
   const router = useRouter();
   const headerLinks: { url: string; title: string }[] = [];
   if (myInfo?.validRounges)
