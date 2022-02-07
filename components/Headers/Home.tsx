@@ -7,6 +7,9 @@ import 'swiper/css/pagination';
 import 'swiper/css';
 import { Pagination } from 'swiper';
 import { useRouter } from 'next/router';
+import { useSelector } from 'react-redux';
+//@ts-ignore
+import { UserState, ValidRounge, UserInfo } from '@interface';
 
 const SwiperStyled = styled(Swiper)`
   background-color: rgba(28, 28, 30, 1);
@@ -39,14 +42,18 @@ const SwiperStyled = styled(Swiper)`
   }
 `;
 const HeaderHome: React.FC = () => {
-  const { data: myInfo } = useQuery('user', getMyInfo, {
-    refetchOnWindowFocus: false,
-  });
+  // const { data: myInfo } = useQuery('user', getMyInfo, {
+  //   refetchOnWindowFocus: false,
+  // });
+  const { user: myInfo }: UserInfo = useSelector<UserState>(
+    (state) => state.user,
+  );
+  console.log(myInfo);
   const router = useRouter();
   const headerLinks: { url: string; title: string }[] = [];
   if (myInfo?.validRounges)
     headerLinks.push(
-      ...myInfo?.validRounges.map((v) => ({
+      ...myInfo?.validRounges.map((v: ValidRounge) => ({
         title: v.title,
         url: `/list/${v.url}`,
       })),

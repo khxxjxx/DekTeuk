@@ -1,6 +1,7 @@
 import { TopicPost, RoungePost } from '../interface/CardInterface';
 import delay from '@utils/delay';
 import { app, auth } from '@firebase/firebase';
+import { UserInfo } from '@pages/_app';
 
 export const getMyInfo = async () => {
   // console.log(app);
@@ -19,7 +20,7 @@ export const getMyInfo = async () => {
       { title: '외식·음료', url: 'food-service' },
       { title: '매장관리·판매', url: 'store-service' },
     ],
-    myChatting: [
+    myChattings: [
       {
         roomName: '채팅방1',
         roomId: 'r8qur390wjfioajwfeio399r3q4esrtscw',
@@ -42,8 +43,8 @@ export const getMyInfo = async () => {
         unreadCount: 4,
       },
     ],
-    notification: true,
-  };
+    hasNewNotification: true,
+  } as UserInfo;
 };
 
 export const getTimelinePosts = async () => {};

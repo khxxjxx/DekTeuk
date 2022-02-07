@@ -1,45 +1,72 @@
 import '../styles/globals.css';
-import type { AppProps } from 'next/app';
+import type { AppContext, AppInitialProps, AppProps } from 'next/app';
+import { Provider } from 'react-redux';
 import {
-  QueryClientProvider,
-  QueryClient,
-  Hydrate,
-  dehydrate,
-} from 'react-query';
-import { ReactQueryDevtools } from 'react-query/devtools';
-// import { useRef } from 'react';
-// import { getMyInfo } from '@utils/function';
-const queryClient = new QueryClient();
-function MyApp({ Component, pageProps }: AppProps) {
-  // const queryClientRef = useRef<QueryClient>();
-  // if (!queryClientRef.current) {
-  //   queryClientRef.current = new QueryClient({
-  //     defaultOptions: {
-  //       queries: { refetchOnWindowFocus: false },
-  //     },
-  //   });
-  // }
-  return (
-    <QueryClientProvider client={queryClient}>
-      <Hydrate state={pageProps.dehydratedState}>
-        <Component {...pageProps} />;
-        <ReactQueryDevtools initialIsOpen={false} position="top-right" />
-      </Hydrate>
-    </QueryClientProvider>
-  );
-}
-// MyApp.getInitialProps = async () => {
-//   const queryClient = new QueryClient({
-//     defaultOptions: {
-//       queries: { refetchOnWindowFocus: false },
-//     },
-//   });
-//   await queryClient.prefetchQuery('user', getMyInfo);
+  configureStore,
+  createSlice,
+  createAsyncThunk,
+  Store,
+} from '@reduxjs/toolkit';
+import { createWrapper } from 'next-redux-wrapper';
+import { getMyInfo } from '@utils/function';
+//@ts-ignore
+import { UserState } from '@interface';
+import wrapper from 'store/configureStore';
+import { userSlice } from 'store/reducer';
 
-//   return {
-//     pageProps: {
-//       dehydratedState: JSON.parse(JSON.stringify(dehydrate(queryClient))),
-//     },
-//   };
+// const initialUserState: UserState = {
+//   user: {
+//     nickname: '',
+//     jobSector: '',
+//     validRounges: [],
+//     myChattings: [],
+//     hasNewNotification: false,
+//   },
+//   status: 'standby',
 // };
-export default MyApp;
+// export const getUser = createAsyncThunk('getUser', async () => {
+//   return await getMyInfo();
+// });
+// const userSlice = createSlice({
+//   name: 'user',
+//   initialState: initialUserState,
+//   reducers: {},
+//   extraReducers: {
+//     [getUser.pending as any]: (state: UserState, action: any) => {
+//       state.status = 'loading';
+//     },
+//     [getUser.fulfilled as any]: (state: UserState, action: any) => {
+//       console.log(action.payload);
+//       state.user = action.payload;
+//       state.status = 'success';
+//     },
+//     [getUser.rejected as any]: (state: UserState, action: any) => {
+//       state.status = 'error';
+//     },
+//   },
+// });
+// const store = configureStore({ reducer: userSlice.reducer });
+function MyApp({ Component, pageProps }: AppProps) {
+  return <Component {...pageProps} />;
+}
+
+// MyApp.getInitialProps = wrapper.getInitialAppProps(async () => {
+//   console.log('@@@@@@@@');
+//   // console.log(ctx);
+//   console.log('@@@@@@@@');
+//   return wrapper.withRedux(MyApp);
+// });
+// MyApp.getInitialProps = async ({
+//   Component,
+//   ctx,
+// }: AppContext): Promise<AppInitialProps> => {
+//   // console.log(Component);
+//   console.log('@@@@@@@@@@@@');
+//   console.log(ctx.store);
+//   console.log('@@@@@@@@@@@@');
+
+//   return await getMyInfo();
+// };
+
+export default wrapper.withRedux(MyApp);
+// export default MyApp;
