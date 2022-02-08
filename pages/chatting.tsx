@@ -1,14 +1,14 @@
 import styled from '@emotion/styled';
 import MoodBadIcon from '@mui/icons-material/MoodBad';
 // import { CircularProgress } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 // import { motion, AnimatePresence } from 'framer-motion';
-import { useQuery } from 'react-query';
 import Layout from '@layouts/Layout';
 import { getMyInfo } from '@utils/function';
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 import { MyChatting, UserState } from '@interface/StoreInterface';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { getUser } from 'store/reducer';
 const ChattingPageWrapperDiv = styled.div`
   background-color: rgba(28, 28, 30, 1);
   color: rgb(81, 81, 83);
@@ -63,13 +63,11 @@ const DividerStyled = styled.div`
 
 const Chatting = () => {
   const [chatMode, setChatMode] = useState('my');
-  // const { data: myInfo } = useQuery('user', getMyInfo, {
-  //   refetchOnWindowFocus: false,
-  // });
-  const myInfo = useSelector((state: UserState) => state.user);
-  // ('대화 내역이 없습니다.');
-  // ('대화내역들 렌더링');
-  // ('로그인 후 이용해주세요');
+  const { user: myInfo }: any = useSelector((state: UserState) => state.user);
+  const dispatch = useDispatch();
+  useEffect(() => {
+    if (!myInfo) dispatch(getUser());
+  }, [myInfo, dispatch]);
   return (
     <Layout>
       <ChattingPageWrapperDiv>

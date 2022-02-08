@@ -6,19 +6,15 @@ import { getUser } from 'store/reducer';
 import styled from '@emotion/styled';
 import { LinearProgress } from '@mui/material';
 
-import { UserInfo, UserState, ValidRounge } from '@interface/StoreInterface';
+import { UserState, ValidRounge } from '@interface/StoreInterface';
 import { TopicPost, RoungePost } from '@interface/CardInterface';
 import { getHomePostsInfiniteFunction } from '@utils/function';
 import Layout from '@layouts/Layout';
 import { SearchResult } from '@pages/search';
 import { RoungeCard, TopicCard } from '@components/Card';
-import wrapper from 'store/configureStore';
 import NotFoundPage from '@pages/404';
-import { useTheme } from '@emotion/react';
 
 const ListPage = () => {
-  const theme = useTheme();
-  console.log(theme);
   const router = useRouter();
   const [results, setResults] = useState<Array<SearchResult>>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -28,11 +24,6 @@ const ListPage = () => {
   useEffect(() => {
     if (!myInfo) dispatch(getUser());
   }, [myInfo, dispatch]);
-  // const { data: myInfo } = useQuery('user', getMyInfo, {
-  //   refetchOnWindowFocus: false,
-  // });
-  // console.log(myInfo?.validRounges);
-  // console.log(myInfo);
   useEffect(() => {
     if (
       myInfo?.validRounges.findIndex(

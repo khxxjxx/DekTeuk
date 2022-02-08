@@ -8,6 +8,9 @@ import BorderColorOutlinedIcon from '@mui/icons-material/BorderColorOutlined';
 import Link from 'next/link';
 
 const FooterDiv = styled.footer`
+  ${({ theme }: any) =>
+    `border-top: 2px solid ${theme.customTheme.defaultMode.footerBordertopColor};`};
+
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   padding: 1rem 0.4rem 1rem 0.4rem;
@@ -17,41 +20,58 @@ const FooterDiv = styled.footer`
   width: 100%;
   bottom: 0;
   position: fixed;
-  // background-color: rgb(34, 34, 36);
-  background-color: #8946a6;
+  background-color: ${({ theme }: any) =>
+    theme.customTheme.defaultMode.footerMenuBackgroundColor};
+  @media (prefers-color-scheme: dark) {
+    background-color: ${({ theme }: any) =>
+      theme.customTheme.darkMode.footerMenuBackgroundColor};
+    ${({ theme }: any) =>
+      `border-top: 2px solid ${theme.customTheme.darkMode.footerBordertopColor};`};
+  }
 `;
 const HomeOutlinedIconStyled = styled(HomeOutlinedIcon)`
-  // color: rgb(145, 145, 146);
-  color: #fff;
+  color: ${({ theme }: any) => theme.customTheme.defaultMode.footerIconColor};
+  @media (prefers-color-scheme: dark) {
+    color: ${({ theme }: any) => theme.customTheme.darkMode.footerIconColor};
+  }
 `;
 const SearchOutlinedIconStyled = styled(SearchOutlinedIcon)`
-  // color: rgb(145, 145, 146);
-  color: #fff;
+  color: ${({ theme }: any) => theme.customTheme.defaultMode.footerIconColor};
+  @media (prefers-color-scheme: dark) {
+    color: ${({ theme }: any) => theme.customTheme.darkMode.footerIconColor};
+  }
 `;
 
 const ForumOutlinedIconStyled = styled(ForumOutlinedIcon)`
-  // color: rgb(145, 145, 146);
-  color: #fff;
+  color: ${({ theme }: any) => theme.customTheme.defaultMode.footerIconColor};
+  @media (prefers-color-scheme: dark) {
+    color: ${({ theme }: any) => theme.customTheme.darkMode.footerIconColor};
+  }
 `;
 const NotificationsNoneOutlinedIconStyled = styled(
   NotificationsNoneOutlinedIcon,
 )`
-  // color: rgb(145, 145, 146);
-  color: #fff;
+  color: ${({ theme }: any) => theme.customTheme.defaultMode.footerIconColor};
+  @media (prefers-color-scheme: dark) {
+    color: ${({ theme }: any) => theme.customTheme.darkMode.footerIconColor};
+  }
 `;
 const MoreHorizOutlinedIconStyled = styled(MoreHorizOutlinedIcon)`
-  // color: rgb(145, 145, 146);
-  color: #fff;
+  color: ${({ theme }: any) => theme.customTheme.defaultMode.footerIconColor};
+  @media (prefers-color-scheme: dark) {
+    color: ${({ theme }: any) => theme.customTheme.darkMode.footerIconColor};
+  }
 `;
 const BorderColorOutlinedIconStyled = styled(BorderColorOutlinedIcon)`
-  // color: rgba(247,227,227,1);
-  background-color: #9165e2;
-
+  // color: rgba(247, 227, 227, 1);
+  background-color: ${({ theme }: any) =>
+    theme.customTheme.defaultMode.footerWriteIconBackgroundColor};
   border-radius: 50%;
   padding: 1px;
-  // color: #fff;
-  // color: #000;
-  color: rgb(28, 28, 30);
+  @media (prefers-color-scheme: dark) {
+    background-color: ${({ theme }: any) =>
+      theme.customTheme.darkMode.footerWriteIconBackgroundColor};
+  }
 `;
 const Footer = () => {
   return (

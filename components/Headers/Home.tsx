@@ -10,7 +10,6 @@ import { useSelector } from 'react-redux';
 import { UserState, ValidRounge, UserInfo } from '@interface';
 
 const SwiperStyled = styled(Swiper)`
-  // background-color: rgba(28, 28, 30, 1);
   background-color: ${({ theme }: any) =>
     theme.customTheme.defaultMode.headerMenuBackgroundColor};
   height: 60px;
@@ -25,7 +24,9 @@ const SwiperStyled = styled(Swiper)`
     z-index: 1;
   }
   & .swiper-slide {
-    color: rgba(93, 93, 95, 0.9);
+    // color: rgba(93, 93, 95, 0.9); // swiper 양 옆 글자 색
+    color: ${({ theme }: any) =>
+      theme.customTheme.defaultMode.swiperSlideTextColor};
     text-align: center;
     font-size: 0.8rem;
     line-height: 1.6rem;
@@ -39,6 +40,23 @@ const SwiperStyled = styled(Swiper)`
   }
   & .slide-title {
     margin-top: 16px;
+  }
+  @media (prefers-color-scheme: dark) {
+    background-color: ${({ theme }: any) =>
+      theme.customTheme.darkMode.headerMenuBackgroundColor};
+    & .swiper-slide {
+      color: ${({ theme }: any) =>
+        theme.customTheme.darkMode.swiperSlideTextColor};
+    }
+    & .swiper-slide-active {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 1rem;
+      line-height: 1.2rem;
+      font-weight: bolder;
+    }
+    & .slide-title {
+      margin-top: 16px;
+    }
   }
 `;
 const HeaderHome: React.FC = () => {

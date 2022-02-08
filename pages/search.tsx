@@ -24,29 +24,13 @@ const Search = ({ searchValue = '' }: { searchValue: string }) => {
   useEffect(() => {
     (async () => {
       const results = await searchInfiniteFunction(searchValue, 0);
-      // console.log(results);
       setSearchResults([results]);
     })();
   }, [searchValue]);
-  // const {
-  //   data: searchInfiniteResult,
-  //   fetchNextPage,
-  //   isFetching,
-  //   remove: infiniteSearchQueryRemove,
-  // } = useInfiniteQuery(
-  //   ['infinite-search', searchValue],
-  //   async ({ pageParam = 0 }) =>
-  //     await searchInfiniteFunction(searchValue, pageParam),
-  //   {
-  //     getNextPageParam: ({ nextPage }) => nextPage,
-  //     refetchOnWindowFocus: false,
-  //   },
-  // );
   const { ref, inView } = useInView();
 
   useEffect(() => {
     if (inView) {
-      // fetchNextPage(); // inView 시 nextPage 불러옴
       (async () => {
         const nextResult = await searchInfiniteFunction(
           searchValue,
@@ -56,16 +40,7 @@ const Search = ({ searchValue = '' }: { searchValue: string }) => {
       })();
     }
   }, [inView, searchResults, searchValue]);
-  // useEffect(() => {
-  //   return () => infiniteSearchQueryRemove(); // unmount 시 query 삭제
-  // }, []);
-
-  // const renderData =
-  //   searchInfiniteResult?.pages.flatMap((value: any) => value.result) ?? [];
   const renderData = searchResults.flatMap((value: any) => value.result) ?? [];
-  // console.log(renderData[1]?.content);
-  // console.log(renderData?.length);
-
   if (renderData.length > 0) {
     return (
       <SearchResultsWrapperDiv>
@@ -92,26 +67,12 @@ const Search = ({ searchValue = '' }: { searchValue: string }) => {
 };
 const WrappedSearch = () => {
   const router = useRouter();
-  // const { data: myInfo } = useQuery('user', getMyInfo, {
-  //   refetchOnWindowFocus: false,
-  // });
   const [searchValue, setSearchValue] = useState('');
-  const myInfo = useSelector((state: UserState) => state.user);
+  const { user: myInfo }: any = useSelector((state: UserState) => state.user);
   const dispatch = useDispatch();
   useEffect(() => {
     if (!myInfo) dispatch(getUser());
   }, [myInfo, dispatch]);
-  console.log(myInfo);
-  // const queryClient = useQueryClient();
-  // const searchInfiniteQuery = useInfiniteQuery(
-  //   ['infinite-search', searchValue],
-  //   async ({ pageParam = 0 }) =>
-  //     await searchInfiniteFunction(searchValue, pageParam),
-  //   {
-  //     getNextPageParam: ({ nextPage }) => nextPage,
-  //     refetchOnWindowFocus: false,
-  //   },
-  // );
   const onSubmitSearchForm = async (e: FormEvent) => {
     e.preventDefault(); // form 액션으로 인한 refresh 방지
     const value = (
@@ -123,7 +84,6 @@ const WrappedSearch = () => {
     document
       .querySelector('#main-content')
       ?.scrollTo({ top: 0, behavior: 'smooth' }); // 새로 검색 시 상단스크롤
-    // searchInfiniteQuery.remove();
     setSearchValue(value); // value값 변경
   };
   return (
@@ -159,7 +119,8 @@ const WrappedSearch = () => {
 export default WrappedSearch;
 
 const SearchPageWrapperDiv = styled.div`
-  background-color: rgba(28, 28, 30, 1);
+  background-color: ${({ theme }: any) =>
+    theme.customTheme.defaultMode.searchPageWrapperBackgroundColor};
   color: rgb(81, 81, 83);
   display: flex;
   flex-direction: column;
@@ -167,8 +128,14 @@ const SearchPageWrapperDiv = styled.div`
   align-items: center;
   text-align: left;
   height: 20vh;
-  border-top: solid 1px rgb(59, 59, 61);
-  border-bottom: solid 1px rgb(59, 59, 61);
+  border-top: solid 1px white;
+  border-bottom: solid 1px white;
+  // border-top: solid 1px rgb(59, 59, 61);
+  // border-bottom: solid 1px rgb(59, 59, 61);
+  @media (prefers-color-scheme: dark) {
+    background-color: ${({ theme }: any) =>
+      theme.customTheme.darkMode.searchPageWrapperBackgroundColor};
+  }
 `;
 const SearchResultsWrapperDiv = styled.div`
   width: 100%;
@@ -176,26 +143,42 @@ const SearchResultsWrapperDiv = styled.div`
 `;
 
 const SearchWrapperStyled = styled.div`
-  background-color: rgba(28, 28, 30, 1);
+  background-color: ${({ theme }: any) =>
+    theme.customTheme.defaultMode.headerMenuBackgroundColor};
   height: 60px;
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
   text-align: center;
-  border-bottom: 2px solid rgb(17, 17, 19);
+  ${({ theme }: any) =>
+    `border-bottom: 2px solid ${theme.customTheme.defaultMode.searchWrapperBorderBottomColor}`};
+  @media (prefers-color-scheme: dark) {
+    background-color: ${({ theme }: any) =>
+      theme.customTheme.darkMode.headerMenuBackgroundColor};
+    ${({ theme }: any) =>
+      `border-bottom: 2px solid ${theme.customTheme.darkMode.searchWrapperBorderBottomColor}`};
+  }
 `;
 const InputStyled = styled.input`
-  background-color: rgb(39, 39, 41);
+  background-color: ${({ theme }: any) =>
+    theme.customTheme.defaultMode.searchInputBackgroundColor};
+  color: ${({ theme }: any) =>
+    theme.customTheme.defaultMode.searchInputTextColor};
   border: 0;
   border-radius: 10px;
   height: 30px;
-  color: rgb(149, 149, 151);
   padding: 1rem 0.8rem 1rem 0.8rem;
   width: 90vw;
   max-width: 600px;
   padding-left: 36px;
   transition: 0.3s;
+  @media (prefers-color-scheme: dark) {
+    background-color: ${({ theme }: any) =>
+      theme.customTheme.darkMode.searchInputBackgroundColor};
+    color: ${({ theme }: any) =>
+      theme.customTheme.darkMode.searchInputTextColor};
+  }
 `;
 
 const SearchFormStyled = styled.form`

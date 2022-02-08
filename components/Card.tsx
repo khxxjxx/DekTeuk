@@ -14,8 +14,8 @@ const Wrapper = styled.div`
   justify-content: center;
 `;
 const CardWrapper = styled.div`
-  // background-color: rgba(28, 28, 30, 1);
-  background-color: white;
+  background-color: ${({ theme }: any) =>
+    theme.customTheme.defaultMode.cardWrapperBackgroundColor};
   height: 200px;
   border-radius: 10px;
   margin: 17px 8px 0 8px;
@@ -25,6 +25,10 @@ const CardWrapper = styled.div`
   justify-content: center;
   align-items: center;
   max-width: 680px;
+  @media (prefers-color-scheme: dark) {
+    background-color: ${({ theme }: any) =>
+      theme.customTheme.darkMode.cardWrapperBackgroundColor};
+  }
 `;
 const OneDepthNestedLink = styled(Link)`
   z-index: 1;
@@ -36,11 +40,21 @@ const TopicWrapperDivStyled = styled.div`
     font-size: 8px;
     font-weight: 500;
     margin-bottom: 4px;
-    background-color: purple;
-    border-radius: 10px;
-    padding: 2px 6px 2px 6px;
-
-    color: white;
+    background-color: ${({ theme }: any) =>
+      theme.customTheme.defaultMode.topicWrapperBackgroundColor};
+    border-radius: 20px;
+    padding: 4px 12px 4px 12px;
+    color: ${({ theme }: any) =>
+      theme.customTheme.defaultMode.topicWrapperTextColor};
+  }
+  @media (prefers-color-scheme: dark) {
+    & div {
+      background-color: ${({ theme }: any) =>
+        theme.customTheme.darkMode.topicWrapperBackgroundColor};
+      color: ${({ theme }: any) =>
+        theme.customTheme.darkMode.topicWrapperTextColor};
+      // color: red;
+    }
   }
 `;
 

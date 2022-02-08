@@ -10,7 +10,7 @@ body {
   background-color: #eaeaea;
   /* color: rgb(208, 208, 210); */
 }
-/* html,
+html,
 body {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -18,19 +18,21 @@ body {
 html ::-webkit-scrollbar,
 body ::-webkit-scrollbar {
   display: none;
-} */
+}
 a {
   color: inherit;
   text-decoration: none;
 }
-/* 
+
 * {
   box-sizing: border-box;
-} */
+}
 
-/* @media (prefers-color-scheme: dark) {
-  .themed {
-    background: #000;
-    color: #fff;
+@media (prefers-color-scheme: dark) {
+  html,
+  body {
+    background-color: rgb(17, 17, 19);
+    /* background-color: #eaeaea; */
+    color: rgb(208, 208, 210);
   }
-} */
+}
