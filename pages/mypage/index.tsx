@@ -2,6 +2,7 @@ import type { NextPage } from 'next';
 import Head from 'next/head';
 import MyPageComponent from '@components/mypage/MyPageComponent';
 import Layout from '@layouts/Layout';
+import Container from '@mui/material/Container';
 
 const MyPage: NextPage = () => {
   return (
@@ -12,7 +13,9 @@ const MyPage: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Layout>
-        <MyPageComponent></MyPageComponent>
+        <Container>
+          <MyPageComponent />
+        </Container>
       </Layout>
     </>
   );

@@ -3,24 +3,23 @@ import type {
   GetServerSideProps,
   InferGetServerSidePropsType,
 } from 'next';
-import Head from 'next/head';
-import Layout from '@layouts/Layout';
+import MyPageNickName from '@components/mypage/MyPageNickname';
+import MyPagePassword from '@components/mypage/MyPagePassword';
+import MyPageMorePost from '@components/mypage/MyPageMorePost';
 
 const ChangePage: NextPage = ({
   data,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  return (
-    <>
-      <Head>
-        <title>{data.type} 변경하기</title>
-        <meta name="description" content="Generate by elice Team 5" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <Layout>
-        <div>변경</div>
-      </Layout>
-    </>
-  );
+  switch (data.type) {
+    case 'nickname':
+      return <MyPageNickName />;
+    case 'password':
+      return <MyPagePassword />;
+    case 'posts':
+      return <MyPageMorePost />;
+    default:
+      return <></>;
+  }
 };
 
 export const getServerSideProps: GetServerSideProps = async (context) => {

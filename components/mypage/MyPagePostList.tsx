@@ -1,40 +1,32 @@
-import Link from 'next/link';
-import styled from '@emotion/styled';
 import MyPagePost from './MyPagePost';
+import { MyPageListComponent } from './MyPageListComponent';
 
-const MyPagePostListCom = styled.article`
-  margin-left: 20px;
-  & ul {
-    list-style: none;
-    padding-left: 20px;
-  }
-`;
 const postings = [
   {
-    title: '게시물 제목입니다. ',
+    title: '게시물 제목 ',
     content: '게시물 내용 조금',
   },
   {
-    title: '게시물 제목입니다. ',
+    title: '게시물 제목 ',
     content: '게시물 내용 조금',
   },
   {
-    title: '게시물 제목입니다. ',
+    title: '게시물 제목 ',
     content: '게시물 내용 조금',
   },
   {
-    title: '게시물 제목입니다. ',
+    title: '게시물 제목 ',
     content: '게시물 내용 조금',
   },
   {
-    title: '게시물 제목입니다. ',
+    title: '게시물 제목 ',
     content: '게시물 내용 조금',
   },
 ];
 
 const MyPagePostList: React.FC = () => {
   return (
-    <MyPagePostListCom>
+    <MyPageListComponent>
       <h1>내가 작성한 게시물</h1>
       <ul>
         {postings.map((post, idx) => {
@@ -43,8 +35,7 @@ const MyPagePostList: React.FC = () => {
           );
         })}
       </ul>
-      <Link href={'/mypage/posts'}>더보기</Link>
-    </MyPagePostListCom>
+    </MyPageListComponent>
   );
 };
 

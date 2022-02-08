@@ -1,14 +1,17 @@
 import { useState } from 'react';
-
+import Head from 'next/head';
+import Layout from '@layouts/Layout';
 import ButtonComponent from '@components/items/ButtonComponent';
 import InputComponent from '@components/items/InputComponent';
+import { Container } from '@mui/material';
+import { MyPageChangeCom } from './MyPageChangeComponent';
 
 const MyPagePassword: React.FC = () => {
   const [pw, setPw] = useState<string>('');
   const [pwCheck, setPwCheck] = useState<string>('');
 
   const passwordChange = () => {
-    if (pw === pwCheck) {
+    if (pw === pwCheck && pw !== '') {
       console.log('비밀번호가 동일하네!');
     } else {
       console.log('비밀번호가 동일하지 않네!');
@@ -16,17 +19,36 @@ const MyPagePassword: React.FC = () => {
   };
 
   return (
-    <article>
-      <h1>비밀번호 변경</h1>
-      <div>
-        <InputComponent></InputComponent>
-        <InputComponent></InputComponent>
-        <ButtonComponent
-          text="비밀번호 변경하기"
-          activeFn={passwordChange}
-        ></ButtonComponent>
-      </div>
-    </article>
+    <>
+      <Head>
+        <title>비밀번호 변경하기</title>
+        <meta name="description" content="Generate by elice Team 5" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+      <Layout>
+        <Container>
+          <MyPageChangeCom>
+            <h1>비밀번호 변경</h1>
+            <div>
+              <InputComponent
+                type="password"
+                placeholder="비밀번호"
+                changeFn={setPw}
+              ></InputComponent>
+              <InputComponent
+                type="password"
+                placeholder="비밀번호 확인"
+                changeFn={setPwCheck}
+              ></InputComponent>
+              <ButtonComponent
+                text="비밀번호 변경하기"
+                activeFn={passwordChange}
+              ></ButtonComponent>
+            </div>
+          </MyPageChangeCom>
+        </Container>
+      </Layout>
+    </>
   );
 };
 
