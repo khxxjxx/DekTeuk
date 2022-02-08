@@ -4,7 +4,7 @@ import delay from '@utils/delay';
 import { app, auth } from '@firebase/firebase';
 
 export const getMyInfo = async () => {
-  // await delay(10000);
+  // await delay(5000);
   // console.log(app);
   // console.log(auth);
   // console.log(auth.currentUser);
@@ -54,7 +54,7 @@ export const getHomePostsInfiniteFunction = async (
   list: string,
   pageParam: number,
 ) => {
-  await delay(800);
+  // await delay(800);
   const dummyRoungePost: RoungePost = {
     postId: 'r8q394uf90q23urq89pd3oil',
     postType: 'rounge',
@@ -165,7 +165,7 @@ export const searchInfiniteFunction = async (
   if (!value) {
     return { result: [], nextPage: 1 };
   }
-  await delay(800);
+  // await delay(800);
   const dummyRoungePost: RoungePost = {
     postId: 'r8q394uf90q23urq89pd3oil',
     postType: 'rounge',

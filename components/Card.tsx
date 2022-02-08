@@ -8,14 +8,23 @@ import { ForwardedRef, forwardRef } from 'react';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ModeCommentIcon from '@mui/icons-material/ModeComment';
 import { useInView } from 'react-intersection-observer';
+const Wrapper = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: center;
+`;
 const CardWrapper = styled.div`
-  background-color: rgba(28, 28, 30, 1);
+  // background-color: rgba(28, 28, 30, 1);
+  background-color: white;
   height: 200px;
   border-radius: 10px;
   margin: 17px 8px 0 8px;
   padding: 12px 24px;
   cursor: pointer;
   display: grid;
+  justify-content: center;
+  align-items: center;
+  max-width: 680px;
 `;
 const OneDepthNestedLink = styled(Link)`
   z-index: 1;
@@ -30,6 +39,8 @@ const TopicWrapperDivStyled = styled.div`
     background-color: purple;
     border-radius: 10px;
     padding: 2px 6px 2px 6px;
+
+    color: white;
   }
 `;
 
@@ -80,25 +91,27 @@ const CardStatWrapper = styled.div`
 const ThumbUpIconStyled = styled(ThumbUpIcon)`
   font-size: 1rem;
   margin-right: 0.5rem;
+  // color: rgb(144, 202, 249);
+  color: rgb(66, 103, 178);
 `;
 const ModeCommentIconStyled = styled(ModeCommentIcon)`
   font-size: 1rem;
   margin-right: 0.5rem;
 `;
 
-export const RoungeCard = forwardRef(
-  (
-    {
-      roungeCardData,
-    }: {
-      roungeCardData: RoungePost;
-    },
-    ref?: ForwardedRef<any>,
-  ) => {
-    const { ref: cardRef, inView } = useInView();
-    return (
-      <Link href={`/rounge/posts/${roungeCardData.postId}`}>
-        <CardWrapper ref={cardRef}>
+export const RoungeCard = forwardRef(function RoungeCardWithRef(
+  {
+    roungeCardData,
+  }: {
+    roungeCardData: RoungePost;
+  },
+  ref?: ForwardedRef<any>,
+) {
+  const { ref: cardRef, inView } = useInView();
+  return (
+    <Wrapper ref={cardRef}>
+      <Link href={`/rounge/posts/${roungeCardData.postId}`} passHref>
+        <CardWrapper>
           {inView && (
             <>
               <div ref={ref} />
@@ -136,25 +149,25 @@ export const RoungeCard = forwardRef(
           )}
         </CardWrapper>
       </Link>
-    );
+    </Wrapper>
+  );
+});
+
+export const TopicCard = forwardRef(function TopicCardWithRef(
+  {
+    topicCardData,
+  }: {
+    topicCardData: TopicPost;
   },
-);
+  ref?: any,
+) {
+  const { ref: cardRef, inView } = useInView();
 
-export const TopicCard = forwardRef(
-  (
-    {
-      topicCardData,
-    }: {
-      topicCardData: TopicPost;
-    },
-    ref?: any,
-  ) => {
-    const { ref: cardRef, inView } = useInView();
-
-    // console.log(Object.keys(topicCardData));
-    return (
-      <Link href={`/topic/posts/${topicCardData.postId}`}>
-        <CardWrapper ref={cardRef}>
+  // console.log(Object.keys(topicCardData));
+  return (
+    <Wrapper ref={cardRef}>
+      <Link href={`/topic/posts/${topicCardData.postId}`} passHref>
+        <CardWrapper>
           {inView && (
             <>
               <div ref={ref} />
@@ -200,6 +213,6 @@ export const TopicCard = forwardRef(
           )}
         </CardWrapper>
       </Link>
-    );
-  },
-);
+    </Wrapper>
+  );
+});

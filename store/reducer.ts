@@ -37,20 +37,6 @@ export const userSlice = createSlice({
       state.status = 'error';
     });
   },
-
-  // {
-  //   [getUser.pending as any]: (state: UserState, action: any) => {
-  //     state.status = 'loading';
-  //   },
-  //   [getUser.fulfilled as any]: (state: UserState, action: any) => {
-  //     console.log(action.payload);
-  //     state.user = action.payload;
-  //     state.status = 'success';
-  //   },
-  //   [getUser.rejected as any]: (state: UserState, action: any) => {
-  //     state.status = 'error';
-  //   },
-  // },
 });
 // console.log(userSlice);
 const rootReducer = (state: UserState, action: AnyAction) => {

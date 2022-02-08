@@ -7,7 +7,8 @@ import { useQuery } from 'react-query';
 import Layout from '@layouts/Layout';
 import { getMyInfo } from '@utils/function';
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
-import { MyChatting } from '@interface/StoreInterface';
+import { MyChatting, UserState } from '@interface/StoreInterface';
+import { useSelector } from 'react-redux';
 const ChattingPageWrapperDiv = styled.div`
   background-color: rgba(28, 28, 30, 1);
   color: rgb(81, 81, 83);
@@ -62,13 +63,13 @@ const DividerStyled = styled.div`
 
 const Chatting = () => {
   const [chatMode, setChatMode] = useState('my');
-  const { data: myInfo } = useQuery('user', getMyInfo, {
-    refetchOnWindowFocus: false,
-  });
-
-  ('대화 내역이 없습니다.');
-  ('대화내역들 렌더링');
-  ('로그인 후 이용해주세요');
+  // const { data: myInfo } = useQuery('user', getMyInfo, {
+  //   refetchOnWindowFocus: false,
+  // });
+  const myInfo = useSelector((state: UserState) => state.user);
+  // ('대화 내역이 없습니다.');
+  // ('대화내역들 렌더링');
+  // ('로그인 후 이용해주세요');
   return (
     <Layout>
       <ChattingPageWrapperDiv>
@@ -99,7 +100,7 @@ const Chatting = () => {
           <>
             {chatMode === 'my' && (
               <>
-                {myInfo.myChattings.length > 0 ? (
+                {myInfo.myChattings?.length > 0 ? (
                   <div>
                     {myInfo.myChattings.map((chat: MyChatting) => (
                       <div

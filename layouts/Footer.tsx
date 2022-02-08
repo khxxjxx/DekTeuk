@@ -17,57 +17,68 @@ const FooterDiv = styled.footer`
   width: 100%;
   bottom: 0;
   position: fixed;
-  background-color: rgb(34, 34, 36);
+  // background-color: rgb(34, 34, 36);
+  background-color: #8946a6;
+`;
+const HomeOutlinedIconStyled = styled(HomeOutlinedIcon)`
+  // color: rgb(145, 145, 146);
+  color: #fff;
+`;
+const SearchOutlinedIconStyled = styled(SearchOutlinedIcon)`
+  // color: rgb(145, 145, 146);
+  color: #fff;
+`;
+
+const ForumOutlinedIconStyled = styled(ForumOutlinedIcon)`
+  // color: rgb(145, 145, 146);
+  color: #fff;
+`;
+const NotificationsNoneOutlinedIconStyled = styled(
+  NotificationsNoneOutlinedIcon,
+)`
+  // color: rgb(145, 145, 146);
+  color: #fff;
+`;
+const MoreHorizOutlinedIconStyled = styled(MoreHorizOutlinedIcon)`
+  // color: rgb(145, 145, 146);
+  color: #fff;
+`;
+const BorderColorOutlinedIconStyled = styled(BorderColorOutlinedIcon)`
+  // color: rgba(247,227,227,1);
+  background-color: #9165e2;
+
+  border-radius: 50%;
+  padding: 1px;
+  // color: #fff;
+  // color: #000;
+  color: rgb(28, 28, 30);
 `;
 const Footer = () => {
   return (
     <FooterDiv>
       <Link href="/">
         <div>
-          <HomeOutlinedIcon
-            fontSize="medium"
-            style={{ color: 'rgb(145,145,146)' }}
-          />
+          <HomeOutlinedIconStyled fontSize="medium" />
         </div>
       </Link>
       <div>
         <Link href="/search">
-          <SearchOutlinedIcon
-            fontSize="medium"
-            style={{ color: 'rgb(145,145,146)' }}
-          />
+          <SearchOutlinedIconStyled fontSize="medium" />
         </Link>
       </div>
       <Link href="/chatting">
         <div>
-          <ForumOutlinedIcon
-            fontSize="medium"
-            style={{ color: 'rgb(145,145,146)' }}
-          />
+          <ForumOutlinedIconStyled fontSize="medium" />
         </div>
       </Link>
       <div>
-        <NotificationsNoneOutlinedIcon
-          fontSize="medium"
-          style={{ color: 'rgb(145,145,146)' }}
-        />
+        <NotificationsNoneOutlinedIconStyled fontSize="medium" />
       </div>
       <div>
-        <MoreHorizOutlinedIcon
-          fontSize="medium"
-          style={{ color: 'rgb(145,145,146)' }}
-        />
+        <MoreHorizOutlinedIconStyled fontSize="medium" />
       </div>
       <div>
-        <BorderColorOutlinedIcon
-          fontSize="medium"
-          style={{
-            backgroundColor: 'rgb(201,65,63)',
-            borderRadius: '50%',
-            padding: '1px',
-            color: 'rgba(247,227,227,1)',
-          }}
-        />
+        <BorderColorOutlinedIconStyled fontSize="medium" />
       </div>
     </FooterDiv>
   );

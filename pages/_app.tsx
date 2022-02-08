@@ -1,78 +1,62 @@
 import '../styles/globals.css';
-import type { AppContext, AppInitialProps, AppProps } from 'next/app';
-import { Provider } from 'react-redux';
-import {
-  configureStore,
-  createSlice,
-  createAsyncThunk,
-  Store,
-} from '@reduxjs/toolkit';
-import { createWrapper } from 'next-redux-wrapper';
-import { getMyInfo } from '@utils/function';
-//@ts-ignore
-import { UserState } from '@interface';
+import type { AppContext, AppProps } from 'next/app';
 import wrapper from 'store/configureStore';
-import { getUser, userSlice } from 'store/reducer';
+import { getUser } from 'store/reducer';
+// import { ThemeProvider } from '@emotion/react';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+const theme = {
+  palette: { mode: 'light' },
+  // colors: { fixedMenuBackgroundColor: '#8946A6' },
+  colors: {
+    HeaderBackgroundColor: '#8946A6',
+    // HeaderBackgroundColor: '#8946A6',
+    // HeaderBackgroundColor: '#8946A6',
+    // HeaderBackgroundColor: '#8946A6',
+    // HeaderBackgroundColor: '#8946A6',
+    // HeaderBackgroundColor: '#8946A6',
+    // HeaderBackgroundColor: '#8946A6',
+    // HeaderBackgroundColor: '#8946A6',
+    // HeaderBackgroundColor: '#8946A6',
+    // HeaderBackgroundColor: '#8946A6',
+  },
+  mode: { primary: 'black' },
+};
 
-// const initialUserState: UserState = {
-//   user: {
-//     nickname: '',
-//     jobSector: '',
-//     validRounges: [],
-//     myChattings: [],
-//     hasNewNotification: false,
-//   },
-//   status: 'standby',
-// };
-// export const getUser = createAsyncThunk('getUser', async () => {
-//   return await getMyInfo();
-// });
-// const userSlice = createSlice({
-//   name: 'user',
-//   initialState: initialUserState,
-//   reducers: {},
-//   extraReducers: {
-//     [getUser.pending as any]: (state: UserState, action: any) => {
-//       state.status = 'loading';
-//     },
-//     [getUser.fulfilled as any]: (state: UserState, action: any) => {
-//       console.log(action.payload);
-//       state.user = action.payload;
-//       state.status = 'success';
-//     },
-//     [getUser.rejected as any]: (state: UserState, action: any) => {
-//       state.status = 'error';
-//     },
-//   },
-// });
-// const store = configureStore({ reducer: userSlice.reducer });
+const theme_ = createTheme(
+  {},
+  {
+    customTheme: {
+      defaultMode: {
+        headerMenuBackgroundColor: '#8946A6',
+        headerBackgroundColor: '#8946A6',
+        inCardRoungeColor: '#4C78C1',
+        // inCardRoungeColor: '#4C78C1',
+        // inCardRoungeColor: '#4C78C1',
+        // inCardRoungeColor: '#4C78C1',
+      },
+      darkMode: {
+        headerMenuBackgroundColor: '#8946A6',
+        headerBackgroundColor: '#8946A6',
+        inCardRoungeColor: '#4C78C1',
+        // inCardRoungeColor: '#4C78C1',
+        // inCardRoungeColor: '#4C78C1',
+        // inCardRoungeColor: '#4C78C1',
+      },
+    },
+  },
+);
 function MyApp({ Component, pageProps }: AppProps) {
-  return <Component {...pageProps} />;
+  return (
+    <ThemeProvider theme={theme_}>
+      <Component {...pageProps} />
+    </ThemeProvider>
+  );
 }
-export const getServerSideProps = wrapper.getServerSideProps(
+MyApp.getInitialProps = wrapper.getInitialAppProps(
   (store) =>
-    async ({ req }): Promise<any> => {
-      // console.log(req.cookies);
-      // await store.dispatch(getUser());
+    async ({ Component, ctx }: AppContext): Promise<any> => {
+      await store.dispatch(getUser());
     },
 );
-// MyApp.getInitialProps = wrapper.getInitialAppProps(async () => {
-//   console.log('@@@@@@@@');
-//   // console.log(ctx);
-//   console.log('@@@@@@@@');
-//   return wrapper.withRedux(MyApp);
-// });
-// MyApp.getInitialProps = async ({
-//   Component,
-//   ctx,
-// }: AppContext): Promise<AppInitialProps> => {
-//   // console.log(Component);
-//   console.log('@@@@@@@@@@@@');
-//   console.log(ctx.store);
-//   console.log('@@@@@@@@@@@@');
-
-//   return await getMyInfo();
-// };
 
 export default wrapper.withRedux(MyApp);
-// export default MyApp;

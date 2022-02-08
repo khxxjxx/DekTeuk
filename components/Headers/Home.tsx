@@ -10,7 +10,9 @@ import { useSelector } from 'react-redux';
 import { UserState, ValidRounge, UserInfo } from '@interface';
 
 const SwiperStyled = styled(Swiper)`
-  background-color: rgba(28, 28, 30, 1);
+  // background-color: rgba(28, 28, 30, 1);
+  background-color: ${({ theme }: any) =>
+    theme.customTheme.defaultMode.headerMenuBackgroundColor};
   height: 60px;
   width: 100%;
   & .swiper-pagination-bullet {
@@ -40,13 +42,9 @@ const SwiperStyled = styled(Swiper)`
   }
 `;
 const HeaderHome: React.FC = () => {
-  // const { data: myInfo } = useQuery('user', getMyInfo, {
-  //   refetchOnWindowFocus: false,
-  // });
   const { user: myInfo }: UserInfo = useSelector<UserState>(
     (state) => state.user,
   );
-  // console.log(myInfo);
   const router = useRouter();
   const headerLinks: { url: string; title: string }[] = [];
   if (myInfo?.validRounges)

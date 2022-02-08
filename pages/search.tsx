@@ -55,7 +55,7 @@ const Search = ({ searchValue = '' }: { searchValue: string }) => {
         setSearchResults([...searchResults, nextResult]);
       })();
     }
-  }, [inView]);
+  }, [inView, searchResults, searchValue]);
   // useEffect(() => {
   //   return () => infiniteSearchQueryRemove(); // unmount 시 query 삭제
   // }, []);
@@ -100,7 +100,7 @@ const WrappedSearch = () => {
   const dispatch = useDispatch();
   useEffect(() => {
     if (!myInfo) dispatch(getUser());
-  }, []);
+  }, [myInfo, dispatch]);
   console.log(myInfo);
   // const queryClient = useQueryClient();
   // const searchInfiniteQuery = useInfiniteQuery(

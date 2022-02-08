@@ -6,48 +6,56 @@ import { getUser } from 'store/reducer';
 import styled from '@emotion/styled';
 import { LinearProgress } from '@mui/material';
 
-import { UserState } from '@interface/StoreInterface';
+import { UserInfo, UserState, ValidRounge } from '@interface/StoreInterface';
 import { TopicPost, RoungePost } from '@interface/CardInterface';
 import { getHomePostsInfiniteFunction } from '@utils/function';
 import Layout from '@layouts/Layout';
 import { SearchResult } from '@pages/search';
 import { RoungeCard, TopicCard } from '@components/Card';
+import wrapper from 'store/configureStore';
+import NotFoundPage from '@pages/404';
+import { useTheme } from '@emotion/react';
 
 const ListPage = () => {
+  const theme = useTheme();
+  console.log(theme);
   const router = useRouter();
   const [results, setResults] = useState<Array<SearchResult>>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { ref, inView } = useInView();
-  const myInfo = useSelector((state: UserState) => state.user);
+  const { user: myInfo }: any = useSelector((state: UserState) => state.user);
   const dispatch = useDispatch();
   useEffect(() => {
     if (!myInfo) dispatch(getUser());
-  }, []);
+  }, [myInfo, dispatch]);
   // const { data: myInfo } = useQuery('user', getMyInfo, {
   //   refetchOnWindowFocus: false,
   // });
+  // console.log(myInfo?.validRounges);
+  // console.log(myInfo);
   useEffect(() => {
-    // if (
-    //   myInfo?.validRounges.findIndex(
-    //     (v) => `/list/${v.url}` === router.asPath,
-    //   ) === -1
-    // ) {
-    //   router.push('/404');
-    // } else {
-    //   (async () => {
-    //     setIsLoading(true);
-    //     const result = await getHomePostsInfiniteFunction(
-    //       router.asPath.split('/')[2],
-    //       0,
-    //     );
-    //     setIsLoading(false);
-    //     setResults([result]);
-    //   })();
-    // }
+    if (
+      myInfo?.validRounges.findIndex(
+        (v: ValidRounge) => `/list/${v.url}` === router.asPath,
+      ) === -1
+    ) {
+      return;
+      router.push('/404');
+    } else {
+      (async () => {
+        setIsLoading(true);
+        const result = await getHomePostsInfiniteFunction(
+          router.asPath.split('/')[2],
+          0,
+        );
+        setIsLoading(false);
+        setResults([result]);
+      })();
+    }
     return () => {
       setResults([]);
     };
-  }, [router.asPath]);
+  }, [router, myInfo]);
   useEffect(() => {
     if (inView) {
       (async () => {
@@ -58,7 +66,7 @@ const ListPage = () => {
         setResults([...results, nextResult]);
       })();
     }
-  }, [inView]);
+  }, [inView, results, router.asPath]);
   const renderData = results.flatMap((value: any) => value.result) ?? [];
   // console.log(renderData[1]?.content);
   // console.log(renderData?.length);
@@ -68,6 +76,13 @@ const ListPage = () => {
         <LinearProgress />
       </Layout>
     );
+  }
+  if (
+    myInfo?.validRounges.findIndex(
+      (v: ValidRounge) => `/list/${v.url}` === router.asPath,
+    ) === -1
+  ) {
+    return <NotFoundPage />;
   }
   return (
     <>
