@@ -1,16 +1,20 @@
+import { FormEvent, useEffect, useState } from 'react';
 import styled from '@emotion/styled';
-import { TopicPost, RoungePost } from '../interface/CardInterface';
-import { RoungeCard, TopicCard } from '@components/Card';
+import { useDispatch, useSelector } from 'react-redux';
+import { getUser } from 'store/reducer';
+import { AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/router';
 import { useInView } from 'react-intersection-observer';
+import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
+
+import { TopicPost, RoungePost } from '@interface/CardInterface';
+import { UserState } from '@interface/StoreInterface';
+import { RoungeCard, TopicCard } from '@components/Card';
 import { ChildrenWrapperDivStyled } from '@layouts/Layout';
 import Footer from '@layouts/Footer';
 import { HeaderWrapperDivStyled } from '@layouts/Header';
-import { AnimatePresence } from 'framer-motion';
-import { useRouter } from 'next/router';
-// import { useInfiniteQuery, useQuery, useQueryClient } from 'react-query';
 import { getMyInfo, searchInfiniteFunction } from '@utils/function';
-import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
-import { FormEvent, useEffect, useState } from 'react';
+
 export interface SearchResult {
   result: Array<TopicPost | RoungePost>;
   nextPage: number;
@@ -91,8 +95,13 @@ const WrappedSearch = () => {
   // const { data: myInfo } = useQuery('user', getMyInfo, {
   //   refetchOnWindowFocus: false,
   // });
-
   const [searchValue, setSearchValue] = useState('');
+  const myInfo = useSelector((state: UserState) => state.user);
+  const dispatch = useDispatch();
+  useEffect(() => {
+    if (!myInfo) dispatch(getUser());
+  }, []);
+  console.log(myInfo);
   // const queryClient = useQueryClient();
   // const searchInfiniteQuery = useInfiniteQuery(
   //   ['infinite-search', searchValue],

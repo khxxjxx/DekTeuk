@@ -53,7 +53,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
   (store) =>
     async ({ req }): Promise<any> => {
       // console.log(req.cookies);
-      await store.dispatch(getUser());
+      // await store.dispatch(getUser());
     },
 );
 // MyApp.getInitialProps = wrapper.getInitialAppProps(async () => {

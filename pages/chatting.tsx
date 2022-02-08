@@ -1,12 +1,13 @@
 import styled from '@emotion/styled';
 import MoodBadIcon from '@mui/icons-material/MoodBad';
-import { CircularProgress } from '@mui/material';
+// import { CircularProgress } from '@mui/material';
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import Layout from '@layouts/Layout';
+// import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from 'react-query';
+import Layout from '@layouts/Layout';
 import { getMyInfo } from '@utils/function';
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
+import { MyChatting } from '@interface/StoreInterface';
 const ChattingPageWrapperDiv = styled.div`
   background-color: rgba(28, 28, 30, 1);
   color: rgb(81, 81, 83);
@@ -98,9 +99,9 @@ const Chatting = () => {
           <>
             {chatMode === 'my' && (
               <>
-                {myInfo.myChatting.length > 0 ? (
+                {myInfo.myChattings.length > 0 ? (
                   <div>
-                    {myInfo.myChatting.map((chat) => (
+                    {myInfo.myChattings.map((chat: MyChatting) => (
                       <div
                         key={chat.roomId}
                         style={{ display: 'flex', alignItems: 'center' }}

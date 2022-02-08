@@ -1,18 +1,18 @@
+import { useSelector, useDispatch } from 'react-redux';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+import { useInView } from 'react-intersection-observer';
+import { getUser } from 'store/reducer';
+import styled from '@emotion/styled';
+import { LinearProgress } from '@mui/material';
+
+import { UserState } from '@interface/StoreInterface';
+import { TopicPost, RoungePost } from '@interface/CardInterface';
 import { getHomePostsInfiniteFunction } from '@utils/function';
 import Layout from '@layouts/Layout';
-import styled from '@emotion/styled';
-import { TopicPost, RoungePost } from '../../interface/CardInterface';
 import { SearchResult } from '@pages/search';
 import { RoungeCard, TopicCard } from '@components/Card';
-import { useInView } from 'react-intersection-observer';
-import { LinearProgress } from '@mui/material';
-import { useSelector, useDispatch } from 'react-redux';
-//@ts-ignore
-import { UserState } from '@interface';
-import wrapper from 'store/configureStore';
-import { getUser } from 'store/reducer';
+
 const ListPage = () => {
   const router = useRouter();
   const [results, setResults] = useState<Array<SearchResult>>([]);
@@ -20,12 +20,8 @@ const ListPage = () => {
   const { ref, inView } = useInView();
   const myInfo = useSelector((state: UserState) => state.user);
   const dispatch = useDispatch();
-  // console.log(myInfo);
   useEffect(() => {
-    // console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@');
-    // console.log(myInfo);
-    // console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@');
-    // dispatch(getUser());
+    if (!myInfo) dispatch(getUser());
   }, []);
   // const { data: myInfo } = useQuery('user', getMyInfo, {
   //   refetchOnWindowFocus: false,
@@ -105,13 +101,6 @@ const ListPage = () => {
     </>
   );
 };
-export const getServerSideProps = wrapper.getServerSideProps(
-  (store) =>
-    async ({ req }): Promise<any> => {
-      // console.log(req.cookies);
-      await store.dispatch(getUser());
-    },
-);
 
 export default ListPage;
 

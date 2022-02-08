@@ -1,14 +1,15 @@
-import { TopicPost, RoungePost } from '../interface/CardInterface';
+//@ts-ignore
+import { UserInfo, TopicPost, RoungePost } from '@interface/CardInterface';
 import delay from '@utils/delay';
 import { app, auth } from '@firebase/firebase';
-import { UserInfo } from '@pages/_app';
 
 export const getMyInfo = async () => {
+  // await delay(10000);
   // console.log(app);
   // console.log(auth);
   // console.log(auth.currentUser);
   // console.log('getMyInfo Called!');
-  await delay(0);
+  // await delay(0);
   // return null;
   parseInt(Date.now().toString()) - Math.floor(Math.random() * 30000) * 1000;
   return {
