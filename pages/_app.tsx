@@ -55,9 +55,9 @@ function MyApp({ Component, pageProps }: AppProps) {
   );
 }
 
-MyApp.getInitialProps = wrapper.getInitialAppProps((store) => {
-  return async ({ Component, ctx }: AppContext): Promise<any> =>
-    await store.dispatch(getUser());
-});
-
+MyApp.getInitialProps = wrapper.getInitialAppProps(
+  (store) =>
+    async ({ Component, ctx }: AppContext): Promise<any> =>
+      await store.dispatch(getUser()),
+);
 export default wrapper.withRedux(MyApp);
