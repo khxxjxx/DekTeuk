@@ -17,9 +17,9 @@ import {
   doc,
   getDoc,
 } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { db } from '@firebase/firebase';
 import { Box } from '@mui/system';
-import { useAuth } from '../../Auth';
+import { useAuth } from '@hooks/Auth';
 import Router from 'next/router';
 //select 부분을 위해서 사용
 import InputLabel from '@mui/material/InputLabel';

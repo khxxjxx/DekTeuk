@@ -1,7 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
-
+import { getAuth,GoogleAuthProvider } from 'firebase/auth';
+//Google
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_AUTH_DOMAIN,
@@ -15,5 +15,5 @@ const firebaseConfig = {
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore();
-
+export const provider = new GoogleAuthProvider();
 export const commentRef = collection(db, 'comment');
