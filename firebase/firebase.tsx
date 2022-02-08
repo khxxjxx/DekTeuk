@@ -1,5 +1,7 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { getFirestore, collection } from 'firebase/firestore';
+import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_AUTH_DOMAIN,
@@ -9,5 +11,8 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_APP_ID,
   databaseURL: process.env.NEXT_PUBLIC_DATABASE_URL,
 };
-export const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+// export const app = initializeApp(firebaseConfig);
+// export const auth = getAuth(app);
+export const db = getFirestore();
+export const provider = new GoogleAuthProvider();
+export const commentRef = collection(db, 'comment');
