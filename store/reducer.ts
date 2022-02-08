@@ -2,8 +2,7 @@ import { HYDRATE } from 'next-redux-wrapper';
 import { AnyAction, combineReducers } from '@reduxjs/toolkit';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { getMyInfo } from '@utils/function';
-//@ts-ignore
-import { UserState } from '@interface';
+import { UserState } from '@interface/StoreInterface';
 
 const initialUserState: UserState = {
   user: {
@@ -39,7 +38,7 @@ export const userSlice = createSlice({
   },
 });
 // console.log(userSlice);
-const rootReducer = (state: UserState, action: AnyAction) => {
+const rootReducer = (state: { user: UserState }, action: AnyAction) => {
   {
     switch (action.type) {
       case HYDRATE:
@@ -54,3 +53,4 @@ const rootReducer = (state: UserState, action: AnyAction) => {
 };
 
 export default rootReducer;
+export type RootReducer = ReturnType<typeof rootReducer>;

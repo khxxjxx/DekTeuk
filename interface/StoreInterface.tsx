@@ -20,6 +20,8 @@ export interface UserInfo {
 }
 
 export interface UserState {
+  state: UserInfo;
   user: UserInfo;
   status: 'loading' | 'success' | 'error' | 'standby';
+  error: string;
 }
