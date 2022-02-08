@@ -1,14 +1,9 @@
 //@ts-ignore
 import { UserInfo, TopicPost, RoungePost } from '@interface/CardInterface';
 import delay from '@utils/delay';
-import { app, auth } from '@firebase/firebase';
 
 export const getMyInfo = async () => {
   // await delay(5000);
-  // console.log(app);
-  // console.log(auth);
-  // console.log(auth.currentUser);
-  // console.log('getMyInfo Called!');
   // await delay(0);
   // return null;
   parseInt(Date.now().toString()) - Math.floor(Math.random() * 30000) * 1000;
