@@ -2,6 +2,7 @@ export interface ValidRounge {
   title: string;
   url: string;
 }
+
 export interface MyChatting {
   roomName: string;
   roomId: string;
@@ -9,6 +10,7 @@ export interface MyChatting {
   lastMessage: { content: string; updatedAt: string };
   unreadCount: number;
 }
+
 export interface UserInfo {
   nickname: string;
   jobSector: string;
@@ -16,6 +18,7 @@ export interface UserInfo {
   myChattings: Array<MyChatting>;
   hasNewNotification: boolean;
 }
+
 export interface UserState {
   user: UserInfo;
   status: 'loading' | 'success' | 'error' | 'standby';
