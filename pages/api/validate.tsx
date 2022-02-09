@@ -10,7 +10,7 @@ const validate = async (token: any) => {
   // Get any additional user data from the Firebase DB
   await firebaseAdmin
     .firestore()
-    .collection('users')
+    .collection('user')
     .doc(decodedToken.uid)
     .get()
     .then((doc) => {
@@ -28,6 +28,7 @@ const validate = async (token: any) => {
       email: user.email,
       // username: userData.username,
       emailVerified: user.emailVerified,
+      userData: userData,
     },
   };
   return result;
