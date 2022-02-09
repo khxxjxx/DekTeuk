@@ -1,11 +1,12 @@
 import { firebaseAdmin } from '@firebase/firebaseAdmin';
 
-const validate = async (token: any) => {
+const validate = async (token: string) => {
   // Check that the user has a valid token
   const decodedToken = await firebaseAdmin.auth().verifyIdToken(token, true);
   // console.log(decodedToken);
   let userData;
   //Get user Firebase data from token
+
   const user = await firebaseAdmin.auth().getUser(decodedToken.uid);
   // Get any additional user data from the Firebase DB
   await firebaseAdmin

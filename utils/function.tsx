@@ -7,7 +7,6 @@ export const getMyInfo = async (result: any) => {
   // return null;
 
   const { userData } = result.data;
-  console.log('userData', userData);
 
   parseInt(Date.now().toString()) - Math.floor(Math.random() * 30000) * 1000;
   return {

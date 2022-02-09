@@ -3,13 +3,17 @@ import { AnyAction, combineReducers } from '@reduxjs/toolkit';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { getMyInfo } from '@utils/function';
 import { UserState } from '@interface/StoreInterface';
-
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db } from '@firebase/firebase';
+import { createStore } from 'redux';
+import { useSelector, useDispatch } from 'react-redux';
 const initialUserState: UserState = {
   user: {
     nickname: '',
     jobSector: '',
     validRounges: [],
     myChattings: [],
+    id: '',
     hasNewNotification: false,
   },
   status: 'standby',
@@ -17,7 +21,7 @@ const initialUserState: UserState = {
 };
 
 export const getUser = createAsyncThunk('getUser', async (result: any) => {
-  return await getMyInfo(result);
+  return await result;
 });
 // export const getUser = createAsyncThunk('getUser', async () => {
 //   return await getMyInfo();
@@ -26,7 +30,11 @@ export const getUser = createAsyncThunk('getUser', async (result: any) => {
 export const userSlice = createSlice({
   name: 'user',
   initialState: initialUserState,
-  reducers: {},
+  reducers: {
+    setNewUserInfo: (state, action) => {
+      state.user.nickname = action.payload.nickname;
+    },
+  },
   extraReducers: (builder) => {
     builder.addCase(getUser.pending, (state, action) => {
       state.status = 'loading';
@@ -46,7 +54,7 @@ const rootReducer = (state: { user: UserState }, action: AnyAction) => {
   {
     switch (action.type) {
       case HYDRATE:
-        return action.payload;
+        return { ...state, ...action.payload };
       default:
         const combineReducer = combineReducers({
           user: userSlice.reducer,

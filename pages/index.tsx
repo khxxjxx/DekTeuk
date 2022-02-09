@@ -10,9 +10,12 @@ import Link from 'next/link';
 import { firebaseAdmin } from '@firebase/firebaseAdmin';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
+import { useSelector } from 'react-redux';
+import { UserState } from '@interface/StoreInterface';
 
 const Home: NextPage = () => {
   const router = useRouter();
+
   useEffect(() => {
     router.push('/list/timeline');
   }, [router]);
@@ -20,14 +23,6 @@ const Home: NextPage = () => {
 };
 export default Home;
 
-// // export const getServerSideProps = async (ctx: any) => {
-// //   console.log('=============================');
-// //   // //const cookie = nookies.get(ctx);
-// //   // //console.log('cookies', cookie.token);
-// //   console.log('token', ctx.req.cookies.token);
-// //   const token = await firebaseAdmin.auth().verifyIdToken(ctx.req.cookies.token);
-// //   console.log(token);
-// // };
 // export const getServerSideProps = async () => {
 //   // const fs = await require('fs');
 //   // console.log(fs);

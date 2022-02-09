@@ -3,7 +3,6 @@ import React from 'react';
 import { signOut } from 'firebase/auth';
 import { auth } from '@firebase/firebase';
 import { useRouter } from 'next/router';
-
 export default function Logout() {
   const router = useRouter();
   const logOut = async () => {

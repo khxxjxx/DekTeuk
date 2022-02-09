@@ -26,8 +26,9 @@ export function AuthProvider({ children }: any) {
   useEffect(() => {
     const handle = setInterval(async () => {
       const user = getAuth().currentUser;
+      console.log(user);
       if (user) await user.getIdToken(true);
-    }, 10 * 60 * 1000);
+    }, 10 * 1000);
 
     // clean up setInterval
     return () => clearInterval(handle);
