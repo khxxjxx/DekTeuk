@@ -3,7 +3,6 @@ import type { AppContext, AppProps } from 'next/app';
 import wrapper from 'store/configureStore';
 import { getUser } from 'store/reducer';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { AuthProvider } from '@hooks/Auth';
 
 const theme_ = createTheme(
   {},
@@ -24,6 +23,8 @@ const theme_ = createTheme(
         searchPageWrapperBackgroundColor: '#EAEAEA',
         searchWrapperBorderBottomColor: '#EAEAEA',
         footerBordertopColor: '#EAEAEA',
+        thumbUpIconNotLiked: '',
+        thumbUpIconLiked: 'rgb(144, 202, 249)',
       },
       darkMode: {
         headerMenuBackgroundColor: 'rgba(28, 28, 30, 1)',
@@ -40,18 +41,17 @@ const theme_ = createTheme(
         searchPageWrapperBackgroundColor: 'rgba(28, 28, 30, 1)',
         searchWrapperBorderBottomColor: 'rgb(17, 17, 19)',
         footerBordertopColor: 'rgb(17, 17, 19)',
+        thumbUpIconNotLiked: '',
+        thumbUpIconLiked: '',
       },
     },
   },
 );
 function MyApp({ Component, pageProps }: AppProps) {
-  console.log(process.browser);
   return (
-    <AuthProvider>
-      <ThemeProvider theme={theme_}>
-        <Component {...pageProps} />
-      </ThemeProvider>
-    </AuthProvider>
+    <ThemeProvider theme={theme_}>
+      <Component {...pageProps} />
+    </ThemeProvider>
   );
 }
 

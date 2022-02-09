@@ -1,3 +1,5 @@
+import { Ref } from 'react';
+
 export interface ValidRounge {
   title: string;
   url: string;
@@ -23,4 +25,12 @@ export interface UserState {
   user: UserInfo;
   status: 'loading' | 'success' | 'error' | 'standby';
   error: string | undefined;
+}
+export interface ViewPosts {
+  view: [];
+}
+export interface StoreState {
+  user: UserState;
+  view: ViewPosts;
+  scroll: { scrollRef: string };
 }

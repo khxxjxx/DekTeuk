@@ -27,16 +27,16 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import { useAuth } from '@hooks/Auth';
 import Comment from '@components/comment/Comment';
 
-const Detail = ({ postProps, postId }) => {
+const Detail = ({ postProps, postId }: any) => {
   const post = JSON.parse(postProps);
-  const { currentUser } = useAuth();
+  const { currentUser }: any = useAuth();
   //해당 게시물에 좋아요를 누른 사람의 배열과 현재 로그인한 유저의 이메일을 비교하여 판단함
   const [userLike, setUserLike] = useState(
     post.press_person.includes(currentUser.uid),
   );
   const [postLikeCount, setPostLikeCount] = useState(post.press_person.length);
 
-  const changeLike = async (id, e) => {
+  const changeLike = async (id: any, e: any) => {
     //다른 태그에 이벤트가 전달되지 않게 하기 위함
 
     e.stopPropagation();
@@ -116,7 +116,7 @@ export const getStaticPaths = async () => {
   };
 };
 
-export const getStaticProps = async (context) => {
+export const getStaticProps = async (context: any) => {
   const id = context.params.id;
 
   const docRef = doc(db, 'posts', id);
