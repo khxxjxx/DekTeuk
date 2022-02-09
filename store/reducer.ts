@@ -38,7 +38,6 @@ export const userSlice = createSlice({
     });
   },
 });
-// console.log(userSlice);
 const rootReducer = (state: { user: UserState }, action: AnyAction) => {
   {
     switch (action.type) {
