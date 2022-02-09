@@ -7,6 +7,7 @@ import styled from '@emotion/styled';
 import useInputHook from 'hooks/useInputHook';
 import HomePost from '@components/HomePost';
 import Link from 'next/link';
+import { firebaseAdmin } from '@firebase/firebaseAdmin';
 
 const RenderCategoriesDivStyled = styled.div`
   display: grid;
@@ -116,3 +117,12 @@ const Home: NextPage = () => {
 };
 
 export default Home;
+
+// export const getServerSideProps = async (ctx: any) => {
+//   console.log('=============================');
+//   // //const cookie = nookies.get(ctx);
+//   // //console.log('cookies', cookie.token);
+//   console.log('token', ctx.req.cookies.token);
+//   const token = await firebaseAdmin.auth().verifyIdToken(ctx.req.cookies.token);
+//   console.log(token);
+// };

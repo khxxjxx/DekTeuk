@@ -10,7 +10,6 @@ const AuthContext = createContext<{ loginuser: any }>({
 
 export function AuthProvider({ children }: any) {
   const [loginuser, setLoginUser] = useState<any>(null);
-  // nookies.destroy(undefined);
   useEffect(() => {
     return auth.onIdTokenChanged(async (user) => {
       if (!user) {
@@ -19,10 +18,7 @@ export function AuthProvider({ children }: any) {
       } else {
         const token = await user.getIdToken();
         setLoginUser(user);
-        const { email, uid } = user;
         nookies.set(undefined, 'token', token, { path: '/' });
-        nookies.set(undefined, 'email', email!, { path: '/' });
-        nookies.set(undefined, 'uid', uid, {});
       }
     });
   }, []);

@@ -14,8 +14,22 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
     //console.log(JSON.stringify(cookies, null, 2));
     const token = await firebaseAdmin.auth().verifyIdToken(cookies.token);
     const { uid, email } = token;
+    console.log(token);
 
-    console.log('token', token);
+    // {
+    //   iss: 'https://securetoken.google.com/devily-test',
+    //   aud: 'devily-test',
+    //   auth_time: 1644329781,
+    //   user_id: 'dBEEX25SN6e5f6Zcb9CFU3xnLyI3',
+    //   sub: 'dBEEX25SN6e5f6Zcb9CFU3xnLyI3',
+    //   iat: 1644329781,
+    //   exp: 1644333381,
+    //   email: 'asd@test.com',
+    //   email_verified: false,
+    //   firebase: { identities: { email: [Array] }, sign_in_provider: 'password' },
+    //   uid: 'dBEEX25SN6e5f6Zcb9CFU3xnLyI3'
+    // }
+
     // the user is authenticated!
     // FETCH STUFF HERE
 
