@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import Head from 'next/head';
+import Link from 'next/link';
 import Layout from '@layouts/Layout';
 import ButtonComponent from '@components/items/ButtonComponent';
 import InputComponent from '@components/items/InputComponent';
 import { Container } from '@mui/material';
 import { MyPageChangeCom } from './MyPageChangeComponent';
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 
 const MyPagePassword: React.FC = () => {
   const [pw, setPw] = useState<string>('');
@@ -32,7 +34,12 @@ const MyPagePassword: React.FC = () => {
       <Layout>
         <Container>
           <MyPageChangeCom>
-            <h1>비밀번호 변경</h1>
+            <header>
+              <Link href={'/mypage'}>
+                <ArrowBackIosNewIcon />
+              </Link>
+              <h1>비밀번호 변경</h1>
+            </header>
             <div>
               <InputComponent
                 type="password"

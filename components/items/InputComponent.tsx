@@ -37,6 +37,9 @@ const InputComponent: React.FC<inputProps> = ({
           onChange={(event) => changeFn?.(event.target.value)}
           error={error}
           helperText={errorText}
+          sx={{ input: { backgroundColor: 'white' } }}
+          margin="normal"
+          focused={false}
         />
       )}
     </>

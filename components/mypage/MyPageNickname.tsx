@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import Head from 'next/head';
+import Link from 'next/link';
 import Layout from '@layouts/Layout';
 import ButtonComponent from '@components/items/ButtonComponent';
 import InputComponent from '@components/items/InputComponent';
 import Container from '@mui/material/Container';
 import { MyPageChangeCom } from './MyPageChangeComponent';
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 
 const MyPageNickName: React.FC = () => {
   const [nickname, setNickname] = useState<string>('');
@@ -15,6 +17,9 @@ const MyPageNickName: React.FC = () => {
     if (nickname.length < 3) {
       setError(true);
       setErrorText('닉네임을 더길게 써라 ㅡㅡ');
+    } else {
+      setError(false);
+      setErrorText('');
     }
   };
 
@@ -28,7 +33,13 @@ const MyPageNickName: React.FC = () => {
       <Layout>
         <Container>
           <MyPageChangeCom>
-            <h1>닉네임 변경</h1>
+            <header>
+              <Link href={'/mypage'}>
+                <ArrowBackIosNewIcon />
+              </Link>
+              <h1>닉네임 변경</h1>
+            </header>
+
             <div>
               <InputComponent
                 placeholder="닉네임을 입력해주세요"

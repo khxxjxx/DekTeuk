@@ -5,6 +5,8 @@ import Link from 'next/link';
 import Layout from '@layouts/Layout';
 import Container from '@mui/material/Container';
 import MyPagePost from './MyPagePost';
+import { MyPageChangeCom } from './MyPageChangeComponent';
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 
 const postings = [
   {
@@ -58,10 +60,10 @@ const MyPageMorePost: React.FC = () => {
       </Head>
       <Layout>
         <Container>
-          <article>
-            <header style={{ display: 'flex', alignItems: 'center' }}>
+          <MyPageChangeCom>
+            <header style={{ marginBottom: '2rem' }}>
               <Link href={'/mypage'}>
-                <span style={{ marginRight: '20px' }}>{'<'}</span>
+                <ArrowBackIosNewIcon />
               </Link>
               <h1>내가 작성한 게시물</h1>
             </header>
@@ -84,7 +86,7 @@ const MyPageMorePost: React.FC = () => {
                 )}
               </>
             ))}
-          </article>
+          </MyPageChangeCom>
         </Container>
       </Layout>
     </>
