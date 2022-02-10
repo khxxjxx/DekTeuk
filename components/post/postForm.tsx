@@ -27,7 +27,7 @@ import {
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 import { db } from '@firebase/firebase';
 import { Box } from '@mui/system';
-import { useAuth } from '@hooks/Auth';
+
 import Router from 'next/router';
 //select 부분을 위해서 사용
 import InputLabel from '@mui/material/InputLabel';
@@ -42,16 +42,18 @@ import { green } from '@mui/material/colors';
 import Fab from '@mui/material/Fab';
 import CheckIcon from '@mui/icons-material/Check';
 import SaveIcon from '@mui/icons-material/Save';
+import type { RootReducer } from 'store/reducer';
+import { useSelector } from 'react-redux';
 
 const PostForm = () => {
-  const { currentUser }: any = useAuth();
   //이미지 업로드 부분
   const [postImage, setPostImage] = useState<any>(null);
   const [url, setUrl] = useState('');
   const [progress, setProgress] = useState(0);
   const [imgList, setImgList] = useState<any>([]);
   //텍스트 처리
-
+  const { user }: any = useSelector((state: RootReducer) => state.user);
+  console.log(user);
   //유저
   const [userInfoList, setuserInfoList] = useState<any>('');
   const [alertType, setAlertType] = useState('success');
@@ -93,8 +95,8 @@ const PostForm = () => {
   };
   useEffect(() => {
     const findUserInfo = async () => {
-      //uid로 user 파악함
-      const docRef = doc(db, 'users', currentUser.uid);
+      //id로 user 파악함
+      const docRef = doc(db, 'users', user.id);
 
       const docSnap = await getDoc(docRef);
 
@@ -141,9 +143,9 @@ const PostForm = () => {
         nickname: userInfoList.nickname,
         rounge: '',
         created_at: serverTimestamp(),
-        image: imgInfo,
+        image: [...imgInfo],
       });
-      const docRef = doc(db, 'users', currentUser.uid);
+      const docRef = doc(db, 'users', user.id);
       const userPostUpdate = {
         ...userInfoList,
         post: [...userInfoList.post, newId],
@@ -162,9 +164,9 @@ const PostForm = () => {
         nickname: userInfoList.nickname,
         topic: '',
         created_at: serverTimestamp(),
-        image: imgInfo,
+        image: [...imgInfo],
       });
-      const docRef = doc(db, 'users', currentUser.uid);
+      const docRef = doc(db, 'users', user.id);
       const userPostUpdate = {
         ...userInfoList,
         post: [...userInfoList.post, newId],
@@ -480,19 +482,19 @@ const PostForm = () => {
         }}
       >
         <Link href="/">
-          <Button
-            onClick={() => {
-              console.log([
-                imgList.map((v: any) => {
-                  return { downloadURL: v[0], imageDetail: v[2] };
-                }),
-              ]);
-            }}
-          >
-            테스트
-          </Button>
           <Button variant="contained">메인으로 이동</Button>
         </Link>
+        <Button
+          onClick={() => {
+            console.log([
+              imgList.map((v: any) => {
+                return { downloadURL: v[0], imageDetail: v[2] };
+              }),
+            ]);
+          }}
+        >
+          테스트
+        </Button>
         <Button variant="contained" onClick={onSubmit}>
           {post.hasOwnProperty('timestamp') ? '게시물 수정' : '게시물 작성'}
         </Button>
