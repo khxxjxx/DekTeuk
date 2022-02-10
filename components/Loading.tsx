@@ -1,7 +1,13 @@
 import { Grid } from '@mui/material';
 import React from 'react';
 import ReactLoading from 'react-loading';
-const Loading = ({ type:any, color: any }) => {
+
+type LoadingProps = {
+  type?: any;
+  color?: any;
+};
+
+const Loading: React.FC<LoadingProps> = ({ type, color }) => {
   return (
     <Grid
       container

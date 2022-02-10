@@ -3,8 +3,14 @@ import GoogleIcon from '@mui/icons-material/Google';
 import React from 'react';
 import ReactLoading from 'react-loading';
 import { signInWithPopup } from 'firebase/auth';
-import { auth, provider } from '../firebase';
-const Login = ({ type, color }) => {
+import { auth, provider } from '@firebase/firebase';
+
+type LoginProps = {
+  type?: any;
+  color?: any;
+};
+
+const Login: React.FC<LoginProps> = ({ type, color }) => {
   const loginWithGoogle = () => {
     signInWithPopup(auth, provider);
   };
