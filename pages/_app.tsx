@@ -61,7 +61,6 @@ function MyApp({ Component, pageProps }: AppProps) {
   const { user }: UserState = useSelector((state: RootReducer) => state.user);
 
   useEffect(() => {
-    console.log(user.id, 'asdasd');
     if (user.id) {
       onSnapshot(doc(db, 'user', user.id), (doc) => {
         const data = doc.data();
@@ -114,14 +113,15 @@ MyApp.getInitialProps = wrapper.getInitialAppProps(
             }).then((res) => res.json());
             //console.log('result', result);
 
-            console.log(result.data.uid);
+            console.log(result);
             const data = {
               nickname: result.data.userData.nickname,
               jobSector: result.data.userData.jobSector,
               validRounges: result.data.userData.validRounges,
-              myChattings: result.data.userData.myChattings,
+              myChattings: [],
               id: result.data.uid,
-              hasNewNotification: result.data.userData.hasNewNotification,
+              hasNewNotification: false,
+              email: result.data.email,
             };
             console.log('데이터', data);
             await store.dispatch(getUser(data));

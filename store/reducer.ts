@@ -15,6 +15,7 @@ const initialUserState: UserState = {
     myChattings: [],
     id: '',
     hasNewNotification: false,
+    email: '',
   },
   status: 'standby',
   error: '',

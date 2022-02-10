@@ -1,6 +1,5 @@
 import TextField from '@mui/material/TextField';
 
-
 type inputProps = {
   placeholder?: string;
   defaultValue?: string;
