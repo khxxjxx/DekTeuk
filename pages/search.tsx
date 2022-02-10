@@ -81,12 +81,6 @@ const Search = ({ searchValue = '' }: { searchValue: string }) => {
   );
 };
 const WrappedSearch = ({ referer }: { referer: -1 | 1 }) => {
-  console.log('888888888888888888888888888888888888');
-  console.log('888888888888888888888888888888888888');
-  console.log(referer);
-  console.log('888888888888888888888888888888888888');
-  console.log('888888888888888888888888888888888888');
-
   const router = useRouter();
   const dispatch = useDispatch();
   const { user: myInfo } = useSelector((state: StoreState) => state.user);
@@ -107,9 +101,9 @@ const WrappedSearch = ({ referer }: { referer: -1 | 1 }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    if (!myInfo) dispatch(getUser());
-  }, [myInfo, dispatch]);
+  // useEffect(() => {
+  //   if (!myInfo) dispatch(getUser());
+  // }, [myInfo, dispatch]);
   useEffect(() => {
     if (referer === -1) {
       dispatch(resetViewAction());

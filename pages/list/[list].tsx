@@ -52,9 +52,9 @@ const ListPage = () => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  useEffect(() => {
-    if (!myInfo) dispatch(getUser());
-  }, [myInfo, dispatch]);
+  // useEffect(() => {
+  //   if (!myInfo) dispatch(getUser());
+  // }, [myInfo, dispatch]);
 
   useEffect(() => {
     if (router.asPath !== asPath) {
@@ -74,6 +74,9 @@ const ListPage = () => {
 
     setAsPath(router.asPath);
   }, [router.asPath]);
+  // useEffect(() => {
+  //   if (!myInfo) dispatch(getUser());
+  // }, [myInfo, dispatch]);
   useEffect(() => {
     if (
       myInfo?.validRounges.findIndex(

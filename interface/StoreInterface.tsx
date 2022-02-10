@@ -19,6 +19,7 @@ export interface UserInfo {
   validRounges: Array<ValidRounge>;
   myChattings: Array<MyChatting>;
   hasNewNotification: boolean;
+  id: string;
 }
 
 export interface UserState {
