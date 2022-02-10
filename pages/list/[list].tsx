@@ -1,5 +1,5 @@
 import { useSelector, useDispatch } from 'react-redux';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useInView } from 'react-intersection-observer';
 import styled from '@emotion/styled';
@@ -17,13 +17,15 @@ import {
   setViewAction,
   resetViewAction,
   setScrollAction,
+  initialViewAction,
 } from '@store/reducer';
 import wrapper from '@store/configureStore';
+
+import useDebounce from '@hooks/useDebounce';
 
 const ListPage = () => {
   const router = useRouter();
   const dispatch = useDispatch();
-  const refScroll = useRef<any | null>(null);
   const { ref, inView } = useInView();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [asPath, setAsPath] = useState<string>(router.asPath);
@@ -33,22 +35,44 @@ const ListPage = () => {
   const { view }: { view: Array<SearchResult> } = useSelector(
     (state: StoreState) => state.view,
   );
-  const { scrollRef }: { scrollRef: string } = useSelector(
+  const { scrollY }: { scrollY: number } = useSelector(
     (state: StoreState) => state.scroll,
   );
   useEffect(() => {
+    const paddingFunction = useDebounce({
+      cb: () =>
+        window.scrollY !== 0 && dispatch(setScrollAction(window.scrollY)),
+      ms: 100,
+    });
+
+    window.addEventListener('scroll', paddingFunction);
+    return () => {
+      window.removeEventListener('scroll', paddingFunction);
+      // dispatch(resetViewAction());
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
     if (!myInfo) dispatch(getUser());
   }, [myInfo, dispatch]);
+
   useEffect(() => {
     if (router.asPath !== asPath) {
       dispatch(resetViewAction()); // 뒤로가기로 온 게 아닐때 View를 Reset한다.
-    }
-    setAsPath(router.asPath);
+      dispatch(setScrollAction(0));
+      router.events.on(
+        'routeChangeComplete',
+        () => window.scrollTo({ top: 0 }),
+        // setTimeout(() => window.scrollTo({ top: 0 }), 0),
+      );
+    } else
+      router.events.on(
+        'routeChangeComplete',
+        () => window.scrollTo({ top: scrollY }),
+        // setTimeout(() => window.scrollTo({ top: scrollY }), 0),
+      );
 
-    return () => {
-      console.log(refScroll.current);
-      dispatch(setScrollAction('')); // 언마운트 될 때 Scroll의 State를 dispatch
-    };
+    setAsPath(router.asPath);
   }, [router.asPath]);
   useEffect(() => {
     if (
@@ -82,15 +106,7 @@ const ListPage = () => {
       })();
     }
   }, [inView]);
-  useEffect(() => {
-    if (scrollRef && refScroll.current) {
-      refScroll.current.scrollIntoView({
-        behavior: 'auto',
-        block: 'center',
-        inline: 'center',
-      });
-    }
-  }, []);
+
   const renderData = view.flatMap((value: any) => value.result) ?? [];
   if (isLoading && view.length === 0) {
     return (
@@ -112,21 +128,6 @@ const ListPage = () => {
         <TimelinePageWrapperDiv>
           <TimelineResultsWrapperDiv>
             {(renderData as Array<TopicPost | RoungePost>)?.map((post, i) => {
-              if (scrollRef && scrollRef === post.postId) {
-                return post.postType === 'topic' ? (
-                  <TopicCard
-                    topicCardData={post}
-                    key={post.postId}
-                    ref={refScroll}
-                  />
-                ) : (
-                  <RoungeCard
-                    roungeCardData={post}
-                    key={post.postId}
-                    ref={refScroll}
-                  />
-                );
-              }
               if (
                 i >=
                 (renderData as Array<TopicPost | RoungePost>).length - 10
@@ -161,18 +162,20 @@ export const getServerSideProps = wrapper.getServerSideProps(
       switch (list) {
         case 'timeline': // topic, rounge 데이터 다 갖고와서 view에 dispatch
           store.dispatch(
-            setViewAction(await getHomePostsInfiniteFunction('timeline', 0)),
+            initialViewAction(
+              await getHomePostsInfiniteFunction('timeline', 0),
+            ),
           );
           console.log(list === 'timeline');
           break;
         case 'topic': // topic 데이터 다 갖고와서 view에 dispatch
           store.dispatch(
-            setViewAction(await getHomePostsInfiniteFunction('topic', 0)),
+            initialViewAction(await getHomePostsInfiniteFunction('topic', 0)),
           );
           break;
         default:
           store.dispatch(
-            setViewAction(await getHomePostsInfiniteFunction(list, 0)),
+            initialViewAction(await getHomePostsInfiniteFunction(list, 0)),
           );
           break;
       }

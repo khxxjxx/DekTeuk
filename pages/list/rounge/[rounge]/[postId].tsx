@@ -1,25 +1,19 @@
-import { StoreState } from '@interface/StoreInterface';
 import { setScrollAction } from '@store/reducer';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext,
 ) => {
-  const {
-    req: {
-      headers: { referer },
-    },
-  } = context;
-  if (referer)
+  if (context.req.headers.referer && context.req.url)
     return {
       props: {
-        referer: referer
+        referer: context.req.headers.referer
           .split('/')
-          .slice(3, referer.split('/').length)
+          .slice(3, context.req.headers.referer.split('/').length)
           .join('/'),
-        test: context.req.url,
+        url: context.req.url,
       },
     };
   return { props: {} };
@@ -27,30 +21,22 @@ export const getServerSideProps: GetServerSideProps = async (
 
 export default function RoungePost({
   referer,
-  test,
+  url,
 }: {
   referer: string | undefined;
-  test: string;
+  url: string;
 }) {
   const dispatch = useDispatch();
-  const scrollState = useSelector((state: StoreState) => state.scroll);
-  const urls = [];
-  console.log(scrollState?.scrollRef);
   useEffect(() => {
-    const arr = test.split('/');
-    const idx = test.split('/').indexOf('list');
-    const len = arr.length;
-    const postId = arr.slice(idx, len)[3].split('?')[0].split('.')[0];
     if (
       !(
         referer &&
         referer.split('/').length === 2 &&
-        referer.split('/')[0] === 'list'
+        referer.split('/')[0] === 'list' &&
+        url
       )
     ) {
-      dispatch(setScrollAction(''));
-    } else {
-      dispatch(setScrollAction(postId));
+      dispatch(setScrollAction(0));
     }
   }, []);
   return <div>1234123412341234123412341234123412341234</div>;

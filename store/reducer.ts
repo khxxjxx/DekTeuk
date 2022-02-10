@@ -25,7 +25,7 @@ export const userSlice = createSlice({
   initialState: initialUserState,
   reducers: {},
   extraReducers: (builder) => {
-    builder.addCase(getUser.pending, (state, action) => {
+    builder.addCase(getUser.pending, (state) => {
       state.status = 'loading';
     });
     builder.addCase(getUser.fulfilled, (state, action) => {
@@ -43,32 +43,35 @@ export const view = createSlice({
   name: 'view',
   initialState: { view: <any>[] },
   reducers: {
+    initialViewPosts(state, action) {
+      state.view = [action.payload];
+    },
     setViewPosts(state, action) {
       state.view = [...state.view, action.payload];
     },
     resetViewPosts(state) {
-      console.log();
       state.view = [];
     },
   },
 });
 export const scroll = createSlice({
   name: 'scroll',
-  initialState: { scrollRef: '' },
+  initialState: { scrollY: 0 },
   reducers: {
     setScroll(state, action) {
-      state.scrollRef = action.payload;
+      state.scrollY = action.payload;
     },
   },
 });
 export const setViewAction = view.actions.setViewPosts;
 export const resetViewAction = view.actions.resetViewPosts;
+export const initialViewAction = view.actions.initialViewPosts;
 export const setScrollAction = scroll.actions.setScroll;
 const rootReducer = (
   state: {
     user: UserState;
     view: ViewPosts;
-    scroll: { scrollRef: string };
+    scroll: { scrollY: number };
   },
   action: AnyAction,
 ) => {
@@ -77,17 +80,11 @@ const rootReducer = (
       case HYDRATE:
         if (state.view.view.length === 0) {
           return action.payload;
-        } else if (state.scroll.scrollRef === '') {
-          return {
-            user: action.payload.user,
-            view: { view: [...state.view.view] },
-            scroll: action.payload.scroll,
-          };
         } else
           return {
             user: action.payload.user,
             view: { view: [...state.view.view] },
-            scroll: { scrollRef: state.scroll.scrollRef },
+            scroll: { scrollY: state.scroll.scrollY },
           };
       default:
         const combineReducer = combineReducers({

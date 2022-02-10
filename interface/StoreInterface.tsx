@@ -32,5 +32,5 @@ export interface ViewPosts {
 export interface StoreState {
   user: UserState;
   view: ViewPosts;
-  scroll: { scrollRef: string };
+  scroll: { scrollY: number };
 }
