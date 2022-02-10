@@ -8,6 +8,17 @@ import MyPagePost from './MyPagePost';
 import { MyPageChangeCom } from './MyPageChangeComponent';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  orderBy,
+  limit,
+  startAfter,
+} from 'firebase/firestore';
+import { db } from '@firebase/firebase';
+
 const postings = [
   {
     title: '게시물 제목 ',
@@ -43,12 +54,43 @@ const postings = [
   },
 ];
 
+interface Post {
+  title: string;
+  content: string;
+}
+
 const MyPageMorePost: React.FC = () => {
   const { ref, inView } = useInView();
-  const [posts, setPosts] = useState(postings);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [end, setEnd] = useState(0);
+
+  const getPosts = async () => {
+    let q;
+    if (end === -1) {
+      return;
+    } else if (end) {
+      q = query(collection(db, 'post'), limit(2));
+    } else {
+      q = query(collection(db, 'post'), limit(2));
+    }
+    const snapshots = await getDocs(q);
+    const dataArr: Post[] = [];
+    snapshots.forEach((snapshot) => {
+      dataArr.push(snapshot.data() as Post);
+    });
+    setPosts([...posts, ...dataArr]);
+    console.log(dataArr.length);
+    setEnd(dataArr.length);
+  };
 
   useEffect(() => {
-    setPosts([...posts, ...postings]);
+    getPosts();
+  }, []);
+
+  useEffect(() => {
+    if (end !== 0 && end !== -1) {
+      getPosts();
+    }
   }, [inView]);
 
   return (

@@ -4,7 +4,17 @@ import {
   sendEmailVerification,
   signOut,
 } from 'firebase/auth';
+import { db } from '@firebase/firebase';
 import { auth } from '@firebase/firebase';
+
+import { doc, updateDoc } from 'firebase/firestore';
+
+export const nicknameUpdate = async (newNickname: string, userId: string) => {
+  const userRef = doc(db, 'user', userId);
+  await updateDoc(userRef, {
+    nickname: newNickname,
+  });
+};
 
 export const passwordUpdate = async (newPassword: string) => {
   const user = getAuth().currentUser;

@@ -23,6 +23,8 @@ const MyPagePassword: React.FC = () => {
       const message = await passwordUpdate(pw);
 
       if (message != 'true') {
+        setPwError(true);
+        setPwCheckError(true);
         setErrorText(message);
         setPwCheckErrorText(message);
       } else {
@@ -30,6 +32,8 @@ const MyPagePassword: React.FC = () => {
         router.push('/user/login');
       }
     } else {
+      setPwError(true);
+      setPwCheckError(true);
       setErrorText('다시 입력해주세요');
       setPwCheckErrorText('다시 입력해주세요');
     }

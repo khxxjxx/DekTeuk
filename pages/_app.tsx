@@ -64,14 +64,17 @@ function MyApp({ Component, pageProps }: AppProps) {
     if (user.id) {
       onSnapshot(doc(db, 'user', user.id), (doc) => {
         const data = doc.data();
+
         const user = {
           nickname: data!.nickname,
           jobSector: data!.jobSector,
           validRounges: data!.validRounges,
           myChattings: [],
           hasNewNotification: data!.hasNewNotification,
+          email: data!.email,
+          id: doc.id,
         };
-        console.log('asdasdasd', user);
+
         dispatch(userSlice.actions.setNewUserInfo(user));
       });
     }
@@ -113,7 +116,7 @@ MyApp.getInitialProps = wrapper.getInitialAppProps(
             }).then((res) => res.json());
             //console.log('result', result);
 
-            console.log(result);
+            console.log(result, 'dlrj?');
             const data = {
               nickname: result.data.userData.nickname,
               jobSector: result.data.userData.jobSector,
@@ -123,7 +126,7 @@ MyApp.getInitialProps = wrapper.getInitialAppProps(
               hasNewNotification: false,
               email: result.data.email,
             };
-            console.log('데이터', data);
+
             await store.dispatch(getUser(data));
           } catch (e) {
             // let exceptions fail silently

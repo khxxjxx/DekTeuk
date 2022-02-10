@@ -6,38 +6,71 @@ import type {
 import MyPageNickName from '@components/mypage/MyPageNickname';
 import MyPagePassword from '@components/mypage/MyPagePassword';
 import MyPageMorePost from '@components/mypage/MyPageMorePost';
+import wrapper from '@store/configureStore';
 
 const ChangePage: NextPage = ({
   data,
+  userId,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  switch (data.type) {
+  switch (data) {
     case 'nickname':
-      return <MyPageNickName />;
+      return <MyPageNickName userId={userId} />;
+
     case 'password':
       return <MyPagePassword />;
+
     case 'posts':
       return <MyPageMorePost />;
+
     default:
       return <></>;
   }
 };
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { type } = context.query;
+// export const getServerSideProps: GetServerSideProps = async (context) => {
+//   const { type } = context.query;
 
-  if (type !== 'password' && type !== 'nickname' && type !== 'posts') {
+//   if (type !== 'password' && type !== 'nickname' && type !== 'posts') {
+//     return {
+//       redirect: {
+//         destination: '/404',
+//         permanent: false,
+//       },
+//     };
+//   }
+
+//   const data = { type: type };
+//   return {
+//     props: { data },
+//   };
+// };
+
+export const getServerSideProps: GetServerSideProps =
+  wrapper.getServerSideProps((store) => async (ctx) => {
+    const { type } = ctx.query;
+    if (type !== 'password' && type !== 'nickname' && type !== 'posts') {
+      return {
+        redirect: {
+          destination: '/404',
+          permanent: false,
+        },
+      };
+    }
+
+    const data = store.getState();
+
+    if (data.user.user.nickname == '') {
+      return {
+        redirect: {
+          destination: '/404',
+          permanent: false,
+        },
+      };
+    }
+
     return {
-      redirect: {
-        destination: '/404',
-        permanent: false,
-      },
+      props: { data: type, userId: data.user.user.id },
     };
-  }
-
-  const data = { type: type };
-  return {
-    props: { data },
-  };
-};
+  });
 
 export default ChangePage;

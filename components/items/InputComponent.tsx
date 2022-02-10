@@ -42,6 +42,9 @@ const InputComponent: React.FC<inputProps> = ({
           sx={{ input: { backgroundColor: 'white' } }}
           margin="normal"
           focused={false}
+          inputProps={{
+            autoComplete: 'new-password',
+          }}
         />
       )}
     </>
