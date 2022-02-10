@@ -75,7 +75,6 @@ const PostForm = () => {
     is_deleted: false,
     job: '',
     nickname: '',
-    image: '',
   });
   //photoupload 확인 아이콘-아직 미구현
   const [loading, setLoading] = React.useState(false);
@@ -120,15 +119,24 @@ const PostForm = () => {
     //   showAlert("success", `Post with id ${docRef.id} is updated successfully`);
     // } else { }
     //사진 정보 저장
-    let imgInfo: any[] = [];
+    let image: any = {};
+
     if (imgList.length >= 1) {
-      imgInfo = [
-        imgList.map((v: any) => {
-          return { downloadURL: v[0], imageDetail: v[2] };
-        }),
-      ];
+      // imgURL = [
+      //   imgList.map((v: any) => {
+      //     return v[0];
+      //   }),
+      // ];
+      // imgDetail = [
+      //   imgList.map((v: any) => {
+      //     return v[2];
+      //   }),
+      // ];
+      for (let i = 0; i < imgList.length; i++) {
+        image[i] = imgList[i];
+      }
     } else {
-      imgInfo = [];
+      image = {};
     }
     if (post.post_type === '' || post.title === '' || post.content === '') {
       showAlert('error', `필수항목을 작성해 주세요`);
@@ -143,7 +151,7 @@ const PostForm = () => {
         nickname: userInfoList.nickname,
         rounge: '',
         created_at: serverTimestamp(),
-        image: [...imgInfo],
+        image: image,
       });
       const docRef = doc(db, 'users', user.id);
       const userPostUpdate = {
@@ -164,7 +172,7 @@ const PostForm = () => {
         nickname: userInfoList.nickname,
         topic: '',
         created_at: serverTimestamp(),
-        image: [...imgInfo],
+        image: image,
       });
       const docRef = doc(db, 'users', user.id);
       const userPostUpdate = {
@@ -477,24 +485,12 @@ const PostForm = () => {
           mt: 3,
           display: 'flex',
           justifyContent: 'space-between',
-          bgcolor: 'background.paper',
           borderRadius: 1,
         }}
       >
         <Link href="/">
           <Button variant="contained">메인으로 이동</Button>
         </Link>
-        <Button
-          onClick={() => {
-            console.log([
-              imgList.map((v: any) => {
-                return { downloadURL: v[0], imageDetail: v[2] };
-              }),
-            ]);
-          }}
-        >
-          테스트
-        </Button>
         <Button variant="contained" onClick={onSubmit}>
           {post.hasOwnProperty('timestamp') ? '게시물 수정' : '게시물 작성'}
         </Button>
