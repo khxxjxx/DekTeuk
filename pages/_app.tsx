@@ -14,7 +14,7 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootReducer } from 'store/reducer';
 import { userSlice } from 'store/reducer';
-import { UserState } from '@interface/StoreInterface';
+import { UserInfo, UserState } from '@interface/StoreInterface';
 
 const theme_ = createTheme(
   {},
@@ -67,21 +67,18 @@ function MyApp({ Component, pageProps }: AppProps) {
   useEffect(() => {
     if (user.id) {
       onSnapshot(doc(db, 'user', user.id), (doc) => {
-        const data = doc.data();
-
-        const userData = {
-          nickname: data?.nickname,
-          jobSector: data?.jobSector,
-          validRounges: data?.validRounges,
-          myChatting: data?.myChatting,
-          hasNewNotification: data?.notification,
-          email: data!.email,
+        const data = doc.data() as UserInfo;
+        const userData: UserInfo = {
+          nickname: data.nickname,
+          jobSector: data.jobSector,
+          validRounges: data.validRounges,
+          email: data.email,
+          myChattings: [],
+          hasNewNotification: data.hasNewNotification,
           id: doc.id,
         };
 
         dispatch(userSlice.actions.setNewUserInfo(userData));
-
-        dispatch(userSlice.actions.setNewUserInfo(user));
       });
     }
   }, []);
