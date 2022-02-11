@@ -1,61 +1,46 @@
 import { FormEvent, useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  getUser,
-  initialViewAction,
-  resetViewAction,
-  setScrollAction,
-  setViewAction,
-} from 'store/reducer';
+import { getUser } from 'store/reducer';
+import { AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/router';
 import { useInView } from 'react-intersection-observer';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 
 import { TopicPost, RoungePost } from '@interface/CardInterface';
-import { StoreState, UserState } from '@interface/StoreInterface';
+import { UserState } from '@interface/StoreInterface';
 import { RoungeCard, TopicCard } from '@components/Card';
 import { ChildrenWrapperDivStyled } from '@layouts/Layout';
 import Footer from '@layouts/Footer';
 import { HeaderWrapperDivStyled } from '@layouts/Header';
-import { searchInfiniteFunction } from '@utils/function';
-import { useRouter } from 'next/router';
-import { GetServerSideProps, GetServerSidePropsContext } from 'next';
-import useDebounce from '@hooks/useDebounce';
+import { getMyInfo, searchInfiniteFunction } from '@utils/function';
 
 export interface SearchResult {
   result: Array<TopicPost | RoungePost>;
   nextPage: number;
 }
 const Search = ({ searchValue = '' }: { searchValue: string }) => {
-  const dispatch = useDispatch();
-  const { view }: { view: Array<SearchResult> } = useSelector(
-    (state: StoreState) => state.view,
-  );
-  const { ref, inView } = useInView();
-  useEffect(() => {
-    if (view.length === 0 && searchValue) {
-      (async () => {
-        dispatch(
-          initialViewAction(await searchInfiniteFunction(searchValue, 0)),
-        );
-      })();
-    }
-  }, [searchValue, view]);
+  const [searchResults, setSearchResults] = useState<Array<SearchResult>>([]);
   useEffect(() => {
     (async () => {
-      if (view.length > 0 && inView) {
-        dispatch(
-          setViewAction(
-            await searchInfiniteFunction(
-              searchValue,
-              view[view.length - 1].nextPage,
-            ),
-          ),
-        );
-      }
+      const results = await searchInfiniteFunction(searchValue, 0);
+      setSearchResults([results]);
     })();
-  }, [inView]);
-  const renderData = view.flatMap((value: any) => value.result) ?? [];
+  }, [searchValue]);
+  const { ref, inView } = useInView();
+
+  useEffect(() => {
+    if (inView) {
+      (async () => {
+        const nextResult = await searchInfiniteFunction(
+          searchValue,
+          searchResults[searchResults.length - 1].nextPage,
+        );
+        setSearchResults([...searchResults, nextResult]);
+      })();
+    }
+  }, [inView, searchResults, searchValue]);
+  const renderData = searchResults.flatMap((value: any) => value.result) ?? [];
   if (renderData.length > 0) {
     return (
       <SearchResultsWrapperDiv>
@@ -80,47 +65,14 @@ const Search = ({ searchValue = '' }: { searchValue: string }) => {
     <SearchPageWrapperDiv>최근에 검색한 내용이 없습니다.</SearchPageWrapperDiv>
   );
 };
-const WrappedSearch = ({ referer }: { referer: -1 | 1 }) => {
+const WrappedSearch = () => {
   const router = useRouter();
-  const dispatch = useDispatch();
-<<<<<<< HEAD
-  // useEffect(() => {
-  //   if (!myInfo) dispatch(getUser());
-  // }, [myInfo, dispatch]);
-=======
-  const { user: myInfo } = useSelector((state: StoreState) => state.user);
-  const { scrollY } = useSelector((state: StoreState) => state.scroll);
   const [searchValue, setSearchValue] = useState('');
+  const { user: myInfo }: any = useSelector((state: UserState) => state.user);
+  const dispatch = useDispatch();
   useEffect(() => {
-    const paddingFunction = useDebounce({
-      cb: () =>
-        window.scrollY !== 0 && dispatch(setScrollAction(window.scrollY)),
-      ms: 100,
-    });
-
-    window.addEventListener('scroll', paddingFunction);
-    return () => {
-      window.removeEventListener('scroll', paddingFunction);
-      // dispatch(resetViewAction());
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // useEffect(() => {
-  //   if (!myInfo) dispatch(getUser());
-  // }, [myInfo, dispatch]);
-  useEffect(() => {
-    if (referer === -1) {
-      dispatch(resetViewAction());
-      dispatch(setScrollAction(0));
-    } else {
-      window.scrollTo({ top: scrollY });
-    }
-    return () => {
-      dispatch(setScrollAction(scrollY));
-    };
-  }, [router.asPath]);
->>>>>>> 182ded5f6172239ff1fe9ebfb668f4eecb554da5
+    if (!myInfo) dispatch(getUser());
+  }, [myInfo, dispatch]);
   const onSubmitSearchForm = async (e: FormEvent) => {
     e.preventDefault(); // form 액션으로 인한 refresh 방지
     const value = (
@@ -129,11 +81,11 @@ const WrappedSearch = ({ referer }: { referer: -1 | 1 }) => {
       ) as HTMLInputElement
     ).value; // form 내 input value
     if (!value) return; // value가 없을 시 return
-    window.scrollTo({ top: 0, behavior: 'smooth' }); // 새로 검색 시 상단스크롤
+    document
+      .querySelector('#main-content')
+      ?.scrollTo({ top: 0, behavior: 'smooth' }); // 새로 검색 시 상단스크롤
     setSearchValue(value); // value값 변경
-    dispatch(resetViewAction());
   };
-
   return (
     <>
       <HeaderWrapperDivStyled>
@@ -148,26 +100,21 @@ const WrappedSearch = ({ referer }: { referer: -1 | 1 }) => {
           </SearchFormStyled>
         </SearchWrapperStyled>
       </HeaderWrapperDivStyled>
-      <ChildrenWrapperDivStyled>
-        <Search searchValue={searchValue} />
-      </ChildrenWrapperDivStyled>
+      <AnimatePresence key={router.asPath} exitBeforeEnter>
+        <ChildrenWrapperDivStyled
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{
+            duration: 0.4,
+          }}
+          id="main-content"
+        >
+          <Search searchValue={searchValue} />
+        </ChildrenWrapperDivStyled>
+      </AnimatePresence>
       <Footer />
     </>
   );
-};
-export const getServerSideProps: GetServerSideProps = async (
-  context: GetServerSidePropsContext,
-) => {
-  const returnProps: { referer: 1 | -1 } = { referer: -1 };
-  // referer prop은 URL직접접근 시 undefined 이기 때문에 ''
-  // search결과에서의 뒤로가기가 아니면 -1
-  if (
-    context.req.headers.referer &&
-    context.req.headers.referer?.split('/').indexOf('search') !== -1
-  )
-    returnProps.referer = 1;
-  // 값이 존재 하면서 search가 존재한다면 결과에서 뒤로가기로 접근한 것
-  return { props: returnProps };
 };
 export default WrappedSearch;
 
