@@ -2,7 +2,8 @@ import styled from '@emotion/styled';
 export const MyPageProfileComponent = styled.article`
   margin-top: 2rem;
   border-radius: 15px;
-  padding: 65px 40px 30px 40px;
+  padding: 80px 40px 60px 40px;
+  margin-top: 40px;
   & header {
     display: flex;
     margin-bottom: 5.5rem;

@@ -11,12 +11,25 @@ import wrapper from '@store/configureStore';
 import styled from '@emotion/styled';
 import { useEffect } from 'react';
 
-const MorePage = styled.div`
-  & a {
-    opacity: 0.3;
-    margin: 20px auto 90px auto;
-    display: block;
-    text-align: center;
+const MyPageheader = styled.div`
+  height: 60px;
+  position: fixed;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.2rem;
+  line-height: 1.2rem;
+  font-weight: bold;
+  background-color: ${({ theme }: any) =>
+    theme.customTheme.defaultMode.footerMenuBackgroundColor};
+  @media (prefers-color-scheme: dark) {
+    background-color: ${({ theme }: any) =>
+      theme.customTheme.darkMode.footerMenuBackgroundColor};
+    ${({ theme }: any) =>
+      `border-top: 2px solid ${theme.customTheme.darkMode.footerBordertopColor};`};
   }
 `;
 
@@ -33,15 +46,9 @@ const MyPage: NextPage = ({
         <meta name="description" content="Generate by elice Team 5" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div>여기가 해더</div>
+      <MyPageheader>마이페이지</MyPageheader>
       <Layout>
         <Container>
-          {/* <MyPageProfile></MyPageProfile>
-          <MyPagePostList userId={userId}></MyPagePostList>
-          <MorePage>
-            <Link href={'/mypage/posts'}>더보기</Link>
-          </MorePage> */}
-
           <MyPageProfile email={email} nickname={nickname} />
         </Container>
       </Layout>

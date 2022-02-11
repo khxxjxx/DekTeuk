@@ -66,11 +66,11 @@ function MyApp({ Component, pageProps }: AppProps) {
         const data = doc.data();
 
         const userData = {
-          nickname: data!.nickname,
-          jobSector: data!.jobSector,
-          validRounges: data!.validRounges,
-          myChatting: data!.myChatting,
-          hasNewNotification: data!.notification,
+          nickname: data?.nickname,
+          jobSector: data?.jobSector,
+          validRounges: data?.validRounges,
+          myChatting: data?.myChatting,
+          hasNewNotification: data?.notification,
           email: data!.email,
           id: doc.id,
         };

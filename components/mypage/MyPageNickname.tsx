@@ -50,19 +50,17 @@ const MyPageNickName: React.FC<MyPageNickNameProps> = ({ userId }) => {
               <h1>닉네임 변경</h1>
             </header>
 
-            <div>
-              <InputComponent
-                placeholder="닉네임을 입력해주세요"
-                changeFn={setNickname}
-                type={'text'}
-                error={error}
-                errorText={errorText}
-              ></InputComponent>
-              <ButtonComponent
-                text="변경하기"
-                activeFn={nicknameChange}
-              ></ButtonComponent>
-            </div>
+            <InputComponent
+              placeholder="닉네임을 입력해주세요"
+              changeFn={setNickname}
+              type={'text'}
+              error={error}
+              errorText={errorText}
+            ></InputComponent>
+            <ButtonComponent
+              text="변경하기"
+              activeFn={nicknameChange}
+            ></ButtonComponent>
           </MyPageChangeCom>
         </Container>
       </Layout>
