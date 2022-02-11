@@ -83,11 +83,9 @@ function MyApp({ Component, pageProps }: AppProps) {
   }, []);
 
   return (
-    <AuthProvider>
-      <ThemeProvider theme={theme_}>
-        <Component {...pageProps} />
-      </ThemeProvider>
-    </AuthProvider>
+    <ThemeProvider theme={theme_}>
+      <Component {...pageProps} />
+    </ThemeProvider>
   );
 }
 
