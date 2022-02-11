@@ -79,12 +79,8 @@ function MyApp({ Component, pageProps }: AppProps) {
           myChattings: [],
           hasNewNotification: data!.hasNewNotification,
         };
-<<<<<<< HEAD
-        dispatch(userSlice.actions.setNewUserInfo(user_));
-=======
         dispatch(setMyInfoAction(user));
         // dispatch(userSlice.actions.setNewUserInfo(user));
->>>>>>> 182ded5f6172239ff1fe9ebfb668f4eecb554da5
       });
     }
   }, []);

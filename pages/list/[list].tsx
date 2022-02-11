@@ -38,7 +38,6 @@ const ListPage = () => {
   const { scrollY }: { scrollY: number } = useSelector(
     (state: StoreState) => state.scroll,
   );
-  console.log(myInfo);
   useEffect(() => {
     const paddingFunction = useDebounce({
       cb: () =>
