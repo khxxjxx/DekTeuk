@@ -155,7 +155,10 @@ export const RoungeCard = forwardRef(function RoungeCardWithRef(
   return (
     // <Wrapper ref={cardRef}>
     <Wrapper>
-      <Link href={`/rounge/posts/${roungeCardData.postId}`} passHref>
+      <Link
+        href={`/list/rounge/${roungeCardData.rounge}/${roungeCardData.postId}`}
+        passHref
+      >
         <CardWrapper>
           {
             // {inView && (
@@ -222,7 +225,10 @@ export const TopicCard = forwardRef(function TopicCardWithRef(
   return (
     // <Wrapper ref={cardRef}>
     <Wrapper>
-      <Link href={`/topic/posts/${topicCardData.postId}`} passHref>
+      <Link
+        href={`/list/topic/${topicCardData.topic}/${topicCardData.postId}`}
+        passHref
+      >
         <CardWrapper>
           {/* {inView && ( */}
           {
