@@ -26,3 +26,11 @@ export interface UserState {
   status: 'loading' | 'success' | 'error' | 'standby';
   error: string | undefined;
 }
+export interface ViewPosts {
+  view: [];
+}
+export interface StoreState {
+  user: UserState;
+  view: ViewPosts;
+  scroll: { scrollY: number };
+}
