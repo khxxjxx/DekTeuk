@@ -65,19 +65,18 @@ function MyApp({ Component, pageProps }: AppProps) {
   const { user }: UserState = useSelector((state: RootReducer) => state.user);
 
   useEffect(() => {
-    console.log(user.id, 'asdasd');
     if (user.id) {
       onSnapshot(doc(db, 'user', user.id), (doc) => {
         const data = doc.data();
-        const user = {
+        console.log(data);
+        const user_ = {
           nickname: data!.nickname,
           jobSector: data!.jobSector,
           validRounges: data!.validRounges,
           myChattings: [],
           hasNewNotification: data!.hasNewNotification,
         };
-        console.log('asdasdasd', user);
-        dispatch(userSlice.actions.setNewUserInfo(user));
+        dispatch(userSlice.actions.setNewUserInfo(user_));
       });
     }
   }, []);
@@ -117,6 +116,9 @@ MyApp.getInitialProps = wrapper.getInitialAppProps(
               headers,
             }).then((res) => res.json());
             //console.log('result', result);
+            console.log('@@@@@');
+            console.log(result);
+            console.log('@@@@@');
 
             console.log(result.data.uid);
             const data = {

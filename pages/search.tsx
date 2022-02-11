@@ -70,9 +70,9 @@ const WrappedSearch = () => {
   const [searchValue, setSearchValue] = useState('');
   const { user: myInfo }: any = useSelector((state: UserState) => state.user);
   const dispatch = useDispatch();
-  useEffect(() => {
-    if (!myInfo) dispatch(getUser());
-  }, [myInfo, dispatch]);
+  // useEffect(() => {
+  //   if (!myInfo) dispatch(getUser());
+  // }, [myInfo, dispatch]);
   const onSubmitSearchForm = async (e: FormEvent) => {
     e.preventDefault(); // form 액션으로 인한 refresh 방지
     const value = (
