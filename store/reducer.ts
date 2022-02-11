@@ -99,6 +99,12 @@ const rootReducer = (
   {
     switch (action.type) {
       case HYDRATE:
+        console.log('@@@@');
+        console.log('@@@@');
+        console.log(state.view.searchValue);
+        console.log(action.payload.view.searchValue);
+        console.log('@@@@');
+        console.log('@@@@');
         let userState: UserState = {
           user: {
             nickname: '',
@@ -113,12 +119,22 @@ const rootReducer = (
         };
         if (action.payload.user.user.nickname) userState = action.payload.user;
         else userState = state.user;
-        if (state.view.view.length === 0) {
-          return { ...action.payload, user: userState };
-        } else
+        if (state.view.view.length === 0)
+          return {
+            ...action.payload,
+            view:
+              state.view.searchValue && action.payload.view.searchValue
+                ? { view: [], searchValue: '' }
+                : state.view,
+            user: userState,
+          };
+        else
           return {
             user: userState,
-            view: state.view,
+            view:
+              state.view.searchValue && action.payload.view.searchValue
+                ? { view: [], searchValue: '' }
+                : state.view,
             scroll: { scrollY: state.scroll.scrollY },
           };
       default:

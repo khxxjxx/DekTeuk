@@ -22,6 +22,7 @@ import { searchInfiniteFunction } from '@utils/function';
 import { useRouter } from 'next/router';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import useDebounce from '@hooks/useDebounce';
+import wrapper from '@store/configureStore';
 
 const Search = () => {
   const dispatch = useDispatch();
@@ -90,8 +91,11 @@ const WrappedSearch = ({ referer }: { referer: -1 | 1 }) => {
     cb: () => window.scrollY !== 0 && dispatch(setScrollAction(window.scrollY)),
     ms: 100,
   });
-
   useEffect(() => {
+    if (referer === -1) {
+      dispatch(setSearchValueAction(''));
+      dispatch(resetViewAction());
+    }
     window.addEventListener('scroll', paddingFunction);
     return () => {
       window.removeEventListener('scroll', paddingFunction);
@@ -147,6 +151,7 @@ const WrappedSearch = ({ referer }: { referer: -1 | 1 }) => {
     </>
   );
 };
+
 export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext,
 ) => {

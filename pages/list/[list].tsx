@@ -22,6 +22,7 @@ import {
   resetViewAction,
   setScrollAction,
   initialViewAction,
+  setSearchValueAction,
 } from '@store/reducer';
 import wrapper from '@store/configureStore';
 
@@ -161,32 +162,33 @@ const ListPage = () => {
   );
 };
 
-// export const getServerSideProps = wrapper.getServerSideProps(
-//   (store) =>
-//     async (props): Promise<any> => {
-//       // const { list } = props.params as { list: string };
-//       // switch (list) {
-//       //   case 'timeline': // topic, rounge 데이터 다 갖고와서 view에 dispatch
-//       //     store.dispatch(
-//       //       initialViewAction(
-//       //         await getHomePostsInfiniteFunction('timeline', 0),
-//       //       ),
-//       //     );
-//       //     console.log(list === 'timeline');
-//       //     break;
-//       //   case 'topic': // topic 데이터 다 갖고와서 view에 dispatch
-//       //     store.dispatch(
-//       //       initialViewAction(await getHomePostsInfiniteFunction('topic', 0)),
-//       //     );
-//       //     break;
-//       //   default:
-//       //     store.dispatch(
-//       //       initialViewAction(await getHomePostsInfiniteFunction(list, 0)),
-//       //     );
-//       //     break;
-//       // }
-//     },
-// );
+export const getServerSideProps = wrapper.getServerSideProps(
+  (store) =>
+    async (props): Promise<any> => {
+      const { list } = props.params as { list: string };
+      store.dispatch(setSearchValueAction(''));
+      switch (list) {
+        case 'timeline': // topic, rounge 데이터 다 갖고와서 view에 dispatch
+          store.dispatch(
+            initialViewAction(
+              await getHomePostsInfiniteFunction('timeline', 0),
+            ),
+          );
+          console.log(list === 'timeline');
+          break;
+        case 'topic': // topic 데이터 다 갖고와서 view에 dispatch
+          store.dispatch(
+            initialViewAction(await getHomePostsInfiniteFunction('topic', 0)),
+          );
+          break;
+        default:
+          store.dispatch(
+            initialViewAction(await getHomePostsInfiniteFunction(list, 0)),
+          );
+          break;
+      }
+    },
+);
 
 export default ListPage;
 
