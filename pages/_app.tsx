@@ -5,7 +5,7 @@ import { firebaseAdmin } from '@firebase/firebaseAdmin';
 import nookies from 'nookies';
 import fetch from 'isomorphic-unfetch';
 import wrapper from 'store/configureStore';
-import { getUser } from 'store/reducer';
+import { getUser, setMyInfoAction } from 'store/reducer';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 // import { AuthProvider } from '@hooks/Auth';
 import { query, doc, onSnapshot } from 'firebase/firestore';
@@ -75,8 +75,8 @@ function MyApp({ Component, pageProps }: AppProps) {
           myChattings: [],
           hasNewNotification: data!.hasNewNotification,
         };
-        console.log('asdasdasd', user);
-        dispatch(userSlice.actions.setNewUserInfo(user));
+        dispatch(setMyInfoAction(user));
+        // dispatch(userSlice.actions.setNewUserInfo(user));
       });
     }
   }, []);

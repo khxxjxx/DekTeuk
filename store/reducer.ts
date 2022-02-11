@@ -7,6 +7,7 @@ import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '@firebase/firebase';
 import { createStore } from 'redux';
 import { useSelector, useDispatch } from 'react-redux';
+
 const initialUserState: UserState = {
   user: {
     nickname: '',
@@ -33,6 +34,9 @@ export const userSlice = createSlice({
   reducers: {
     setNewUserInfo: (state, action) => {
       state.user.nickname = action.payload.nickname;
+    },
+    setMyInfo: (state, action) => {
+      state.user = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -74,10 +78,13 @@ export const scroll = createSlice({
     },
   },
 });
+
 export const setViewAction = view.actions.setViewPosts;
 export const resetViewAction = view.actions.resetViewPosts;
 export const initialViewAction = view.actions.initialViewPosts;
 export const setScrollAction = scroll.actions.setScroll;
+export const setMyInfoAction = userSlice.actions.setMyInfo;
+
 const rootReducer = (
   state: {
     user: UserState;
@@ -89,15 +96,22 @@ const rootReducer = (
   {
     switch (action.type) {
       case HYDRATE:
+        // console.log(state);
+        // console.log(state);
+        console.log(action.payload);
+        return { ...state, ...action.payload };
+        // return state;
+        return action.payload;
+        if (!state.user.user.nickname) return action.payload;
+        else return state;
         if (state.view.view.length === 0) {
-          return action.payload;
+          return { ...action.payload, user: state.user };
         } else
           return {
             user: action.payload.user,
             view: { view: [...state.view.view] },
             scroll: { scrollY: state.scroll.scrollY },
           };
-        return { ...state, ...action.payload };
       default:
         const combineReducer = combineReducers({
           user: userSlice.reducer,

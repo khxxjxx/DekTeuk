@@ -67,13 +67,14 @@ const HeaderHome: React.FC = () => {
   const router = useRouter();
   const ref = useRef(null);
   const headerLinks: { url: string; title: string }[] = [];
-  if (myInfo?.validRounges)
+  if (myInfo?.validRounges) {
     headerLinks.push(
       ...myInfo?.validRounges.map((v: ValidRounge) => ({
         title: v.title,
         url: `/list/${v.url}`,
       })),
     );
+  }
   if (headerLinks.length === 0) {
     headerLinks.push(
       { title: '타임라인', url: 'timeline' },

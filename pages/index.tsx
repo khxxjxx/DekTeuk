@@ -22,8 +22,6 @@ const Home: NextPage = () => {
   return <div></div>;
 };
 export default Home;
-<<<<<<< HEAD
-=======
 
 // export const getServerSideProps = async () => {
 //   // const fs = await require('fs');
@@ -34,4 +32,3 @@ export default Home;
 //   // );
 //   return { props: {} };
 // };
->>>>>>> 34ea8073216baee2de624b7bbc3cdc921339add2

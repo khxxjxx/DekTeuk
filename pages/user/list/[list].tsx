@@ -81,7 +81,7 @@ const ListPage = () => {
   useEffect(() => {
     if (
       myInfo?.validRounges.findIndex(
-        (v: ValidRounge) => `/list/${v.url}` === router.asPath,
+        (v: ValidRounge) => '/user' + `/list/${v.url}` === 'router.asPath',
       ) === -1
     ) {
       return;
@@ -124,7 +124,8 @@ const ListPage = () => {
       (v: ValidRounge) => `/list/${v.url}` === router.asPath,
     ) === -1
   ) {
-    return <NotFoundPage />;
+    // console.log(123412421434124213);
+    // return <NotFoundPage />;
   }
   return (
     <>
@@ -159,32 +160,32 @@ const ListPage = () => {
   );
 };
 
-// export const getServerSideProps = wrapper.getServerSideProps(
-//   (store) =>
-//     async (props): Promise<any> => {
-//       // const { list } = props.params as { list: string };
-//       // switch (list) {
-//       //   case 'timeline': // topic, rounge 데이터 다 갖고와서 view에 dispatch
-//       //     store.dispatch(
-//       //       initialViewAction(
-//       //         await getHomePostsInfiniteFunction('timeline', 0),
-//       //       ),
-//       //     );
-//       //     console.log(list === 'timeline');
-//       //     break;
-//       //   case 'topic': // topic 데이터 다 갖고와서 view에 dispatch
-//       //     store.dispatch(
-//       //       initialViewAction(await getHomePostsInfiniteFunction('topic', 0)),
-//       //     );
-//       //     break;
-//       //   default:
-//       //     store.dispatch(
-//       //       initialViewAction(await getHomePostsInfiniteFunction(list, 0)),
-//       //     );
-//       //     break;
-//       // }
-//     },
-// );
+export const getServerSideProps = wrapper.getServerSideProps(
+  (store) =>
+    async (props): Promise<any> => {
+      const { list } = props.params as { list: string };
+      switch (list) {
+        case 'timeline': // topic, rounge 데이터 다 갖고와서 view에 dispatch
+          store.dispatch(
+            initialViewAction(
+              await getHomePostsInfiniteFunction('timeline', 0),
+            ),
+          );
+          console.log(list === 'timeline');
+          break;
+        case 'topic': // topic 데이터 다 갖고와서 view에 dispatch
+          store.dispatch(
+            initialViewAction(await getHomePostsInfiniteFunction('topic', 0)),
+          );
+          break;
+        default:
+          store.dispatch(
+            initialViewAction(await getHomePostsInfiniteFunction(list, 0)),
+          );
+          break;
+      }
+    },
+);
 
 export default ListPage;
 
