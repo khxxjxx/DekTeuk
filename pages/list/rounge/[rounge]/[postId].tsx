@@ -13,7 +13,6 @@ export const getServerSideProps: GetServerSideProps = async (
           .split('/')
           .slice(3, context.req.headers.referer.split('/').length)
           .join('/'),
-        url: context.req.url,
       },
     };
   return { props: {} };
@@ -21,20 +20,21 @@ export const getServerSideProps: GetServerSideProps = async (
 
 export default function RoungePost({
   referer,
-  url,
 }: {
   referer: string | undefined;
-  url: string;
 }) {
   const dispatch = useDispatch();
   useEffect(() => {
+    // search에서의 접속은 referer가 search이다.
     if (
       !(
-        referer &&
-        referer.split('/').length === 2 &&
-        referer.split('/')[0] === 'list' &&
-        url
-      )
+        (
+          referer && // 이전 페이지 정보가 존재할 것
+          referer.split('/').length === 2 && // 2인 경우는 list/* 에서 온 경우
+          referer.split('/')[0] === 'list'
+        ) // [0]가 list인지 확인
+      ) &&
+      referer !== 'search'
     ) {
       dispatch(setScrollAction(0));
     }

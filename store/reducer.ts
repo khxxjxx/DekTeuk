@@ -68,6 +68,7 @@ export const view = createSlice({
     },
   },
 });
+
 export const scroll = createSlice({
   name: 'scroll',
   initialState: { scrollY: 0 },
@@ -95,6 +96,8 @@ const rootReducer = (
   {
     switch (action.type) {
       case HYDRATE:
+        console.log(state);
+        console.log(action);
         let userState: UserState = {
           user: {
             nickname: '',
@@ -109,7 +112,6 @@ const rootReducer = (
         };
         if (action.payload.user.user.nickname) userState = action.payload.user;
         else userState = state.user;
-        if (!state.user.user.nickname) return action.payload;
         if (state.view.view.length === 0) {
           return { ...action.payload, user: userState };
         } else
