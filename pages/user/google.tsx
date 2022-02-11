@@ -29,8 +29,12 @@ export default function Signup() {
     jobSector: '',
     validRounges: [
       {
-        title: '',
-        url: '',
+        title: '타임라인',
+        url: 'timeline',
+      },
+      {
+        title: '토픽',
+        url: 'topic',
       },
     ],
     myChatting: [
@@ -63,6 +67,7 @@ export default function Signup() {
       router.push('/');
     }
   };
+
   const checkNickname = async () => {
     const nicknameCheckQuery = query(
       collection(db, 'user'),

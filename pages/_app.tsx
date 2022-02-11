@@ -65,7 +65,6 @@ function MyApp({ Component, pageProps }: AppProps) {
   const { user }: UserState = useSelector((state: RootReducer) => state.user);
 
   useEffect(() => {
-    console.log(user.id, 'asdasd');
     if (user.id) {
       onSnapshot(doc(db, 'user', user.id), (doc) => {
         const data = doc.data();
@@ -76,7 +75,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           myChattings: [],
           hasNewNotification: data!.hasNewNotification,
         };
-        console.log('asdasdasd', user);
+        console.log(user);
         dispatch(userSlice.actions.setNewUserInfo(user));
       });
     }
@@ -130,6 +129,7 @@ MyApp.getInitialProps = wrapper.getInitialAppProps(
             console.log('데이터', data);
             await store.dispatch(getUser(data));
           } catch (e) {
+            console.error(e);
             // let exceptions fail silently
             // could be invalid token, just let client-side deal with that
           }

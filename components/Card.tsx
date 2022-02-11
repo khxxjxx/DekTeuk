@@ -99,6 +99,7 @@ const CardTitleStyled = styled.div`
   font-size: 1.5rem;
   margin-bottom: 3px;
 `;
+
 const CardContentStyled = styled.div`
   height: 2rem;
   overflow: hidden;
@@ -155,7 +156,10 @@ export const RoungeCard = forwardRef(function RoungeCardWithRef(
   return (
     // <Wrapper ref={cardRef}>
     <Wrapper>
-      <Link href={`/rounge/posts/${roungeCardData.postId}`} passHref>
+      <Link
+        href={`/list/rounge/${roungeCardData.rounge.url}/${roungeCardData.postId}`}
+        passHref
+      >
         <CardWrapper>
           {
             // {inView && (
@@ -222,7 +226,10 @@ export const TopicCard = forwardRef(function TopicCardWithRef(
   return (
     // <Wrapper ref={cardRef}>
     <Wrapper>
-      <Link href={`/topic/posts/${topicCardData.postId}`} passHref>
+      <Link
+        href={`/list/topic/${topicCardData.topic.url}/${topicCardData.postId}`}
+        passHref
+      >
         <CardWrapper>
           {/* {inView && ( */}
           {
@@ -230,9 +237,11 @@ export const TopicCard = forwardRef(function TopicCardWithRef(
               <div ref={ref} />
               <TopicCardMainStyled>
                 <TopicCardContentWrapper>
-                  <OneDepthNestedLink href={`/topic/${topicCardData.topic}`}>
+                  <OneDepthNestedLink
+                    href={`/topic/${topicCardData.topic.url}`}
+                  >
                     <TopicWrapperDivStyled>
-                      <div>{topicCardData.topic}</div>
+                      <div>{topicCardData.topic.title}</div>
                     </TopicWrapperDivStyled>
                   </OneDepthNestedLink>
                   <CardTitleStyled>{topicCardData.title}</CardTitleStyled>

@@ -3,10 +3,19 @@ export interface PostAuthor {
   jobSector: string;
 }
 
+export interface RoungeObj {
+  title: string;
+  url: string;
+}
+export interface TopicObj {
+  title: string;
+  url: string;
+}
+
 export interface RoungePost {
   postId: string;
   postType: 'rounge';
-  rounge: string;
+  rounge: RoungeObj;
   title: string;
   content: string;
   author: PostAuthor;
@@ -18,7 +27,7 @@ export interface RoungePost {
 export interface TopicPost {
   postId: string;
   postType: 'topic';
-  topic: string;
+  topic: TopicObj;
   title: string;
   content: string;
   author: PostAuthor;
