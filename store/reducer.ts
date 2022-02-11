@@ -32,7 +32,7 @@ export const userSlice = createSlice({
   initialState: initialUserState,
   reducers: {
     setNewUserInfo: (state, action) => {
-      state.user.nickname = action.payload.nickname;
+      state.user = action.payload;
     },
   },
   extraReducers: (builder) => {
