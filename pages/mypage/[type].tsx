@@ -20,30 +20,12 @@ const ChangePage: NextPage = ({
       return <MyPagePassword />;
 
     case 'posts':
-      return <MyPageMorePost />;
+      return <MyPageMorePost userId={userId} />;
 
     default:
       return <></>;
   }
 };
-
-// export const getServerSideProps: GetServerSideProps = async (context) => {
-//   const { type } = context.query;
-
-//   if (type !== 'password' && type !== 'nickname' && type !== 'posts') {
-//     return {
-//       redirect: {
-//         destination: '/404',
-//         permanent: false,
-//       },
-//     };
-//   }
-
-//   const data = { type: type };
-//   return {
-//     props: { data },
-//   };
-// };
 
 export const getServerSideProps: GetServerSideProps =
   wrapper.getServerSideProps((store) => async (ctx) => {

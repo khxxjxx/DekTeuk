@@ -59,36 +59,58 @@ interface Post {
   content: string;
 }
 
-const MyPageMorePost: React.FC = () => {
+type MyPageMorePostProp = {
+  userId: string;
+};
+
+const MyPageMorePost: React.FC<MyPageMorePostProp> = ({ userId }) => {
   const { ref, inView } = useInView();
   const [posts, setPosts] = useState<Post[]>([]);
-  const [end, setEnd] = useState(0);
+  const [stopFetch, setStopFetch] = useState<boolean>(false);
+  const [firstFetch, setFirstFetch] = useState<boolean>(true);
+
+  const [end, setEnd] = useState<any>(0);
 
   const getPosts = async () => {
     let q;
-    if (end === -1) {
-      return;
-    } else if (end) {
-      q = query(collection(db, 'post'), limit(2));
+
+    if (firstFetch) {
+      q = query(
+        collection(db, 'post'),
+        where('userId', '==', `${userId}`),
+        orderBy('timestamp', 'asc'),
+        limit(10),
+      );
     } else {
-      q = query(collection(db, 'post'), limit(2));
+      q = query(
+        collection(db, 'post'),
+        where('userId', '==', `${userId}`),
+        orderBy('timestamp', 'asc'),
+        limit(10),
+        startAfter(end),
+      );
     }
+
     const snapshots = await getDocs(q);
     const dataArr: Post[] = [];
     snapshots.forEach((snapshot) => {
       dataArr.push(snapshot.data() as Post);
     });
+
+    if (dataArr.length < 10) setStopFetch(true);
+
     setPosts([...posts, ...dataArr]);
-    console.log(dataArr.length);
-    setEnd(dataArr.length);
+
+    setEnd(snapshots.docs[snapshots.docs.length - 1]);
   };
 
   useEffect(() => {
+    setFirstFetch(false);
     getPosts();
   }, []);
 
   useEffect(() => {
-    if (end !== 0 && end !== -1) {
+    if (inView === true && firstFetch === false && stopFetch === false) {
       getPosts();
     }
   }, [inView]);
