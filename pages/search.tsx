@@ -29,7 +29,6 @@ const Search = () => {
   const { view, searchValue }: ViewPosts = useSelector(
     (state: StoreState) => state.view,
   );
-  console.log(view);
   const { ref, inView } = useInView();
   useEffect(() => {
     if (view.length === 0 && searchValue) {

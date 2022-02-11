@@ -99,12 +99,6 @@ const rootReducer = (
   {
     switch (action.type) {
       case HYDRATE:
-        console.log('@@@@');
-        console.log('@@@@');
-        console.log(state.view.searchValue);
-        console.log(action.payload.view.searchValue);
-        console.log('@@@@');
-        console.log('@@@@');
         let userState: UserState = {
           user: {
             nickname: '',
