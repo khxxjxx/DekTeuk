@@ -1,10 +1,8 @@
 import styled from '@emotion/styled';
 import { getDateTime } from '@utils/function';
-//@ts-ignore
 import { TopicPost, RoungePost } from '@interface/CardInterface';
 import Link from 'next/link';
 import { ForwardedRef, forwardRef } from 'react';
-// import VisibilityIcon from '@mui/icons-material/Visibility';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ModeCommentIcon from '@mui/icons-material/ModeComment';
 import { useInView } from 'react-intersection-observer';
