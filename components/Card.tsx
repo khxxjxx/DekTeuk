@@ -237,7 +237,7 @@ export const TopicCard = forwardRef(function TopicCardWithRef(
               <TopicCardMainStyled>
                 <TopicCardContentWrapper>
                   <OneDepthNestedLink
-                    href={`/topic/${topicCardData.topic.url}`}
+                    href={`/list/topic/${topicCardData.topic.url}`}
                   >
                     <TopicWrapperDivStyled>
                       <div>{topicCardData.topic.title}</div>
