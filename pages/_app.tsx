@@ -36,6 +36,8 @@ const theme_ = createTheme(
         footerBordertopColor: '#EAEAEA',
         thumbUpIconNotLiked: '',
         thumbUpIconLiked: 'rgb(144, 202, 249)',
+        chatFromBackgroundColor: '#f0f0f0',
+        chatToBackgroundColor: '#b762c1',
       },
       darkMode: {
         headerMenuBackgroundColor: 'rgba(28, 28, 30, 1)',
@@ -54,6 +56,8 @@ const theme_ = createTheme(
         footerBordertopColor: 'rgb(17, 17, 19)',
         thumbUpIconNotLiked: '',
         thumbUpIconLiked: '',
+        chatFromBackgroundColor: 'rgba(35, 35, 37, 1)',
+        chatToBackgroundColor: '#4C78C1',
       },
     },
   },
@@ -80,7 +84,6 @@ function MyApp({ Component, pageProps }: AppProps) {
       });
     }
   }, []);
-
   return (
     <ThemeProvider theme={theme_}>
       <Component {...pageProps} />
