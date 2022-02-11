@@ -45,7 +45,7 @@ export default function Signup() {
         unreadCount: 0,
       },
     ],
-    notification: true,
+    notification: false,
   };
 
   const onInputChange = (

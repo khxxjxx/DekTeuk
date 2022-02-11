@@ -5,11 +5,9 @@ import type {
 } from 'next';
 import Head from 'next/head';
 import MyPageProfile from '@components/mypage/MyPageProfile';
-import MyPagePostList from '@components/mypage/MyPagePostList';
 import Layout from '@layouts/Layout';
 import Container from '@mui/material/Container';
 import wrapper from '@store/configureStore';
-import Link from 'next/link';
 import styled from '@emotion/styled';
 import { useEffect } from 'react';
 
@@ -27,7 +25,6 @@ const MyPage: NextPage = ({
   userId,
   nickname,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  console.log(email, userId, nickname, 'sss');
   useEffect(() => {}, []);
   return (
     <>
@@ -36,13 +33,16 @@ const MyPage: NextPage = ({
         <meta name="description" content="Generate by elice Team 5" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+      <div>여기가 해더</div>
       <Layout>
         <Container>
-          <MyPageProfile></MyPageProfile>
+          {/* <MyPageProfile></MyPageProfile>
           <MyPagePostList userId={userId}></MyPagePostList>
           <MorePage>
             <Link href={'/mypage/posts'}>더보기</Link>
-          </MorePage>
+          </MorePage> */}
+
+          <MyPageProfile email={email} nickname={nickname} />
         </Container>
       </Layout>
     </>

@@ -1,28 +1,41 @@
 import Link from 'next/link';
 import styled from '@emotion/styled';
-import { MyPageListComponent } from './MyPageListComponent';
+import { MyPageProfileComponent } from './MyPageProfileComponent';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
-const MyPageProfileLi = styled.li`
-  margin: 0 auto;
-  margin-bottom: 30px;
-  font-size: 1.1rem;
-  width: 80%;
-`;
+import MyPageProfileList from './MyPageProfileList';
 
-const MyPageProfile: React.FC = () => {
+type MyPageProfileProps = {
+  email: string;
+  nickname: string;
+};
+
+// todo: 마이페이지 리다자인
+
+const MyPageProfile: React.FC<MyPageProfileProps> = ({ email, nickname }) => {
   return (
-    <MyPageListComponent>
-      <h1>프로필</h1>
-      <ul>
-        <MyPageProfileLi>Email </MyPageProfileLi>
-        <MyPageProfileLi>
-          <Link href={'/mypage/nickname'}>닉네임 변경하기</Link>
-        </MyPageProfileLi>
-        <MyPageProfileLi>
-          <Link href={'/mypage/password'}>비밀번호 변경하기</Link>
-        </MyPageProfileLi>
-      </ul>
-    </MyPageListComponent>
+    <MyPageProfileComponent>
+      <header>
+        <AccountCircleIcon sx={{ fontSize: 80 }} />
+        <div>
+          <div id="nickname">{nickname}</div>
+          <div id="email">{email}</div>
+        </div>
+      </header>
+      <div>
+        <Link href={'/mypage/nickname'}>
+          <MyPageProfileList text="닉네임 변경하기" />
+        </Link>
+
+        <Link href={'/mypage/password'}>
+          <MyPageProfileList text="비밀번호 변경하기" />
+        </Link>
+
+        <Link href={'/mypage/posts'}>
+          <MyPageProfileList text="내가 작성한 게시물 보기" />
+        </Link>
+      </div>
+    </MyPageProfileComponent>
   );
 };
 

@@ -65,17 +65,17 @@ function MyApp({ Component, pageProps }: AppProps) {
       onSnapshot(doc(db, 'user', user.id), (doc) => {
         const data = doc.data();
 
-        const user = {
+        const userData = {
           nickname: data!.nickname,
           jobSector: data!.jobSector,
           validRounges: data!.validRounges,
-          myChattings: [],
-          hasNewNotification: data!.hasNewNotification,
+          myChatting: data!.myChatting,
+          hasNewNotification: data!.notification,
           email: data!.email,
           id: doc.id,
         };
 
-        dispatch(userSlice.actions.setNewUserInfo(user));
+        dispatch(userSlice.actions.setNewUserInfo(userData));
       });
     }
   }, []);
@@ -123,7 +123,7 @@ MyApp.getInitialProps = wrapper.getInitialAppProps(
               validRounges: result.data.userData.validRounges,
               myChattings: [],
               id: result.data.uid,
-              hasNewNotification: false,
+              hasNewNotification: result.data.userData.notification,
               email: result.data.email,
             };
 

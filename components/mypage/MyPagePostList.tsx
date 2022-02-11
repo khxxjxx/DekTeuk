@@ -1,6 +1,6 @@
 import MyPagePost from './MyPagePost';
 import { useEffect, useState } from 'react';
-import { MyPageListComponent } from './MyPageListComponent';
+import { MyPageProfileComponent } from './MyPageProfileComponent';
 import { collection, query, where, getDocs, limit } from 'firebase/firestore';
 import { db } from '@firebase/firebase';
 
@@ -27,7 +27,7 @@ const MyPagePostList: React.FC<MyPagePostListProps> = ({ userId }) => {
     getMyPost(userId);
   }, []);
   return (
-    <MyPageListComponent>
+    <MyPageProfileComponent>
       <h1>내가 작성한 게시물</h1>
       <ul>
         {posts.map((post: any, idx: number) => {
@@ -36,7 +36,7 @@ const MyPagePostList: React.FC<MyPagePostListProps> = ({ userId }) => {
           );
         })}
       </ul>
-    </MyPageListComponent>
+    </MyPageProfileComponent>
   );
 };
 
