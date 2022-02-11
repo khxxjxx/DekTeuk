@@ -1,21 +1,20 @@
 import '../styles/globals.css';
 import type { AppContext, AppProps } from 'next/app';
 import { AuthProvider } from './user/auth';
-import { firebaseAdmin } from '@firebase/firebaseAdmin';
 import nookies from 'nookies';
 import fetch from 'isomorphic-unfetch';
 import wrapper from 'store/configureStore';
 import { getUser } from 'store/reducer';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 // import { AuthProvider } from '@hooks/Auth';
-import { query, doc, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '@firebase/firebase';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootReducer } from 'store/reducer';
 import { userSlice } from 'store/reducer';
 import { UserState } from '@interface/StoreInterface';
-
+import { setNewUserInfo } from 'store/reducer';
 const theme_ = createTheme(
   {},
   {
@@ -61,19 +60,19 @@ function MyApp({ Component, pageProps }: AppProps) {
   const { user }: UserState = useSelector((state: RootReducer) => state.user);
 
   useEffect(() => {
-    console.log(user.id, 'asdasd');
+    const id = user.id;
     if (user.id) {
-      onSnapshot(doc(db, 'user', user.id), (doc) => {
+      onSnapshot(doc(db, 'user', id), (doc) => {
         const data = doc.data();
-        const user = {
+        const userInfo = {
           nickname: data!.nickname,
           jobSector: data!.jobSector,
           validRounges: data!.validRounges,
           myChattings: [],
           hasNewNotification: data!.hasNewNotification,
+          id: id,
         };
-        console.log('asdasdasd', user);
-        dispatch(userSlice.actions.setNewUserInfo(user));
+        dispatch(setNewUserInfo(userInfo));
       });
     }
   }, []);
@@ -118,10 +117,14 @@ MyApp.getInitialProps = wrapper.getInitialAppProps(
             const data = {
               nickname: result.data.userData.nickname,
               jobSector: result.data.userData.jobSector,
-              validRounges: result.data.userData.validRounges,
+              validRounges: result.data.userData.validRounges
+                ? result.data.userData.validRounges
+                : [],
               myChattings: result.data.userData.myChattings,
               id: result.data.uid,
               hasNewNotification: result.data.userData.hasNewNotification,
+              providerId: result.data.providerId,
+              post: result.data.userData.post,
             };
             console.log('데이터', data);
             await store.dispatch(getUser(data));

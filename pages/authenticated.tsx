@@ -2,7 +2,7 @@ import React from 'react';
 import nookies from 'nookies';
 import { useRouter } from 'next/router';
 import { firebaseAdmin } from '@firebase/firebaseAdmin';
-import { firebase } from '@firebase/firebaseClient';
+import { firebase } from '@firebase/firebase';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '@firebase/firebase';
 

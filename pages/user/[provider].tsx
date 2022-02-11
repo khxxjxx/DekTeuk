@@ -19,8 +19,14 @@ import {
 } from 'firebase/firestore';
 import { getStorage, ref, uploadString } from 'firebase/storage';
 import { useRouter } from 'next/router';
-
-export default function Signup() {
+type UserData = {
+  email: string;
+  password: string;
+  checkPassword: string;
+  nickname: string;
+  isGoogle: boolean;
+};
+export default function Signup(provider: any) {
   const router = useRouter();
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
@@ -30,8 +36,18 @@ export default function Signup() {
   const [fileUrl, setFileUrl] = useState<string>('');
   const [fileExt, setFileExt] = useState<string>('');
   const [isGoogle, setIsGoogle] = useState<boolean>(false);
+  const [userInfo, setUserInfo] = useState<UserData>([]);
   const storage = getStorage();
 
+  useEffect(() => {
+    if (provider === 'google') {
+      console.log('google account');
+      setIsGoogle(true);
+      setEmail(auth.currentUser?.email!);
+      setPassword(auth.currentUser?.email!);
+      setCheckPassword(auth.currentUser?.email!);
+    }
+  }, []);
   const userInitData = {
     nickname: nickname,
     jobSector: '',
@@ -66,7 +82,8 @@ export default function Signup() {
     else if (name === 'checkPassword') setCheckPassword(value);
     else if (name === 'nickname') setNickname(value);
   };
-  const createUser = async () => {
+
+  const createUserWithEmail = async () => {
     try {
       const result = await createUserWithEmailAndPassword(
         auth,
@@ -75,7 +92,7 @@ export default function Signup() {
       );
       return result;
     } catch (err: any) {
-      setError(err.code);
+      return err.code;
     }
   };
   const SignUpSubmitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -83,23 +100,21 @@ export default function Signup() {
     if (checkPassword !== password) {
       alert('비밀번호가 다릅니다!');
     } else {
-      // const fileName = 'asdasd.' + fileExt;
+      // const fileName = uid + fileExt;
       // const imgRef = ref(storage, fileName);
       // await uploadString(imgRef, fileUrl, 'data_url').then((snapshot) => {
       //   console.log('success upload');
       // });
-      // const {
-      //   user: { uid },
-      // } = await createUser();
-      // console.log(uid);
-      // if (uid) {
-      //   console.log('success');
-      //   await setDoc(doc(db, 'user', uid), userInitData);
-      //   await signOut(auth);
-      //   router.push('/');
-      // } else {
-      //   console.log(error);
-      // }
+      const createUserResult = await createUserWithEmail();
+
+      if (createUserResult.user || isGoogle) {
+        console.log('success');
+        await setDoc(doc(db, 'user', createUserResult.user.uid), userInitData);
+        await signOut(auth);
+        router.push('/');
+      } else {
+        console.log(createUserResult);
+      }
     }
 
     // try {
@@ -125,13 +140,14 @@ export default function Signup() {
   const onFileChange = (e: any) => {
     const files = e.target.files!;
     const reader = new FileReader();
+    reader.readAsDataURL(files[0]);
     reader.onloadend = (finishedEvent: any) => {
       const {
         currentTarget: { result },
       } = finishedEvent;
       setFileUrl(result);
     };
-    reader.readAsDataURL(files[0]);
+
     setFileExt(e.target.value.split('.')[1]);
     // setFileUrl(URL.createObjectURL(e.target.files[0]));
     e.target.value = '';
@@ -151,7 +167,7 @@ export default function Signup() {
                 variant="outlined"
                 placeholder="Email 주소를 입력해 주세요."
                 name="email"
-                value={email}
+                defaultValue={isGoogle ? email : ''}
                 onChange={onInputChange}
               />
             </WrapInput>
@@ -228,6 +244,16 @@ export default function Signup() {
       </Main>
     </>
   );
+}
+
+export async function getServerSideProps(context: any) {
+  const { provider } = context.params;
+
+  console.log('===========context', provider);
+  console.log('===========context===========');
+  return {
+    props: provider,
+  };
 }
 
 const Main = styled.div`

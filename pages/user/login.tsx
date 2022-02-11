@@ -8,7 +8,6 @@ import {
   signInWithPopup,
 } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
-
 import { db, auth } from '@firebase/firebase';
 import { useRouter } from 'next/router';
 
@@ -18,17 +17,21 @@ export default function Login() {
 
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
-
   const onChangeInput = (
     e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
   ) => {
     const { name, value } = e.target;
     if (name === 'email') setEmail(value);
     else if (name === 'password') setPassword(value);
+    console.log(e.target.value);
   };
 
-  const loginWithGoogle = () => {
-    signInWithPopup(auth, provider)
+  const checkSignIn = async () => {
+    return await signInWithPopup(auth, provider);
+  };
+
+  const loginWithGoogle = async () => {
+    await signInWithPopup(auth, provider)
       .then(async (result) => {
         // The signed-in user info.
         const user = result.user;
@@ -79,8 +82,7 @@ export default function Login() {
                 variant="outlined"
                 margin="dense"
                 name="email"
-                value={email}
-                onChange={onChangeInput}
+                onBlur={onChangeInput}
               />
             </WrapInput>
             <WrapInput>
@@ -92,8 +94,7 @@ export default function Login() {
                 variant="outlined"
                 margin="dense"
                 name="password"
-                value={password}
-                onChange={onChangeInput}
+                onBlur={onChangeInput}
               />
             </WrapInput>
             <WrapButton>

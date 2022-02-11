@@ -18,6 +18,7 @@ export interface UserInfo {
   myChattings: Array<MyChatting>;
   hasNewNotification: boolean;
   id: string;
+  post: Array<string>;
 }
 
 export interface UserState {
