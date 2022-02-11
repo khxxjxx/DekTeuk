@@ -1,10 +1,8 @@
 import styled from '@emotion/styled';
 import { getDateTime } from '@utils/function';
-//@ts-ignore
 import { TopicPost, RoungePost } from '@interface/CardInterface';
 import Link from 'next/link';
 import { ForwardedRef, forwardRef } from 'react';
-// import VisibilityIcon from '@mui/icons-material/Visibility';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ModeCommentIcon from '@mui/icons-material/ModeComment';
 import { useInView } from 'react-intersection-observer';
@@ -150,12 +148,17 @@ export const RoungeCard = forwardRef(function RoungeCardWithRef(
   },
   ref?: ForwardedRef<any>,
 ) {
-  const { ref: cardRef, inView } = useInView();
+  // const { ref: cardRef, inView } = useInView();
   return (
-    <Wrapper ref={cardRef}>
-      <Link href={`/rounge/posts/${roungeCardData.postId}`} passHref>
+    // <Wrapper ref={cardRef}>
+    <Wrapper>
+      <Link
+        href={`/list/rounge/${roungeCardData.rounge.url}/${roungeCardData.postId}`}
+        passHref
+      >
         <CardWrapper>
-          {inView && (
+          {
+            // {inView && (
             <>
               <div ref={ref} style={{ display: 'contents' }} />
               <RoungeCardMainStyled>
@@ -201,7 +204,7 @@ export const RoungeCard = forwardRef(function RoungeCardWithRef(
                 </div>
               </CardBottomWrapperStyled>
             </>
-          )}
+          }
         </CardWrapper>
       </Link>
     </Wrapper>
@@ -216,21 +219,28 @@ export const TopicCard = forwardRef(function TopicCardWithRef(
   },
   ref?: any,
 ) {
-  const { ref: cardRef, inView } = useInView();
+  // const { ref: cardRef, inView } = useInView();
 
   // console.log(Object.keys(topicCardData));
   return (
-    <Wrapper ref={cardRef}>
-      <Link href={`/topic/posts/${topicCardData.postId}`} passHref>
+    // <Wrapper ref={cardRef}>
+    <Wrapper>
+      <Link
+        href={`/list/topic/${topicCardData.topic.url}/${topicCardData.postId}`}
+        passHref
+      >
         <CardWrapper>
-          {inView && (
+          {/* {inView && ( */}
+          {
             <>
               <div ref={ref} />
               <TopicCardMainStyled>
                 <TopicCardContentWrapper>
-                  <OneDepthNestedLink href={`/topic/${topicCardData.topic}`}>
+                  <OneDepthNestedLink
+                    href={`/list/topic/${topicCardData.topic.url}`}
+                  >
                     <TopicWrapperDivStyled>
-                      <div>{topicCardData.topic}</div>
+                      <div>{topicCardData.topic.title}</div>
                     </TopicWrapperDivStyled>
                   </OneDepthNestedLink>
                   <CardTitleStyled>{topicCardData.title}</CardTitleStyled>
@@ -279,7 +289,7 @@ export const TopicCard = forwardRef(function TopicCardWithRef(
                 </div>
               </CardBottomWrapperStyled>
             </>
-          )}
+          }
         </CardWrapper>
       </Link>
     </Wrapper>
