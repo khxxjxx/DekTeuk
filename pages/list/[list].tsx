@@ -5,11 +5,15 @@ import { useInView } from 'react-intersection-observer';
 import styled from '@emotion/styled';
 import { LinearProgress } from '@mui/material';
 
-import { StoreState, UserState, ValidRounge } from '@interface/StoreInterface';
+import {
+  SearchResult,
+  StoreState,
+  UserState,
+  ValidRounge,
+} from '@interface/StoreInterface';
 import { TopicPost, RoungePost } from '@interface/CardInterface';
 import { getHomePostsInfiniteFunction } from '@utils/function';
 import Layout from '@layouts/Layout';
-import { SearchResult } from '@pages/search';
 import { RoungeCard, TopicCard } from '@components/Card';
 import NotFoundPage from '@pages/404';
 import {
@@ -39,13 +43,11 @@ const ListPage = () => {
     (state: StoreState) => state.scroll,
   );
   // console.log(myInfo);
+  const paddingFunction = useDebounce({
+    cb: () => window.scrollY !== 0 && dispatch(setScrollAction(window.scrollY)),
+    ms: 100,
+  });
   useEffect(() => {
-    const paddingFunction = useDebounce({
-      cb: () =>
-        window.scrollY !== 0 && dispatch(setScrollAction(window.scrollY)),
-      ms: 100,
-    });
-
     window.addEventListener('scroll', paddingFunction);
     return () => {
       window.removeEventListener('scroll', paddingFunction);
