@@ -46,6 +46,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import type { RootReducer } from 'store/reducer';
 import { useSelector } from 'react-redux';
 import { withRouter } from 'next/router';
+import { StoreState, UserState } from '@interface/StoreInterface';
 const PostForm = () => {
   //이미지 업로드 부분
   const [postImage, setPostImage] = useState<any>(null);
@@ -53,11 +54,13 @@ const PostForm = () => {
   const [progress, setProgress] = useState(0);
   const [imgList, setImgList] = useState<any>([]);
   //텍스트 처리
-  const { user }: any = useSelector((state: RootReducer) => state.user);
+  const { user }: UserState = useSelector((state: StoreState) => state.user);
   console.log(user);
   //유저
   const [userInfoList, setuserInfoList] = useState<any>('');
-  const [alertType, setAlertType] = useState('success');
+  const [alertType, setAlertType] = useState<
+    'error' | 'info' | 'success' | 'warning'
+  >('success');
   const [alertMessage, setAlertMessage] = useState('');
   const [open, setOpen] = useState(false);
   const [clickState, setClickState] = useState(true);
@@ -97,7 +100,7 @@ const PostForm = () => {
   useEffect(() => {
     const findUserInfo = async () => {
       //id로 user 파악함
-      const docRef = doc(db, 'users', user.id);
+      const docRef = doc(db, 'user', user.id);
 
       const docSnap = await getDoc(docRef);
 
@@ -149,16 +152,16 @@ const PostForm = () => {
       const { id: newId } = await addDoc(collectionRef, {
         ...post,
         userId: user.id,
-        job: userInfoList.job,
-        nickname: userInfoList.nickname,
+        job: user.jobSector,
+        nickname: user.nickname,
         rounge: '',
         createdAt: serverTimestamp(),
         image: image,
       });
-      const docRef = doc(db, 'users', user.id);
+      const docRef = doc(db, 'user', user.id);
       const userPostUpdate = {
-        ...userInfoList,
-        post: [...userInfoList.post, newId],
+        ...user,
+        post: [...user.post, newId],
       };
       updateDoc(docRef, userPostUpdate);
       //유저에 게시물 id 추가
@@ -170,16 +173,16 @@ const PostForm = () => {
       const { id: newId } = await addDoc(collectionRef, {
         ...post,
         userId: user.id,
-        job: userInfoList.job,
-        nickname: userInfoList.nickname,
+        job: user.jobSector,
+        nickname: user.nickname,
         topic: '',
         createdAt: serverTimestamp(),
         image: image,
       });
-      const docRef = doc(db, 'users', user.id);
+      const docRef = doc(db, 'user', user.id);
       const userPostUpdate = {
-        ...userInfoList,
-        post: [...userInfoList.post, newId],
+        ...user,
+        post: [...user.post, newId],
       };
       updateDoc(docRef, userPostUpdate);
       //나중에 topic 페이지로 이동하도록 변경하기
@@ -332,7 +335,8 @@ const PostForm = () => {
               label="RoungeMenu"
               onChange={(e) => setPost({ ...post, rounge: e.target.value })}
             >
-              {userInfoList.valid_rounge.map((v: any) => {
+              {console.log(user)}
+              {user.validRounges.map((v: any) => {
                 return (
                   <MenuItem value={v.url} key={v.url}>
                     {v.title}
@@ -388,7 +392,7 @@ const PostForm = () => {
                 alignItems: 'center',
               }}
             >
-              <img src={v[0]} style={{ maxWidth: '100%' }} key={i} />
+              <img src={v[0]} style={{ maxWidth: '100%' }} key={i} alt={v[0]} />
               <Button
                 sx={{ position: 'relative' }}
                 onClick={() => {
@@ -490,7 +494,7 @@ const PostForm = () => {
           borderRadius: 1,
         }}
       >
-        <Link href="/">
+        <Link href="/" passHref>
           <Button variant="contained">메인으로 이동</Button>
         </Link>
         <Button variant="contained" onClick={onSubmit}>
