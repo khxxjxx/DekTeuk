@@ -1,148 +1,85 @@
-import { useSelector, useDispatch } from 'react-redux';
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { useInView } from 'react-intersection-observer';
-import { getUser } from 'store/reducer';
-import styled from '@emotion/styled';
-import { LinearProgress } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { db, auth, app, firebaseConfig } from '@firebase/firebase';
+import { collection, doc } from 'firebase/firestore';
+import { deleteDoc } from 'firebase/firestore';
+import 'firebase/compat/firestore';
+import firebase from 'firebase/compat/app';
 
-import { StoreState, UserState, ValidRounge } from '@interface/StoreInterface';
-import { TopicPost, RoungePost } from '@interface/CardInterface';
-import { getHomePostsInfiniteFunction } from '@utils/function';
-import Layout from '@layouts/Layout';
-import { SearchResult } from '@pages/search';
-import { RoungeCard, TopicCard } from '@components/Card';
-import NotFoundPage from '@pages/404';
-import { setViewAction } from '@store/reducer';
-const RoungePage = () => {
+export default function RoungeIndex() {
   const router = useRouter();
-  const [results, setResults] = useState<Array<SearchResult>>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { ref, inView } = useInView();
-  const { user: myInfo } = useSelector((state: StoreState) => state.user);
-  const dispatch = useDispatch();
-  const { view } = useSelector((state: StoreState) => state.view);
+  const [asPath, setAsPath] = useState('');
   useEffect(() => {
-    dispatch(setViewAction([1, 2, 3, 4, 5]));
-    console.log(view);
+    setAsPath(router.asPath);
   }, [router]);
-
-  const [asPath, setAsPathname] = useState<string>(router.asPath);
-
+  const [조건, set조건] = useState(false);
+  const [state, setState] = useState('');
   useEffect(() => {
-    setAsPathname(router.asPath);
-    if (router.asPath === asPath) {
-      console.log('뒤로가기입니다');
-    }
-  }, [router.asPath]);
-
-  useEffect(() => {
-    if (!myInfo) dispatch(getUser());
-  }, [myInfo, dispatch]);
-  useEffect(() => {
-    console.log(myInfo?.validRounges.map((v: any) => `/list/rounge/${v.url}`));
-    console.log(router.asPath);
-    if (
-      myInfo?.validRounges.findIndex(
-        (v: ValidRounge) => `/list/rounge/${v.url}` === router.asPath,
-      ) === -1
-    ) {
-      return;
-    } else {
-      (async () => {
-        setIsLoading(true);
-        const result = await getHomePostsInfiniteFunction(
-          router.asPath.split('/')[2],
-          0,
-        );
-        setIsLoading(false);
-        setResults([result]);
-      })();
-    }
-  }, [router, myInfo]);
-  useEffect(() => {
-    if (inView) {
-      (async () => {
-        const nextResult = await getHomePostsInfiniteFunction(
-          router.asPath.split('/')[2],
-          results[results.length - 1].nextPage,
-        );
-        setResults([...results, nextResult]);
-      })();
-    }
-  }, [inView, results, router.asPath]);
-  useEffect(() => {
-    console.log('pathname: ', router.asPath);
-  }, [router.asPath]);
-  const renderData = results.flatMap((value: any) => value.result) ?? [];
-  // console.log(renderData[1]?.content);
-  // console.log(renderData?.length);
-  if (isLoading && results.length === 0) {
-    return (
-      <Layout>
-        <LinearProgress />
-      </Layout>
-    );
-  }
-  if (
-    myInfo?.validRounges.findIndex(
-      (v: ValidRounge) => `/list/rounge/${v.url}` === router.asPath,
-    ) === -1
-  ) {
-    return <NotFoundPage />;
-  }
+    console.log(state);
+  }, [state]);
+  const a = { a: '12345', b: '12345' };
   return (
-    <>
-      <Layout>
-        <TimelinePageWrapperDiv>
-          <TimelineResultsWrapperDiv>
-            {(renderData as Array<TopicPost | RoungePost>)?.map((post, i) => {
-              if (
-                i >=
-                (renderData as Array<TopicPost | RoungePost>).length - 10
-              ) {
-                return post.postType === 'topic' ? (
-                  <TopicCard topicCardData={post} key={post.postId} ref={ref} />
-                ) : (
-                  <RoungeCard
-                    roungeCardData={post}
-                    key={post.postId}
-                    ref={ref}
-                  />
-                );
-              }
-              return post.postType === 'topic' ? (
-                <TopicCard topicCardData={post} key={post.postId} />
-              ) : (
-                <RoungeCard roungeCardData={post} key={post.postId} />
-              );
-            })}
-          </TimelineResultsWrapperDiv>
-        </TimelinePageWrapperDiv>
-      </Layout>
-    </>
+    <div>
+      <div>asPath:{asPath}</div>
+      <br />
+      <div>topic의 indexPage</div>
+      <input disabled value={state} readOnly id="인풋" />
+      <input type="checkbox" disabled readOnly checked />
+      <input
+        value={state}
+        onChange={(e) => {
+          set조건((prev) => !prev);
+          setState(e.target.value);
+        }}
+      />
+      <button
+        onClick={async (): Promise<any> => {
+          const uid = auth.currentUser?.uid;
+          // console.log(auth.currentUser?.uid);
+          if (uid) {
+            try {
+              const app = firebase.initializeApp(firebaseConfig);
+              const db = firebase.firestore(app);
+              // 문서의 존재여부 확인
+              // 삭제
+              // 다시 존재여부 확인
+              // 없으면 success
+              // 있으면 삭제실패
+              // 혹시 모르니 전체 과정을 try-catch로 묶어서 에러 핸들링
+              //
+              db.collection('cities')
+                .doc('DC')
+                .delete()
+                .then(() => {
+                  console.log('Document successfully deleted!');
+                })
+                .catch((error) => {
+                  console.error('Error removing document: ', error);
+                });
+              // const result = await db
+              //   .collection('usaaaaaaaaaaer')
+              //   .doc('안되는uId')
+              //   .delete()
+              //   .then(console.log);
+              // console.log(result);
+            } catch (error) {
+              console.error(error);
+            }
+            // try {
+            //   const result = await deleteDoc(doc(db, 'user', uid));
+            //   console.log('#########################');
+            //   console.log('#########################');
+            //   console.log(result);
+            //   console.log('#########################');
+            //   console.log('#########################');
+            // } catch (error) {
+            //   console.log(error);
+            // }
+          }
+        }}
+      >
+        123123123
+      </button>
+    </div>
   );
-};
-
-export default RoungePage;
-
-const TimelinePageWrapperDiv = styled.div``;
-const TimelineResultsWrapperDiv = styled.div`
-  width: 100%;
-  padding-bottom: 68px;
-`;
-
-// export default function () {
-//   const router = useRouter();
-//   const [asPath, setAsPath] = useState('');
-//   useEffect(() => {
-//     setAsPath(router.asPath);
-//   }, [router]);
-//   return (
-//     <div>
-//       <div>asPath:{asPath}</div>
-//       <br />
-//       <div>rounge의 indexPage</div>
-//     </div>
-//   );
-// }
+}

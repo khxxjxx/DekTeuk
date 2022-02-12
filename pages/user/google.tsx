@@ -49,7 +49,7 @@ export default function Signup() {
         unreadCount: 0,
       },
     ],
-    hasNewNotification: true,
+    hasNewNotification: false,
   };
 
   const onChangeInput = (

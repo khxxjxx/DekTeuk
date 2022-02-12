@@ -68,6 +68,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     if (user.id) {
       onSnapshot(doc(db, 'user', user.id), (doc) => {
         const data = doc.data() as UserInfo;
+        console.log(data);
         const userData: UserInfo = {
           nickname: data.nickname,
           jobSector: data.jobSector,
@@ -114,20 +115,22 @@ MyApp.getInitialProps = wrapper.getInitialAppProps(
               }),
             };
 
-            const result = await fetch('http://localhost:3000/api/validate', {
+            const {
+              data: { userData, uid: id, email },
+            }: {
+              data: {
+                uid: string;
+                email: string;
+                userData: Omit<UserInfo, 'email' | 'id'>;
+              };
+            } = await fetch('http://localhost:3000/api/validate', {
               headers,
             }).then((res) => res.json());
-            //console.log('result', result);
 
-            console.log(result, 'dlrj?');
-            const data = {
-              nickname: result.data.userData.nickname,
-              jobSector: result.data.userData.jobSector,
-              validRounges: result.data.userData.validRounges,
-              myChattings: [],
-              id: result.data.uid,
-              hasNewNotification: result.data.userData.notification,
-              email: result.data.email,
+            const data: UserInfo = {
+              ...userData,
+              id,
+              email,
             };
 
             await store.dispatch(getUser(data));

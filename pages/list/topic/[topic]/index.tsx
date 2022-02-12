@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 
-export default function TopicPage() {
+export default function TopicIndex() {
   const router = useRouter();
   const [asPath, setAsPath] = useState('');
   useEffect(() => {
