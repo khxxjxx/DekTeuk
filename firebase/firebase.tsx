@@ -7,6 +7,8 @@ import {
   browserSessionPersistence,
 } from 'firebase/auth';
 
+import { getStorage, ref } from 'firebase/storage';
+import 'firebase/storage';
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_AUTH_DOMAIN,
@@ -23,3 +25,4 @@ export const db = getFirestore();
 export const provider = new GoogleAuthProvider();
 export const commentRef = collection(db, 'comment');
 export { firebase };
+export const storage = getStorage(app);

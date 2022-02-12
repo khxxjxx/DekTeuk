@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { setNewUserInfo } from '@store/reducer';
 import styled from '@emotion/styled';
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
@@ -19,15 +21,30 @@ import {
 } from 'firebase/firestore';
 import { getStorage, ref, uploadString } from 'firebase/storage';
 import { useRouter } from 'next/router';
-type UserData = {
+import { GetServerSidePropsContext, InferGetServerSidePropsType } from 'next';
+import MenuItem from '@mui/material/MenuItem';
+
+const currencies = [
+  '외식·음료',
+  '매장관리·판매',
+  '서비스',
+  '사무직',
+  '고객상담·리서치·영업',
+  '생산·건설·노무',
+  'IT·기술',
+  '디자인',
+];
+type UserInputData = {
   email: string;
   password: string;
   checkPassword: string;
   nickname: string;
+  error: string;
   isGoogle: boolean;
 };
-export default function Signup(provider: any) {
+export default function Signup() {
   const router = useRouter();
+  const dispatch = useDispatch();
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [checkPassword, setCheckPassword] = useState<string>('');
@@ -36,21 +53,29 @@ export default function Signup(provider: any) {
   const [fileUrl, setFileUrl] = useState<string>('');
   const [fileExt, setFileExt] = useState<string>('');
   const [isGoogle, setIsGoogle] = useState<boolean>(false);
-  const [userInfo, setUserInfo] = useState<UserData>([]);
+  const [userInputs, setUserInputs] = useState<UserInputData>();
   const storage = getStorage();
+  const { provider } = router.query;
 
   useEffect(() => {
-    if (provider === 'google') {
+    if (provider === 'google' && auth.currentUser) {
+      const curUser = auth.currentUser;
       console.log('google account');
       setIsGoogle(true);
-      setEmail(auth.currentUser?.email!);
-      setPassword(auth.currentUser?.email!);
-      setCheckPassword(auth.currentUser?.email!);
+      setEmail(curUser?.email!);
+      setPassword(curUser?.email!);
+      setCheckPassword(curUser?.email!);
     }
   }, []);
+  const [currency, setCurrency] = useState('');
+
+  const handleChange = (event: any) => {
+    setCurrency(event.target.value);
+  };
+
   const userInitData = {
     nickname: nickname,
-    jobSector: '',
+    jobSector: currency,
     validRounges: [
       {
         title: '타임라인',
@@ -73,9 +98,7 @@ export default function Signup(provider: any) {
     post: [],
   };
 
-  const onInputChange = (
-    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
-  ) => {
+  const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     if (name === 'email') setEmail(value);
     else if (name === 'password') setPassword(value);
@@ -90,9 +113,18 @@ export default function Signup(provider: any) {
         email,
         password,
       );
-      return result;
+      return result.user.uid;
     } catch (err: any) {
-      return err.code;
+      setError(err.code);
+    }
+  };
+
+  const getUid = async () => {
+    if (isGoogle) {
+      const user = auth.currentUser;
+      return user!.uid;
+    } else {
+      return createUserWithEmail();
     }
   };
   const SignUpSubmitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -100,30 +132,25 @@ export default function Signup(provider: any) {
     if (checkPassword !== password) {
       alert('비밀번호가 다릅니다!');
     } else {
-      // const fileName = uid + fileExt;
-      // const imgRef = ref(storage, fileName);
-      // await uploadString(imgRef, fileUrl, 'data_url').then((snapshot) => {
-      //   console.log('success upload');
-      // });
-      const createUserResult = await createUserWithEmail();
-
-      if (createUserResult.user || isGoogle) {
-        console.log('success');
-        await setDoc(doc(db, 'user', createUserResult.user.uid), userInitData);
-        await signOut(auth);
-        router.push('/');
-      } else {
-        console.log(createUserResult);
-      }
+      const user_id = await getUid();
+      console.log(user_id);
+      uploadImg(user_id!);
+      console.log('success');
+      const docSnap = await setDoc(doc(db, 'user', user_id!), userInitData);
+      console.log(docSnap);
+      await signOut(auth);
+      router.push('/');
     }
+  };
 
-    // try {
-    //   await createUserWithEmailAndPassword(auth, email, password);
-    //   uploadImg();
-    //   router.push;
-    // } catch (err: any) {
-    //   console.log(setError(err.code));
-    // }
+  const uploadImg = async (uid: string) => {
+    const fileName = `${uid}.${fileExt}`;
+    const imgRef = ref(storage, fileName);
+    try {
+      await uploadString(imgRef, fileUrl, 'data_url');
+    } catch (e: any) {
+      console.error(e);
+    }
   };
 
   const checkNickname = async () => {
@@ -147,7 +174,6 @@ export default function Signup(provider: any) {
       } = finishedEvent;
       setFileUrl(result);
     };
-
     setFileExt(e.target.value.split('.')[1]);
     // setFileUrl(URL.createObjectURL(e.target.files[0]));
     e.target.value = '';
@@ -163,12 +189,11 @@ export default function Signup(provider: any) {
               <Label>Email</Label>
               <TextField
                 required
-                disabled={isGoogle}
-                variant="outlined"
+                readonly={isGoogle}
                 placeholder="Email 주소를 입력해 주세요."
                 name="email"
-                defaultValue={isGoogle ? email : ''}
-                onChange={onInputChange}
+                value={email}
+                onBlur={onInputChange}
               />
             </WrapInput>
             <WrapInput>
@@ -183,7 +208,7 @@ export default function Signup(provider: any) {
                 margin="dense"
                 name="password"
                 value={password}
-                onChange={onInputChange}
+                onBlur={onInputChange}
               />
               <TextField
                 required
@@ -194,7 +219,7 @@ export default function Signup(provider: any) {
                 margin="dense"
                 name="checkPassword"
                 value={checkPassword}
-                onChange={onInputChange}
+                onBlur={onInputChange}
               />
             </WrapInput>
 
@@ -238,6 +263,19 @@ export default function Signup(provider: any) {
                 <button onClick={onClearImg}>사진 지우기</button>
               </WrapInput>
             )}
+            <TextField
+              select
+              label="직종"
+              value={currency}
+              onChange={handleChange}
+              helperText="직종을 선택하세요"
+            >
+              {currencies.map((value, idx) => (
+                <MenuItem key={idx} value={value}>
+                  {value}
+                </MenuItem>
+              ))}
+            </TextField>
             <SubmitButton type="submit">회원가입</SubmitButton>
           </WrapContents>
         </form>
@@ -246,15 +284,20 @@ export default function Signup(provider: any) {
   );
 }
 
-export async function getServerSideProps(context: any) {
-  const { provider } = context.params;
+// export const getServerSideProps = async (
+//   context: GetServerSidePropsContext,
+// ) => {
+//   const { provider } = context.query;
 
-  console.log('===========context', provider);
-  console.log('===========context===========');
-  return {
-    props: provider,
-  };
-}
+//   if (provider !== 'google' && provider !== 'signup') {
+//     return {
+//       redirect: {
+//         permanent: false,
+//         destination: '/404',
+//       },
+//     };
+//   }
+// };
 
 const Main = styled.div`
   display: flex;

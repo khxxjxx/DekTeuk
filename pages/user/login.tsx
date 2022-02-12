@@ -7,14 +7,16 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
 } from 'firebase/auth';
+import { useDispatch } from 'react-redux';
 import { doc, getDoc } from 'firebase/firestore';
 import { db, auth } from '@firebase/firebase';
 import { useRouter } from 'next/router';
+import { setNewUserInfo } from '@store/reducer';
 
 export default function Login() {
   const router = useRouter();
   const provider = new GoogleAuthProvider();
-
+  const dispatch = useDispatch();
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const onChangeInput = (
@@ -27,46 +29,41 @@ export default function Login() {
   };
 
   const checkSignIn = async () => {
-    return await signInWithPopup(auth, provider);
+    try {
+      const result = await signInWithPopup(auth, provider);
+      return result.user.uid;
+    } catch (err: any) {
+      console.error(err);
+    }
   };
 
   const loginWithGoogle = async () => {
-    await signInWithPopup(auth, provider)
-      .then(async (result) => {
-        // The signed-in user info.
-        const user = result.user;
-        console.log(user.uid);
-        const docSnap = await getDoc(doc(db, 'user', user.uid));
-        if (docSnap.exists()) {
-          console.log('이미 가입되어 있습니다.');
-          router.push('/');
-        } else {
-          console.log('가입되어있지 않습니다.');
-          router.push('/user/google');
-        }
-        // ...
-      })
-      .catch((error) => {
-        // Handle Errors here.
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        // The email of the user's account used.
-        const email = error.email;
-        // The AuthCredential type that was used.
-        const credential = GoogleAuthProvider.credentialFromError(error);
-        // ...
-      });
+    const uid = await checkSignIn();
+    const docSnap = await getDoc(doc(db, 'user', uid!));
+    if (docSnap.exists()) {
+      dispatch(setNewUserInfo(docSnap.data()));
+      router.push('/');
+    } else {
+      router.push('/user/google');
+    }
+  };
+  const loginWithEmail = async () => {
+    try {
+      const result = await signInWithEmailAndPassword(auth, email, password);
+      return result.user.uid;
+    } catch (err: any) {
+      console.error(err);
+    }
   };
 
   const SignUpSubmitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    await signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        const user = userCredential.user;
-        router.push('/');
-      })
-      .catch((error) => console.log(error.code, error.message));
+    const uid = await loginWithEmail();
+    if (uid) {
+      const docSnap = await getDoc(doc(db, 'user', uid!));
+      dispatch(setNewUserInfo(docSnap.data()));
+      router.push('/');
+    }
   };
   return (
     <>

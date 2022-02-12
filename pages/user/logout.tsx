@@ -3,7 +3,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '@firebase/firebase';
 import { useRouter } from 'next/router';
 import { useDispatch } from 'react-redux';
-
+import { reset } from 'store/reducer';
 export default function Logout() {
   const router = useRouter();
   const dispatch = useDispatch();
@@ -12,7 +12,7 @@ export default function Logout() {
       .then(() => {
         // Sign-out successful.
         console.log('log out');
-
+        dispatch(reset());
         router.push('/');
       })
       .catch((error) => {

@@ -15,6 +15,7 @@ import { RootReducer } from 'store/reducer';
 import { userSlice } from 'store/reducer';
 import { UserState } from '@interface/StoreInterface';
 import { setNewUserInfo } from 'store/reducer';
+import { UserInfo } from '@interface/StoreInterface';
 const theme_ = createTheme(
   {},
   {
@@ -34,6 +35,8 @@ const theme_ = createTheme(
         searchPageWrapperBackgroundColor: '#EAEAEA',
         searchWrapperBorderBottomColor: '#EAEAEA',
         footerBordertopColor: '#EAEAEA',
+        chatFromBackgroundColor: '#f0f0f0',
+        chatToBackgroundColor: '#b762c1',
       },
       darkMode: {
         headerMenuBackgroundColor: 'rgba(28, 28, 30, 1)',
@@ -50,6 +53,8 @@ const theme_ = createTheme(
         searchPageWrapperBackgroundColor: 'rgba(28, 28, 30, 1)',
         searchWrapperBorderBottomColor: 'rgb(17, 17, 19)',
         footerBordertopColor: 'rgb(17, 17, 19)',
+        chatFromBackgroundColor: 'rgba(35, 35, 37, 1)',
+        chatToBackgroundColor: '#4C78C1',
       },
     },
   },
@@ -60,19 +65,20 @@ function MyApp({ Component, pageProps }: AppProps) {
   const { user }: UserState = useSelector((state: RootReducer) => state.user);
 
   useEffect(() => {
-    const id = user.id;
     if (user.id) {
-      onSnapshot(doc(db, 'user', id), (doc) => {
-        const data = doc.data();
-        const userInfo = {
-          nickname: data!.nickname,
-          jobSector: data!.jobSector,
-          validRounges: data!.validRounges,
+      onSnapshot(doc(db, 'user', user.id), (doc) => {
+        const data = doc.data() as UserInfo;
+        const user: UserInfo = {
+          nickname: data.nickname,
+          jobSector: data.jobSector,
+          validRounges: data.validRounges,
           myChattings: [],
-          hasNewNotification: data!.hasNewNotification,
-          id: id,
+          hasNewNotification: data.hasNewNotification,
+          id: doc.id,
+          post: [],
         };
-        dispatch(setNewUserInfo(userInfo));
+        dispatch(setNewUserInfo(user));
+        console.log(user);
       });
     }
   }, []);
@@ -89,14 +95,9 @@ function MyApp({ Component, pageProps }: AppProps) {
 MyApp.getInitialProps = wrapper.getInitialAppProps(
   (store) =>
     async ({ Component, ctx }: AppContext): Promise<any> => {
-      // onSnapshot(doc(db, 'user', 'dBEEX25SN6e5f6Zcb9CFU3xnLyI3'), (doc) => {
-      //   console.log(doc.data(), 'hi');
-      // });
-
       // only run on server-side, user should be auth'd if on client-side
       if (typeof window === 'undefined') {
         const { token } = nookies.get(ctx);
-        // console.log('token', token);
 
         // if a token was found, try to do SSA
         if (token) {
@@ -111,10 +112,9 @@ MyApp.getInitialProps = wrapper.getInitialAppProps(
             const result = await fetch('http://localhost:3000/api/validate', {
               headers,
             }).then((res) => res.json());
-            //console.log('result', result);
 
             console.log(result.data.uid);
-            const data = {
+            const data: UserInfo = {
               nickname: result.data.userData.nickname,
               jobSector: result.data.userData.jobSector,
               validRounges: result.data.userData.validRounges
@@ -123,12 +123,11 @@ MyApp.getInitialProps = wrapper.getInitialAppProps(
               myChattings: result.data.userData.myChattings,
               id: result.data.uid,
               hasNewNotification: result.data.userData.hasNewNotification,
-              providerId: result.data.providerId,
               post: result.data.userData.post,
             };
-            console.log('데이터', data);
             await store.dispatch(getUser(data));
           } catch (e) {
+            console.error(e);
             // let exceptions fail silently
             // could be invalid token, just let client-side deal with that
           }
