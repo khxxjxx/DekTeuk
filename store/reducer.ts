@@ -84,18 +84,18 @@ const scroll = createSlice({
 });
 
 // 임시
-const data = createSlice({
-  name: 'data',
-  initialState: { data: <any>[] },
+const topicPost = createSlice({
+  name: 'posts',
+  initialState: { posts: <any>[] },
   reducers: {
     setData(state, action) {
-      console.log('reducer', action.payload);
-      state.data = action.payload;
+      console.log('setData 실행');
+      state.posts = action.payload;
     },
   },
 });
 
-export const setDataAction = data.actions.setData; // 임시
+export const setDataAction = topicPost.actions.setData; // 임시
 
 export const setViewAction = view.actions.setViewPosts;
 export const resetViewAction = view.actions.resetViewPosts;
@@ -108,13 +108,15 @@ const rootReducer = (
     user: UserState;
     view: ViewPosts;
     scroll: { scrollY: number };
-    data: any;
+    posts: any;
   },
   action: AnyAction,
 ) => {
   {
     switch (action.type) {
       case HYDRATE:
+        // console.log(state);
+        // return state;
         let userState: UserState = {
           user: {
             nickname: '',
@@ -132,8 +134,6 @@ const rootReducer = (
         if (action.payload.user.user.nickname) userState = action.payload.user;
         else userState = state.user;
         if (state.view.view.length === 0) {
-          console.log(state, '이건 스테이트');
-          console.log(action.payload, '이건 액션');
           return {
             ...action.payload,
             view:
@@ -141,6 +141,7 @@ const rootReducer = (
                 ? { view: [], searchValue: '' }
                 : state.view,
             user: userState,
+            posts: state.posts,
           };
         } else
           return {
@@ -150,14 +151,14 @@ const rootReducer = (
                 ? { view: [], searchValue: '' }
                 : state.view,
             scroll: { scrollY: state.scroll.scrollY },
-            data: state.data.data,
+            posts: state.posts,
           };
       default:
         const combineReducer = combineReducers({
           user: userSlice.reducer,
           view: view.reducer,
           scroll: scroll.reducer,
-          data: data.reducer,
+          posts: topicPost.reducer,
         });
         return combineReducer(state, action);
     }
