@@ -192,8 +192,9 @@ export const getServerSideProps = wrapper.getServerSideProps(
 
 export default ListPage;
 
-const TimelinePageWrapperDiv = styled.div``;
-const TimelineResultsWrapperDiv = styled.div`
+const TimelinePageWrapperDiv = styled.div`
   width: 100%;
+`;
+const TimelineResultsWrapperDiv = styled.div`
   padding-bottom: 68px;
 `;
