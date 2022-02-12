@@ -1,5 +1,4 @@
-import { createContext, useEffect, useState } from 'react';
-import { firebase } from '@firebase/firebaseClient';
+import { createContext, useEffect, useState, useContext } from 'react';
 import { getAuth } from 'firebase/auth';
 import nookies from 'nookies';
 import { auth } from '@firebase/firebase';
@@ -28,7 +27,11 @@ export function AuthProvider({ children }: any) {
       const user = getAuth().currentUser;
       console.log(user);
       if (user) await user.getIdToken(true);
+<<<<<<< HEAD
     }, 10 * 60 * 1000);
+=======
+    }, 60 * 10 * 1000);
+>>>>>>> 015f7d84a26ffeddf61cd1904573fbc5ebb3cfd9
 
     // clean up setInterval
     return () => clearInterval(handle);
