@@ -52,6 +52,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Modal from '@mui/material/Modal';
+import { StoreState, UserState } from '@interface/StoreInterface';
 const style = {
   position: 'absolute' as 'absolute',
   top: '50%',
@@ -78,11 +79,13 @@ const PostForm = (props: any) => {
       : [],
   );
   //텍스트 처리
-  const { user }: any = useSelector((state: RootReducer) => state.user);
+  const { user }: UserState = useSelector((state: StoreState) => state.user);
 
   //유저
   const [userInfoList, setuserInfoList] = useState<any>('');
-  const [alertType, setAlertType] = useState('success');
+  const [alertType, setAlertType] = useState<
+    'error' | 'info' | 'success' | 'warning'
+  >('success');
   const [alertMessage, setAlertMessage] = useState('');
   const [open, setOpen] = useState(false);
   const [clickState, setClickState] = useState(true);
@@ -100,7 +103,9 @@ const PostForm = (props: any) => {
     nickname: postInfo.nickname,
     image: postInfo.image,
   });
-  console.log(post);
+  console.log(post.image);
+  console.log(post.title);
+  console.log(post.content);
   //photoupload 확인 아이콘-아직 미구현
   const [loading, setLoading] = React.useState(false);
   const [success, setSuccess] = React.useState(false);
@@ -147,6 +152,7 @@ const PostForm = (props: any) => {
     // } else { }
     //사진 정보 저장
     let image: any = {};
+    console.log(imgList);
 
     if (imgList.length >= 1) {
       // imgURL = [
@@ -179,7 +185,7 @@ const PostForm = (props: any) => {
         image: image,
       };
       updateDoc(docRef, postUpdated);
-
+      setPost({ ...post, image });
       setDiaOpen(true);
       //나중에 topic 페이지로 이동하도록 변경하기
       // props.setEditOpen(false);
@@ -345,8 +351,8 @@ const PostForm = (props: any) => {
                 showAlert('info', `등록 위치는 변경할 수 없습니다`)
               }
             >
-              {userInfoList.valid_rounge &&
-                userInfoList.valid_rounge.map((v: any) => {
+              {user.validRounges &&
+                user.validRounges.map((v: any) => {
                   return (
                     <MenuItem value={v.url} key={v.url}>
                       {v.title}
@@ -393,41 +399,41 @@ const PostForm = (props: any) => {
       <Box sx={{ mt: 2 }}></Box>
       {imgList.map((v: any, i: number) => {
         return (
-          <>
-            <Box
-              sx={{
-                justifyContent: 'center',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
+          <Box
+            key={v[1][0]}
+            sx={{
+              justifyContent: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+            }}
+          >
+            <img src={v[0]} style={{ maxWidth: '100%' }} key={i} />
+            <Button
+              sx={{ position: 'relative' }}
+              onClick={() => {
+                let delArr = [...imgList];
+                delArr.splice(i, 1);
+                console.log(delArr);
+                setImgList(delArr);
               }}
             >
-              <img src={v[0]} style={{ maxWidth: '100%' }} key={i} />
-              <Button
-                sx={{ position: 'relative' }}
-                onClick={() => {
-                  let delArr = [...imgList];
-                  delArr.splice(i, 1);
-                  setImgList(delArr);
-                }}
-              >
-                삭제하기
-              </Button>
-              <TextField
-                sx={{ mt: 2 }}
-                fullWidth
-                variant="standard"
-                label="사진에 대한 설명을 입력해주세요(선택)"
-                multiline
-                value={v[2]}
-                onChange={(e) => {
-                  let ImgArr = [...imgList];
-                  ImgArr[i][2] = e.target.value;
-                  setImgList(ImgArr);
-                }}
-              />
-            </Box>
-          </>
+              삭제하기
+            </Button>
+            <TextField
+              sx={{ mt: 2 }}
+              fullWidth
+              variant="standard"
+              label="사진에 대한 설명을 입력해주세요(선택)"
+              multiline
+              value={v[2]}
+              onChange={(e) => {
+                let ImgArr = [...imgList];
+                ImgArr[i][2] = e.target.value;
+                setImgList(ImgArr);
+              }}
+            />
+          </Box>
         );
       })}
 

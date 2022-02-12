@@ -6,8 +6,7 @@ import { auth } from '@firebase/firebase';
 const AuthContext = createContext<{ loginuser: any }>({
   loginuser: null,
 });
-
-export function AuthProvider({ children }: any) {
+export default function AuthProvider({ children }: any) {
   const [loginuser, setLoginUser] = useState<any>(null);
   useEffect(() => {
     return auth.onIdTokenChanged(async (user) => {
@@ -27,11 +26,7 @@ export function AuthProvider({ children }: any) {
       const user = getAuth().currentUser;
       console.log(user);
       if (user) await user.getIdToken(true);
-<<<<<<< HEAD
-    }, 10 * 60 * 1000);
-=======
     }, 60 * 10 * 1000);
->>>>>>> 015f7d84a26ffeddf61cd1904573fbc5ebb3cfd9
 
     // clean up setInterval
     return () => clearInterval(handle);
