@@ -121,7 +121,10 @@ export const getHomePostsInfiniteFunction = async (
       if (i % 2 === 0) {
         const newRoungePost: RoungePost = {
           ...dummyRoungePost,
-          image: ['https://i.ibb.co/VJXmhFt/asdasd.jpg'],
+          image: [
+            'https://i.ibb.co/VJXmhFt/asdasd.jpg',
+            'https://i.ibb.co/VJXmhFt/asdasd.jpg',
+          ],
           postId: dummyRoungePost.postId + Math.floor(Math.random() * 1000000),
           createdAt: (
             parseInt(dummyRoungePost.createdAt) -

@@ -12,7 +12,9 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db, auth } from '@firebase/firebase';
 import { useRouter } from 'next/router';
 import { setNewUserInfo } from '@store/reducer';
-
+import nookies from 'nookies';
+import { firebaseAdmin } from '@firebase/firebaseAdmin';
+import { InferGetServerSidePropsType, GetServerSidePropsContext } from 'next';
 export default function Login() {
   const router = useRouter();
   const provider = new GoogleAuthProvider();

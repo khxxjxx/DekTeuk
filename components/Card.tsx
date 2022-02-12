@@ -64,7 +64,6 @@ const CardDividerStyled = styled.div`
   background-color: rgb(39, 39, 41);
   height: 0.5px;
   margin-left: -24px;
-  margin-top: 8px;
   margin-bottom: 8px;
 `;
 
@@ -80,7 +79,7 @@ const RoungeCardMainStyled = styled.div`
   flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 0px;
-  height: 136px;
+  height: 138px;
 `;
 
 const TopicCardContentWrapper = styled.div`
@@ -88,17 +87,15 @@ const TopicCardContentWrapper = styled.div`
 `;
 
 const RoungeCardContentWrapper = styled.div`
-  padding-top: 10px;
+  padding-top: 5px;
   flex: 2;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
 `;
 
 const CardTitleStyled = styled.div`
   font-size: 1.5rem;
   margin-bottom: 3px;
 `;
+
 const CardContentStyled = styled.div`
   height: 2rem;
   overflow: hidden;
@@ -127,6 +124,7 @@ const CardAuthorNickname = styled.div`
 `;
 const CardBottomWrapperStyled = styled.div`
   display: flex;
+  height: 20px;
 `;
 const CardStatWrapper = styled.div`
   font-size: 1rem;
@@ -167,9 +165,11 @@ export const RoungeCard = forwardRef(function RoungeCardWithRef(
               <RoungeCardMainStyled>
                 <RoungeCardContentWrapper>
                   <CardTitleStyled>{roungeCardData.title}</CardTitleStyled>
+                  <br />
                   <CardContentStyled>
                     {roungeCardData.content}
                   </CardContentStyled>
+                  <br />
 
                   <CardAuthorJobSectorWrapperStyled>
                     <CardAuthorJobSectorStyled>
@@ -181,10 +181,11 @@ export const RoungeCard = forwardRef(function RoungeCardWithRef(
                     </CardAuthorNickname>
                   </CardAuthorJobSectorWrapperStyled>
                 </RoungeCardContentWrapper>
-                {roungeCardData.image.length == 0 && (
-                  <ImgComponent url={'https://i.ibb.co/VJXmhFt/asdasd.jpg'} />
+                {roungeCardData.image.length !== 0 && (
+                  <ImgComponent urls={roungeCardData.image} />
                 )}
               </RoungeCardMainStyled>
+
               <CardDividerStyled />
               <CardBottomWrapperStyled>
                 <CardStatWrapper>
@@ -237,7 +238,7 @@ export const TopicCard = forwardRef(function TopicCardWithRef(
               <TopicCardMainStyled>
                 <TopicCardContentWrapper>
                   <OneDepthNestedLink
-                    href={`/topic/${topicCardData.topic.url}`}
+                    href={`/list/topic/${topicCardData.topic.url}`}
                   >
                     <TopicWrapperDivStyled>
                       <div>{topicCardData.topic.title}</div>
@@ -267,7 +268,7 @@ export const TopicCard = forwardRef(function TopicCardWithRef(
                   </CardAuthorJobSectorWrapperStyled>
                 </TopicCardContentWrapper>
                 {topicCardData.image.length !== 0 && (
-                  <ImgComponent url={topicCardData.image[0]} />
+                  <ImgComponent urls={topicCardData.image} />
                 )}
               </TopicCardMainStyled>
               <CardDividerStyled />

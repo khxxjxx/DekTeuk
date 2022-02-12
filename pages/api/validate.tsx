@@ -11,7 +11,6 @@ const validate = async (token: string) => {
   const user = await firebaseAdmin.auth().getUser(decodedToken.uid);
   // Get any additional user data from the Firebase DB
   const [UserInfo] = user.providerData;
-  console.log('user', UserInfo.providerId);
   await firebaseAdmin
     .firestore()
     .collection('user')

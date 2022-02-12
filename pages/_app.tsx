@@ -13,9 +13,9 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootReducer } from 'store/reducer';
 import { userSlice } from 'store/reducer';
-import { UserState } from '@interface/StoreInterface';
 import { setNewUserInfo } from 'store/reducer';
-import { UserInfo } from '@interface/StoreInterface';
+import { UserInfo, UserState } from '@interface/StoreInterface';
+
 const theme_ = createTheme(
   {},
   {
@@ -72,13 +72,25 @@ function MyApp({ Component, pageProps }: AppProps) {
           nickname: data.nickname,
           jobSector: data.jobSector,
           validRounges: data.validRounges,
+          email: data.email,
           myChattings: [],
           hasNewNotification: data.hasNewNotification,
           id: doc.id,
           post: [],
         };
         dispatch(setNewUserInfo(user));
-        console.log(user);
+        // console.log(user);
+        // const userData: UserInfo = {
+        //   nickname: data.nickname,
+        //   jobSector: data.jobSector,
+        //   validRounges: data.validRounges,
+        //   email: data.email,
+        //   myChattings: [],
+        //   hasNewNotification: data.hasNewNotification,
+        //   id: doc.id,
+        // };
+
+        // dispatch(userSlice.actions.setNewUserInfo(userData));
       });
     }
   }, []);
@@ -109,22 +121,34 @@ MyApp.getInitialProps = wrapper.getInitialAppProps(
               }),
             };
 
-            const result = await fetch('http://localhost:3000/api/validate', {
+            const {
+              data: { userData, uid: id, email },
+            }: {
+              data: {
+                uid: string;
+                email: string;
+                userData: Omit<UserInfo, 'email' | 'id'>;
+              };
+            } = await fetch('http://localhost:3000/api/validate', {
               headers,
             }).then((res) => res.json());
 
-            console.log(result.data.uid);
             const data: UserInfo = {
-              nickname: result.data.userData.nickname,
-              jobSector: result.data.userData.jobSector,
-              validRounges: result.data.userData.validRounges
-                ? result.data.userData.validRounges
-                : [],
-              myChattings: result.data.userData.myChattings,
-              id: result.data.uid,
-              hasNewNotification: result.data.userData.hasNewNotification,
-              post: result.data.userData.post,
+              ...userData,
+              id,
+              email,
             };
+            // console.log(result, 'dlrj?');
+            // const data = {
+            //   nickname: result.data.userData.nickname,
+            //   jobSector: result.data.userData.jobSector,
+            //   validRounges: result.data.userData.validRounges,
+            //   myChattings: [],
+            //   id: result.data.uid,
+            //   hasNewNotification: result.data.userData.notification,
+            //   email: result.data.email,
+            // };
+
             await store.dispatch(getUser(data));
           } catch (e) {
             console.error(e);

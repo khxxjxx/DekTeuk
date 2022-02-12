@@ -1,3 +1,5 @@
+import { RoungePost, TopicPost } from '@interface/CardInterface';
+
 export interface ValidRounge {
   title: string;
   url: string;
@@ -19,6 +21,7 @@ export interface UserInfo {
   hasNewNotification: boolean;
   id: string;
   post: Array<string>;
+  email: string;
 }
 
 export interface UserState {
@@ -27,10 +30,15 @@ export interface UserState {
   error: string | undefined;
 }
 export interface ViewPosts {
-  view: [];
+  view: Array<SearchResult>;
+  searchValue: string;
 }
 export interface StoreState {
   user: UserState;
   view: ViewPosts;
   scroll: { scrollY: number };
+}
+export interface SearchResult {
+  result: Array<TopicPost | RoungePost>;
+  nextPage: number;
 }

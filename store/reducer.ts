@@ -19,6 +19,7 @@ const initialUserState: UserState = {
     id: '',
     hasNewNotification: false,
     post: [],
+    email: '',
   },
   status: 'standby',
   error: '',
@@ -60,9 +61,9 @@ export const userSlice = createSlice({
   },
 });
 
-export const view = createSlice({
+const view = createSlice({
   name: 'view',
-  initialState: { view: <any>[] },
+  initialState: { view: <any>[], searchValue: '' },
   reducers: {
     initialViewPosts(state, action) {
       state.view = [action.payload];
@@ -73,10 +74,13 @@ export const view = createSlice({
     resetViewPosts(state) {
       state.view = [];
     },
+    setSearchValue(state, action) {
+      state.searchValue = action.payload;
+    },
   },
 });
 
-export const scroll = createSlice({
+const scroll = createSlice({
   name: 'scroll',
   initialState: { scrollY: 0 },
   reducers: {
@@ -89,9 +93,9 @@ export const scroll = createSlice({
 export const setViewAction = view.actions.setViewPosts;
 export const resetViewAction = view.actions.resetViewPosts;
 export const initialViewAction = view.actions.initialViewPosts;
+export const setSearchValueAction = view.actions.setSearchValue;
 export const setScrollAction = scroll.actions.setScroll;
 export const setMyInfoAction = userSlice.actions.setMyInfo;
-
 const rootReducer = (
   state: {
     user: UserState;
@@ -103,8 +107,6 @@ const rootReducer = (
   {
     switch (action.type) {
       case HYDRATE:
-        console.log(state);
-        console.log(action);
         let userState: UserState = {
           user: {
             nickname: '',
@@ -114,18 +116,29 @@ const rootReducer = (
             id: '',
             hasNewNotification: false,
             post: [],
+            email: '',
           },
           status: 'standby',
           error: '',
         };
         if (action.payload.user.user.nickname) userState = action.payload.user;
         else userState = state.user;
-        if (state.view.view.length === 0) {
-          return { ...action.payload, user: userState };
-        } else
+        if (state.view.view.length === 0)
+          return {
+            ...action.payload,
+            view:
+              state.view.searchValue && action.payload.view.searchValue
+                ? { view: [], searchValue: '' }
+                : state.view,
+            user: userState,
+          };
+        else
           return {
             user: userState,
-            view: { view: [...state.view.view] },
+            view:
+              state.view.searchValue && action.payload.view.searchValue
+                ? { view: [], searchValue: '' }
+                : state.view,
             scroll: { scrollY: state.scroll.scrollY },
           };
       default:
