@@ -114,7 +114,6 @@ MyApp.getInitialProps = wrapper.getInitialAppProps(
                 token: token,
               }),
             };
-
             const {
               data: { userData, uid: id, email },
             }: {
@@ -132,7 +131,6 @@ MyApp.getInitialProps = wrapper.getInitialAppProps(
               id,
               email,
             };
-
             await store.dispatch(getUser(data));
           } catch (e) {
             console.error(e);
