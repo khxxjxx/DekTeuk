@@ -26,17 +26,18 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import { useAuth } from '@hooks/Auth';
 import Comment from '@components/comment/Comment';
-
-const Detail = ({ postProps, postId }) => {
+import type { RootReducer } from 'store/reducer';
+import { useSelector } from 'react-redux';
+const Detail = ({ postProps, postId }: any) => {
+  const { user }: any = useSelector((state: RootReducer) => state.user);
+  console.log(user);
   const post = JSON.parse(postProps);
-  const { currentUser } = useAuth();
+
   //해당 게시물에 좋아요를 누른 사람의 배열과 현재 로그인한 유저의 이메일을 비교하여 판단함
-  const [userLike, setUserLike] = useState(
-    post.press_person.includes(currentUser.uid),
-  );
+  const [userLike, setUserLike] = useState(post.press_person.includes(user.id));
   const [postLikeCount, setPostLikeCount] = useState(post.press_person.length);
 
-  const changeLike = async (id, e) => {
+  const changeLike = async (id: any, e: any) => {
     //다른 태그에 이벤트가 전달되지 않게 하기 위함
 
     e.stopPropagation();
@@ -46,7 +47,7 @@ const Detail = ({ postProps, postId }) => {
       const userDocRef = doc(db, 'posts', postId);
       //likeuser에서 현재 유저의 이메일 index를 찾아내서 제거함
       await updateDoc(userDocRef, {
-        press_person: arrayRemove(currentUser.uid),
+        press_person: arrayRemove(user.id),
       });
     } else {
       setUserLike(true);
@@ -54,7 +55,7 @@ const Detail = ({ postProps, postId }) => {
       const userDocRef = doc(db, 'posts', postId);
       //likeuser에서 현재 유저의 이메일 index를 추가함
       await updateDoc(userDocRef, {
-        press_person: arrayUnion(currentUser.uid),
+        press_person: arrayUnion(user.id),
       });
     }
   };
@@ -105,9 +106,16 @@ export default Detail;
 
 export const getStaticPaths = async () => {
   const snapshot = await getDocs(collection(db, 'posts'));
-  const paths = snapshot.docs.map((doc) => {
+  const paths = snapshot.docs.map((doc: any) => {
+    console.log(doc);
     return {
-      params: { id: doc.id.toString() },
+      params: {
+        rounge:
+          doc[
+            '_document'
+          ].data.value.mapValue.fields.rounge.stringValue.toString(),
+        postid: doc.id.toString(),
+      },
     };
   });
   return {
@@ -116,8 +124,8 @@ export const getStaticPaths = async () => {
   };
 };
 
-export const getStaticProps = async (context) => {
-  const id = context.params.id;
+export const getStaticProps = async (context: any) => {
+  const id = context.params.postid;
 
   const docRef = doc(db, 'posts', id);
 

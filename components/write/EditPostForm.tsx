@@ -23,6 +23,7 @@ import {
   updateDoc,
   doc,
   getDoc,
+  getDocs,
 } from 'firebase/firestore';
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 import { db } from '@firebase/firebase';
@@ -44,16 +45,41 @@ import CheckIcon from '@mui/icons-material/Check';
 import SaveIcon from '@mui/icons-material/Save';
 import type { RootReducer } from 'store/reducer';
 import { useSelector } from 'react-redux';
-
-const PostForm = () => {
+import { withRouter } from 'next/router';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import Modal from '@mui/material/Modal';
+const style = {
+  position: 'absolute' as 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 400,
+  bgcolor: 'background.paper',
+  borderRadius: '4px 4px 4px 4px',
+  boxShadow: 24,
+  p: 4,
+};
+const PostForm = (props: any) => {
+  const postInfo = props.postInfo;
+  const [diaOpen, setDiaOpen] = useState(false);
   //이미지 업로드 부분
   const [postImage, setPostImage] = useState<any>(null);
   const [url, setUrl] = useState('');
   const [progress, setProgress] = useState(0);
-  const [imgList, setImgList] = useState<any>([]);
+  const [imgList, setImgList] = useState<any>(
+    postInfo.image
+      ? Object.entries(postInfo.image).map((v) => {
+          return v[1];
+        })
+      : [],
+  );
   //텍스트 처리
   const { user }: any = useSelector((state: RootReducer) => state.user);
-  console.log(user);
+
   //유저
   const [userInfoList, setuserInfoList] = useState<any>('');
   const [alertType, setAlertType] = useState('success');
@@ -61,25 +87,25 @@ const PostForm = () => {
   const [open, setOpen] = useState(false);
   const [clickState, setClickState] = useState(true);
   const [post, setPost] = useState({
-    title: '',
-    content: '',
-    press_person: [],
-    post_id: '',
-    post_type: '',
-    user_id: '',
-    topic: '',
-    rounge: '',
-    created_at: '',
-    updated_at: '',
-    deleted_at: '',
-    is_deleted: false,
-    job: '',
-    nickname: '',
+    title: postInfo.title,
+    content: postInfo.content,
+    pressPerson: postInfo.pressPerson,
+    postType: postInfo.postType,
+    userId: postInfo.userId,
+    topic: postInfo.topic,
+    rounge: postInfo.rounge,
+    createdAt: postInfo.createdAt,
+    updatedAt: postInfo.updatedAt,
+    job: postInfo.job,
+    nickname: postInfo.nickname,
+    image: postInfo.image,
   });
+  console.log(post);
   //photoupload 확인 아이콘-아직 미구현
   const [loading, setLoading] = React.useState(false);
   const [success, setSuccess] = React.useState(false);
-
+  //모달창
+  const [modalOpen, setModalOpen] = useState(false);
   const timer = React.useRef<number>();
   const storage = getStorage();
   // Create the file metadata
@@ -106,6 +132,7 @@ const PostForm = () => {
 
   const handleClose: any = (event: any, reason: any) => {
     setOpen(!open);
+    setDiaOpen(!diaOpen);
   };
 
   const onSubmit = async () => {
@@ -137,51 +164,25 @@ const PostForm = () => {
       }
     } else {
       image = {};
-    }
-    if (post.post_type === '' || post.title === '' || post.content === '') {
+    } //   const docRef = doc(db, "posts", post.id);
+    //   const postUpdated = { ...post, timestamp: serverTimestamp() };
+    //   updateDoc(docRef, postUpdated);
+    //   setPost({ title: "", detail: "" });
+    //   showAlert("success", `Post with id ${docRef.id} is updated successfully`);
+    if (post.title === '' || post.content === '') {
       showAlert('error', `필수항목을 작성해 주세요`);
-    } else if (post.post_type === 'Topic' && post.topic === '') {
-      showAlert('error', `토픽 주제를 선택해 주세요`);
-    } else if (post.post_type === 'Topic') {
-      const collectionRef = collection(db, 'posts');
-      const { id: newId } = await addDoc(collectionRef, {
-        ...post,
-        user_id: userInfoList.user_id,
-        job: userInfoList.job,
-        nickname: userInfoList.nickname,
-        rounge: '',
-        created_at: serverTimestamp(),
-        image: image,
-      });
-      const docRef = doc(db, 'users', user.id);
-      const userPostUpdate = {
-        ...userInfoList,
-        post: [...userInfoList.post, newId],
-      };
-      updateDoc(docRef, userPostUpdate);
-      //유저에 게시물 id 추가
-
-      //나중에 topic 페이지로 이동하도록 변경하기
-      Router.push('/');
     } else {
-      const collectionRef = collection(db, 'posts');
-      const { id: newId } = await addDoc(collectionRef, {
+      const docRef = doc(db, 'posts', props.thisPostId);
+      const postUpdated = {
         ...post,
-        user_id: userInfoList.user_id,
-        job: userInfoList.job,
-        nickname: userInfoList.nickname,
-        topic: '',
-        created_at: serverTimestamp(),
+        updatedAt: serverTimestamp(),
         image: image,
-      });
-      const docRef = doc(db, 'users', user.id);
-      const userPostUpdate = {
-        ...userInfoList,
-        post: [...userInfoList.post, newId],
       };
-      updateDoc(docRef, userPostUpdate);
+      updateDoc(docRef, postUpdated);
+
+      setDiaOpen(true);
       //나중에 topic 페이지로 이동하도록 변경하기
-      Router.push('/');
+      // props.setEditOpen(false);
     }
     //원하는 타겟으로 나중에 변경하기
   };
@@ -282,7 +283,14 @@ const PostForm = () => {
   //     }, 2000);
   //   }
   // };
-
+  //취소버튼 구현
+  function editChange() {
+    props.setEditOpen(false);
+  }
+  function sendEditContent() {
+    props.setPost(post);
+    setModalOpen(true);
+  }
   return (
     <Container maxWidth="sm">
       <Box sx={{ minWidth: 120, mt: 6 }}>
@@ -291,25 +299,29 @@ const PostForm = () => {
           <Select
             labelId="demo-simple-select-label"
             id="demo-simple-select"
-            value={post.post_type}
+            inputProps={{ readOnly: true }}
+            value={postInfo.postType}
             label="postMenu"
-            onChange={(e) => setPost({ ...post, post_type: e.target.value })}
+            onClick={() => showAlert('info', `등록 위치는 변경할 수 없습니다`)}
           >
             <MenuItem value={'Rounge'}>라운지</MenuItem>
             <MenuItem value={'Topic'}>토픽</MenuItem>
           </Select>
         </FormControl>
       </Box>
-      {post.post_type === 'Topic' && (
+      {postInfo.postType === 'Topic' && (
         <Box sx={{ minWidth: 120, mt: 3 }}>
           <FormControl fullWidth>
             <InputLabel id="demo-simple-select-label">토픽</InputLabel>
             <Select
               labelId="demo-simple-select-label"
               id="demo-simple-select"
-              value={post.topic}
               label="postMenu"
-              onChange={(e) => setPost({ ...post, topic: e.target.value })}
+              inputProps={{ readOnly: true }}
+              value={postInfo.topic}
+              onClick={() =>
+                showAlert('info', `등록 위치는 변경할 수 없습니다`)
+              }
             >
               <MenuItem value={'yunmal'}>연말정산</MenuItem>
               <MenuItem value={'market'}>자유시장</MenuItem>
@@ -319,24 +331,28 @@ const PostForm = () => {
           </FormControl>
         </Box>
       )}
-      {post.post_type === 'Rounge' && (
+      {postInfo.postType === 'Rounge' && (
         <Box sx={{ minWidth: 120, mt: 3 }}>
           <FormControl fullWidth>
             <InputLabel id="demo-simple-select-label">라운지</InputLabel>
             <Select
               labelId="demo-simple-select-label"
               id="demo-simple-select"
-              value={post.rounge}
               label="RoungeMenu"
-              onChange={(e) => setPost({ ...post, rounge: e.target.value })}
+              inputProps={{ readOnly: true }}
+              value={postInfo.rounge}
+              onClick={() =>
+                showAlert('info', `등록 위치는 변경할 수 없습니다`)
+              }
             >
-              {userInfoList.valid_rounge.map((v: any) => {
-                return (
-                  <MenuItem value={v.url} key={v.url}>
-                    {v.title}
-                  </MenuItem>
-                );
-              })}
+              {userInfoList.valid_rounge &&
+                userInfoList.valid_rounge.map((v: any) => {
+                  return (
+                    <MenuItem value={v.url} key={v.url}>
+                      {v.title}
+                    </MenuItem>
+                  );
+                })}
             </Select>
           </FormControl>
         </Box>
@@ -383,13 +399,13 @@ const PostForm = () => {
                 justifyContent: 'center',
                 display: 'flex',
                 flexDirection: 'column',
+                alignItems: 'center',
               }}
             >
               <img src={v[0]} style={{ maxWidth: '100%' }} key={i} />
               <Button
                 sx={{ position: 'relative' }}
                 onClick={() => {
-                  deleteClick(imgList[i][1]);
                   let delArr = [...imgList];
                   delArr.splice(i, 1);
                   setImgList(delArr);
@@ -403,11 +419,11 @@ const PostForm = () => {
                 variant="standard"
                 label="사진에 대한 설명을 입력해주세요(선택)"
                 multiline
+                value={v[2]}
                 onChange={(e) => {
                   let ImgArr = [...imgList];
                   ImgArr[i][2] = e.target.value;
                   setImgList(ImgArr);
-                  console.log(imgList);
                 }}
               />
             </Box>
@@ -488,13 +504,50 @@ const PostForm = () => {
           borderRadius: 1,
         }}
       >
-        <Link href="/">
-          <Button variant="contained">메인으로 이동</Button>
-        </Link>
+        <Button variant="contained" onClick={editChange}>
+          취소
+        </Button>
+
         <Button variant="contained" onClick={onSubmit}>
-          {post.hasOwnProperty('timestamp') ? '게시물 수정' : '게시물 작성'}
+          수정하기
         </Button>
       </Box>
+      <Modal
+        open={modalOpen}
+        onClose={() => {
+          props.setEditOpen(false);
+        }}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            {post.title}
+          </Typography>
+          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+            게시물을 수정하였습니다
+          </Typography>
+        </Box>
+      </Modal>
+      <Dialog
+        open={diaOpen}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{props.thisPostTitle}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            이 게시물을 수정하시겠습니까?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>취소</Button>
+          <Button onClick={sendEditContent} autoFocus>
+            확인
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };
