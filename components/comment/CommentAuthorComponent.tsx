@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import styled from '@emotion/styled';
 import { getDateTime } from '@utils/function';
-import ChantOpen from '@components/items/Chatopen';
+import AuthorClickMenu from '@components/items/AuthorClickMenu';
+import { ChatDefault, createChatRoom } from '@utils/chatOpen';
+import { useRouter } from 'next/router';
+import { useSelector } from 'react-redux';
+import { RootReducer } from '@store/reducer';
 
 const CommentAuthorDiv = styled.div`
   margin-bottom: 25px;
   display: flex;
   justify-content: space-between;
 `;
-
-const CommentCompany = styled.span``;
 
 const CommentNickname = styled.span`
   color: grey;
@@ -20,21 +22,38 @@ type authorProps = {
   nickname: string;
   job: string;
   date: string;
+  userId: string;
 };
 
 const CommentAuthorComponent: React.FC<authorProps> = ({
   date,
   nickname,
   job,
+  userId,
 }) => {
   const [toggle, setToggle] = useState(false);
+  const router = useRouter();
 
   const onToggle = () => {
     setToggle(false);
   };
 
-  const openChat = () => {
-    console.log('오픈 채팅!');
+  const userInfo = useSelector((state: RootReducer) => state.user.user);
+
+  const openChat = async () => {
+    const myInfo: ChatDefault = {
+      nickname: userInfo.nickname,
+      jobSector: userInfo.job,
+      id: userInfo.userId,
+    };
+    const counterInfo: ChatDefault = {
+      nickname: nickname,
+      jobSector: job,
+      id: userId,
+    };
+    const id = await createChatRoom(myInfo, counterInfo);
+
+    router.push(`chat/${id}`);
   };
 
   return (
@@ -52,10 +71,10 @@ const CommentAuthorComponent: React.FC<authorProps> = ({
 
           {`  `}
 
-          <CommentCompany>{job}</CommentCompany>
+          <span>{job}</span>
         </div>
       </CommentAuthorDiv>
-      {toggle && <ChantOpen onToggle={onToggle} openChat={openChat} />}
+      {toggle && <AuthorClickMenu onToggle={onToggle} openChat={openChat} />}
     </>
   );
 };

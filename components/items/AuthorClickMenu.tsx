@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 
-const ChantOpen = ({
+const AuthorClickMenu = ({
   onToggle,
   openChat,
 }: {
@@ -21,7 +21,7 @@ const ChantOpen = ({
   );
 };
 
-export default ChantOpen;
+export default AuthorClickMenu;
 
 const Background = styled.div`
   width: 100vw;
