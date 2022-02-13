@@ -28,7 +28,7 @@ const AlertDiv = styled(Alert)`
   left: 50%;
   opacity: 0;
   bottom: 20px;
-  animation: ${AlertOpen} 3s ease;
+  animation: ${AlertOpen} 2s ease;
 `;
 const AlertComponent = ({
   alerMessage,

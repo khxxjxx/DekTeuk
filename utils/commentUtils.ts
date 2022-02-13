@@ -40,7 +40,6 @@ export const addNestedComment = async (
   userInfo: any,
   postId: string,
 ) => {
-  console.log('dho?');
   let result: string = '';
   try {
     await addDoc(collection(db, 'comment'), {

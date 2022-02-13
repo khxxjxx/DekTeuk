@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { updateComment } from '@utils/commentUtils';
 import ButtonComponent from '@components/items/ButtonComponent';
-import InputComponent from '@components/items/InputComponent';
+import CommentInputComponent from '@components/items/CommentInputComponent';
 
 type CommentUpdateEditorProps = {
   originComment: string;
@@ -25,7 +25,7 @@ const CommentUpdateEditor: React.FC<CommentUpdateEditorProps> = ({
 
   return (
     <>
-      <InputComponent
+      <CommentInputComponent
         placeholder="수정할 댓글을 입력해주세요"
         defaultValue={revisedComment}
         changeFn={setRevisedComment}

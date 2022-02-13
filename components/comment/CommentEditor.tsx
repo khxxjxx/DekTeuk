@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styled from '@emotion/styled';
 import { addOriginComment, addNestedComment } from '@utils/commentUtils';
-import InputComponent from '@components/items/InputComponent';
+import CommentInputComponent from '@components/items/CommentInputComponent';
 import ButtonComponent from '@components/items/ButtonComponent';
 import { useSelector } from 'react-redux';
 import { RootReducer } from '@store/reducer';
@@ -61,7 +61,7 @@ const CommentEditor: React.FC<CommentEditorProps> = ({
         alerMessage: '',
         alerType: undefined,
       });
-    }, 3000);
+    }, 2000);
   };
 
   const userInfo = useSelector((state: RootReducer) => state.user.user);
@@ -108,7 +108,7 @@ const CommentEditor: React.FC<CommentEditorProps> = ({
           X
         </div>
       )}
-      <InputComponent
+      <CommentInputComponent
         defaultValue={comment}
         placeholder="댓글을 입력하세요"
         changeFn={setComment}

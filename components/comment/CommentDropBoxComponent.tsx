@@ -59,13 +59,9 @@ const CommentDropBox: React.FC<CommentDropBoxProps> = ({
   };
 
   useEffect(() => {
-    window.addEventListener('click', (event: MouseEvent) =>
-      handleClickOutside(event),
-    );
+    window.addEventListener('click', handleClickOutside);
     return () => {
-      window.removeEventListener('click', (event: MouseEvent) =>
-        handleClickOutside(event),
-      );
+      window.removeEventListener('click', handleClickOutside);
     };
   }, []);
 
