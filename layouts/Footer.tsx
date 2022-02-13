@@ -85,6 +85,15 @@ const BorderColorOutlinedIconStyled = styled(BorderColorOutlinedIcon)`
 const DivStyled = styled.div`
   cursor: pointer;
 `;
+const NotLoggedInElementWrapperDivStyled = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  color: ${({ theme }: any) => theme.customTheme.defaultMode.footerIconColor};
+  @media (prefers-color-scheme: dark) {
+    color: ${({ theme }: any) => theme.customTheme.darkMode.footerIconColor};
+  }
+`;
 const Footer = () => {
   const { user: myInfo } = useSelector((state: StoreState) => state.user);
   if (!myInfo.id)
@@ -92,23 +101,19 @@ const Footer = () => {
       <FooterDivNotLoggedIn>
         <DivStyled>
           <Link href="/user/login" passHref>
-            <div
-              style={{ display: 'flex', justifyContent: 'center', gap: '4px' }}
-            >
+            <NotLoggedInElementWrapperDivStyled>
               <LoginIcon />
               Login
-            </div>
+            </NotLoggedInElementWrapperDivStyled>
           </Link>
         </DivStyled>
         <div />
         <DivStyled>
           <Link href="/user/signup" passHref>
-            <div
-              style={{ display: 'flex', justifyContent: 'center', gap: '4px' }}
-            >
+            <NotLoggedInElementWrapperDivStyled>
               <GroupAddIcon />
               SignUp
-            </div>
+            </NotLoggedInElementWrapperDivStyled>
           </Link>
         </DivStyled>
       </FooterDivNotLoggedIn>
