@@ -126,7 +126,7 @@ const MyPageMorePost: React.FC<MyPageMorePostProp> = ({ userId }) => {
         <Container>
           <MyPageChangeCom>
             <header style={{ marginBottom: '2rem' }}>
-              <Link href={'/mypage'}>
+              <Link href={'/mypage'} passHref>
                 <ArrowBackIosNewIcon />
               </Link>
               <h1>내가 작성한 게시물</h1>

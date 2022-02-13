@@ -226,14 +226,14 @@ export default function TopicPost({
                       alignItems: 'center',
                     }}
                   >
-                    <img key={i} src={v[1][0]} />
+                    <img key={i} src={v[1][0]} alt={v[1][0]} />
                     <Typography sx={{ mb: 2, mt: 1 }}>{v[1][2]}</Typography>
                   </Box>
                 );
               })}
           </Box>
           <CardActions>
-            <Link href="/">
+            <Link href="/" passHref>
               <Button size="small">뒤로가기</Button>
             </Link>
           </CardActions>

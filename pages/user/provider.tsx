@@ -292,7 +292,12 @@ export default function Signup() {
                   사진 지우기
                 </Button>
 
-                <img src={imageUrl} width="150px" height="200px" />
+                <img
+                  src={imageUrl}
+                  alt={imageUrl}
+                  width="150px"
+                  height="200px"
+                />
               </WrapInput>
             )}
             <WrapInput>
