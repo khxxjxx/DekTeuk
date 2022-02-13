@@ -20,18 +20,18 @@ import MenuItem from '@mui/material/MenuItem';
 import { UserInfo } from '@interface/StoreInterface';
 
 const jobSectors = [
-  '외식·음료',
-  '매장관리·판매',
-  '서비스',
-  '사무직',
-  '고객상담·리서치·영업',
-  '생산·건설·노무',
-  'IT·기술',
-  '디자인',
-  '미디어',
-  '운전·배달',
-  '병원·간호·연구',
-  '교육·강사',
+  { title: '외식·음료', url: 'food-service' },
+  { title: '매장관리·판매', url: 'store' },
+  { title: '서비스', url: 'service' },
+  { title: '사무직', url: 'white-collar' },
+  { title: '고객상담·리서치·영업', url: 'sales-research' },
+  { title: '생산·건설·노무', url: 'blue-collar' },
+  { title: 'IT·기술', url: 'it-tech' },
+  { title: '디자인', url: 'design' },
+  { title: '미디어', url: 'media' },
+  { title: '운전·배달', url: 'drive' },
+  { title: '병원·간호·연구', url: 'hospital' },
+  { title: '교육·강사', url: 'education' },
 ];
 
 type UserInputData = {
@@ -76,6 +76,13 @@ export default function Google() {
   const SignUpSubmitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const uid = auth.currentUser?.uid as string;
+    if (!uid) {
+      alert('다시 로그인 해주세요!');
+      router.push('/user/login');
+    }
+    if (!imageUrl) {
+      alert('증명서 파일을 찾을 수 없습니다!');
+    }
     const userInitData: UserInfo = {
       nickname: nickname,
       jobSector: jobSector,
@@ -88,13 +95,16 @@ export default function Google() {
           title: '토픽',
           url: 'topic',
         },
+        {
+          title: jobSector,
+          url: jobSectors.find((v) => v.title === jobSector)?.url as string,
+        },
       ],
       id: uid,
       hasNewNotification: true,
       posts: [],
       email: email,
     };
-
     uploadImg(uid!);
     console.log('success');
     const docSnap = await setDoc(doc(db, 'user', uid!), userInitData);
@@ -215,7 +225,9 @@ export default function Google() {
                 사진 지우기
               </Button>
             </WrapImageUpload>
-            {imageUrl && <img src={imageUrl} width="150px" height="200px" />}
+            {imageUrl && (
+              <img src={imageUrl} alt={imageUrl} width="150px" height="200px" />
+            )}
             <WrapInput>
               <Label>직종</Label>
               <TextFields
@@ -228,8 +240,8 @@ export default function Google() {
                 helperText={inputHelpers.jobSector}
               >
                 {jobSectors.map((value, idx) => (
-                  <MenuItem key={idx} value={value}>
-                    {value}
+                  <MenuItem key={idx} value={value.title}>
+                    {value.title}
                   </MenuItem>
                 ))}
               </TextFields>

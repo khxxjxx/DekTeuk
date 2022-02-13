@@ -1,6 +1,7 @@
+import Head from 'next/head';
 import '../styles/globals.css';
 import type { AppContext, AppProps } from 'next/app';
-import { AuthProvider } from './user/auth';
+import AuthProvider from './user/auth';
 import nookies from 'nookies';
 import fetch from 'isomorphic-unfetch';
 import wrapper from 'store/configureStore';
@@ -67,18 +68,37 @@ function MyApp({ Component, pageProps }: AppProps) {
   useEffect(() => {
     if (user.id) {
       onSnapshot(doc(db, 'user', user.id), (doc) => {
-        const data = doc.data();
-        dispatch(setNewUserInfo(data));
+        const data = doc.data() as UserInfo;
+        // const userData: UserInfo = {
+        //   nickname: data.nickname,
+        //   jobSector: data.jobSector,
+        //   validRounges: data.validRounges,
+        //   email: data.email,
+        //   hasNewNotification: data.hasNewNotification,
+        //   id: doc.id,
+        //   posts: data.posts,
+        // };
+        const userData: UserInfo = { ...data, id: doc.id };
+        dispatch(setNewUserInfo(userData));
       });
     }
   }, []);
 
   return (
-    <AuthProvider>
-      <ThemeProvider theme={theme_}>
-        <Component {...pageProps} />
-      </ThemeProvider>
-    </AuthProvider>
+    <>
+      <Head>
+        <title>DokTeuk</title>
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0, user-scalable=no, shrink-to-fit=no "
+        />
+      </Head>
+      <AuthProvider>
+        <ThemeProvider theme={theme_}>
+          <Component {...pageProps} />
+        </ThemeProvider>
+      </AuthProvider>
+    </>
   );
 }
 
@@ -98,22 +118,6 @@ MyApp.getInitialProps = wrapper.getInitialAppProps(
                 token: token,
               }),
             };
-
-            // const result = await fetch('http://localhost:3000/api/validate', {
-            //   headers,
-            // }).then((res) => res.json());
-            // //console.log('result', result);
-
-            // console.log(result, 'dlrj?');
-            // const data = {
-            //   nickname: result.data.userData.nickname,
-            //   jobSector: result.data.userData.jobSector,
-            //   validRounges: result.data.userData.validRounges,
-            //   myChattings: [],
-            //   id: result.data.uid,
-            //   hasNewNotification: result.data.userData.notification,
-            //   email: result.data.email,
-            // };
 
             const {
               data: { userData, uid: id, email },

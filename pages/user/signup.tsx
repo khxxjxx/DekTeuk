@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
+import Link from 'next/link';
 import styled from '@emotion/styled';
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
@@ -7,6 +8,7 @@ import Button from '@mui/material/Button';
 import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
+  signInWithPopup,
   signOut,
 } from 'firebase/auth';
 import { db, auth } from '@firebase/firebase';
@@ -25,18 +27,18 @@ import { UserInfo } from '@interface/StoreInterface';
 import useId from '@mui/material/utils/useId';
 
 const jobSectors = [
-  '외식·음료', // food-service
-  '매장관리·판매', // store
-  '서비스', // service
-  '사무직', // office
-  '고객상담·리서치·영업', // sales-research
-  '생산·건설·노무', // construction
-  'IT·기술', // it-tech
-  '디자인', // design
-  '미디어', // media
-  '운전·배달', // drive
-  '병원·간호·연구', // hospital
-  '교육·강사', // education
+  { title: '외식·음료', url: 'food-service' },
+  { title: '매장관리·판매', url: 'store' },
+  { title: '서비스', url: 'service' },
+  { title: '사무직', url: 'white-collar' },
+  { title: '고객상담·리서치·영업', url: 'sales-research' },
+  { title: '생산·건설·노무', url: 'blue-collar' },
+  { title: 'IT·기술', url: 'it-tech' },
+  { title: '디자인', url: 'design' },
+  { title: '미디어', url: 'media' },
+  { title: '운전·배달', url: 'drive' },
+  { title: '병원·간호·연구', url: 'hospital' },
+  { title: '교육·강사', url: 'education' },
 ];
 type InputHelperText = {
   email: string;
@@ -113,11 +115,11 @@ export default function Signup() {
 
   const SignUpSubmitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const uid = (await createUserWithEmail()) as string;
 
     if (checkPassword !== password) {
       alert('비밀번호가 다릅니다!');
     } else {
-      const uid = (await createUserWithEmail()) as string;
       const userInitData: UserInfo = {
         nickname: nickname,
         jobSector: jobSector,
@@ -129,6 +131,11 @@ export default function Signup() {
           {
             title: '토픽',
             url: 'topic',
+          },
+          {
+            title: jobSector,
+            url: jobSectors.find((v) => v.title === jobSector)?.url as string,
+            // type error 잡아야 함
           },
         ],
         id: uid,
@@ -193,6 +200,10 @@ export default function Signup() {
     <>
       <Main>
         <h1 style={{ color: '#8946A6' }}>회원가입</h1>
+        <GoogleButton //onClick={signInWithPopup}
+        >
+          구글 계정으로 가입하기
+        </GoogleButton>
         <form onSubmit={SignUpSubmitHandler}>
           <WrapContents>
             <WrapInput>
@@ -283,7 +294,9 @@ export default function Signup() {
                 사진 지우기
               </Button>
             </WrapImageUpload>
-            {imageUrl && <img src={imageUrl} width="150px" height="200px" />}
+            {imageUrl && (
+              <img src={imageUrl} alt={imageUrl} width="150px" height="200px" />
+            )}
             <WrapInput>
               <Label>직종</Label>
               <TextFields
@@ -296,8 +309,8 @@ export default function Signup() {
                 helperText={inputHelpers.jobSector}
               >
                 {jobSectors.map((value, idx) => (
-                  <MenuItem key={idx} value={value}>
-                    {value}
+                  <MenuItem key={idx} value={value.title}>
+                    {value.title}
                   </MenuItem>
                 ))}
               </TextFields>
@@ -351,6 +364,19 @@ const CheckButton = styled.button`
   }
 `;
 
+const GoogleButton = styled(Button)`
+  background: #8946a6;
+  border-radius: 5px;
+  border: none;
+  color: white;
+
+  margin: 5px;
+  font-size: 12px;
+  cursor: pointer;
+  :hover {
+    opacity: 0.8;
+  }
+`;
 const SubmitButton = styled.button`
   background: #8946a6;
   border-radius: 5px;

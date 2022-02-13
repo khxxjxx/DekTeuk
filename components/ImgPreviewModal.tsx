@@ -2,16 +2,16 @@ import { keyframes } from '@emotion/react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { EffectCards } from 'swiper';
 import styled from '@emotion/styled';
-import Image from 'next/image';
+// import Image from 'next/image';
 import 'swiper/css';
 import 'swiper/css/effect-cards';
 
 const ImgPreviewModal = ({
-  fileSrc,
+  imgData,
   onFileReset,
   onSubmitImg,
 }: {
-  fileSrc: FileType | null;
+  imgData: FileType | null;
   onFileReset: () => void;
   onSubmitImg: (k?: string) => void;
 }) => {
@@ -23,9 +23,13 @@ const ImgPreviewModal = ({
           grabCursor={true}
           modules={[EffectCards]}
         >
-          {fileSrc!.src.map((img) => (
+          {imgData!.src.map((img) => (
             <SwiperSlide key={img as string}>
-              <Image src={img as string} alt="preview-img" layout="fill" />
+              <Image
+                src={img as string}
+                alt="preview-img"
+                color={Math.round(Math.random() * 0xffffff).toString(16)}
+              />
             </SwiperSlide>
           ))}
         </SwiperStyled>
@@ -34,12 +38,12 @@ const ImgPreviewModal = ({
           <button
             className="send"
             onClick={() =>
-              fileSrc!.type === 'upload'
+              imgData!.type === 'upload'
                 ? onSubmitImg()
-                : onSubmitImg(fileSrc!.type)
+                : onSubmitImg(imgData!.type)
             }
           >
-            {fileSrc!.type === 'upload' ? '전송' : '다운'}
+            {imgData!.type === 'upload' ? '전송' : '다운'}
           </button>
         </ButtonWrapper>
       </Modal>
@@ -90,11 +94,17 @@ const Modal = styled.div`
 const SwiperStyled = styled(Swiper)`
   width: 240px;
   height: calc(100% - 80px);
-  & img {
-    object-fit: contain;
-  }
-  & .swiper-slide-shadow {
-    opacity: 0;
+`;
+
+const Image = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #cecece;
+  border-radius: 10px;
+
+  @media (prefers-color-scheme: dark) {
+    background: #171717;
   }
 `;
 

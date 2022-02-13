@@ -1,8 +1,4 @@
-import { app } from '@firebase/firebase';
-import delay from '@utils/delay';
-import { getAuth } from 'firebase/auth';
 import {
-  getFirestore,
   collection,
   getDoc,
   doc,
@@ -16,41 +12,35 @@ import {
   orderBy,
   query,
   limit,
+  getDocs,
+  endBefore,
 } from 'firebase/firestore';
-import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
+import { db, storage } from '../../firebase/firebase';
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { Dispatch, SetStateAction } from 'react';
-
-const db = getFirestore(app);
-const storage = getStorage(app);
 
 export const chatList = (
   setMyChats: Dispatch<SetStateAction<ChatRoom[]>>,
-  userData: UserType,
+  user: UserType,
 ) => {
-  const user = {
-    nickname: userData.nickname,
-    job: userData.jobSector,
-  };
-
   const chatListQuery = query(
     collection(db, 'chat'),
-    where('users', 'array-contains', user),
-    orderBy('update_at', 'desc'),
+    where('userIds', 'array-contains', user.id),
+    orderBy('updateAt', 'desc'),
     limit(20),
   );
 
   const unsubscribe = onSnapshot(chatListQuery, (querySnapshot) => {
     const newChat: ChatRoom[] = [];
     querySnapshot.forEach((result) => {
-      const { users, last_chat, update_at, last_visited } = result.data();
-      const other = users.find((me: Person) => me.nickname !== user.nickname);
+      const { users, lastChat, updateAt, lastVisited } = result.data();
+      const other = users.find((me: Person) => me.id !== user.id);
       newChat.push({
         id: result.id,
         other,
-        last_chat,
-        update_at,
-        last_visited,
-        user,
+        lastChat,
+        updateAt,
+        lastVisited,
       });
     });
     setMyChats(newChat);
@@ -58,133 +48,151 @@ export const chatList = (
   return unsubscribe;
 };
 
-export const chatMessages = (
-  chatId: queryType,
-  setMessages: Dispatch<SetStateAction<ChatText[]>>,
-  setLastKey: Dispatch<SetStateAction<Timestamp | null>>,
-  userData: UserType,
-) => {
-  const user = {
-    nickname: userData.nickname,
-    job: userData.jobSector,
-  };
-
+export const getChatMessages = async (chatId: queryType) => {
   const chatQuery = query(
     collection(db, `chat/${chatId}/messages`),
-    orderBy('create_at', 'desc'),
+    orderBy('createAt', 'desc'),
     limit(20),
   );
 
-  const unsubscribe = onSnapshot(chatQuery, (querySnapshot) => {
-    const newChat: ChatText[] = [];
-    const lastKey =
-      querySnapshot.docs.length === 20
-        ? querySnapshot.docs[querySnapshot.docs.length - 1].data().create_at
-        : null;
+  const querySnapshot = await getDocs(chatQuery);
 
+  const initMessage: ChatText[] = [];
+  const startKey =
+    querySnapshot.docs.length === 20
+      ? querySnapshot.docs[querySnapshot.docs.length - 1].data().createAt
+      : null;
+  const endKey =
+    querySnapshot.docs.length > 0
+      ? querySnapshot.docs[0].data().createAt
+      : null;
+
+  querySnapshot.forEach((doc) => {
+    const { msg, img, from, createAt } = doc.data();
+    initMessage.push({
+      id: doc.id,
+      from,
+      msg,
+      img,
+      createAt,
+    });
+  });
+
+  return {
+    initMessage,
+    _startKey: startKey,
+    _endKey: endKey,
+  };
+};
+
+export const chatMessages = (
+  chatId: queryType,
+  setMessages: Dispatch<SetStateAction<ChatText[]>>,
+  key: Timestamp | null,
+) => {
+  let chatQuery;
+
+  if (key) {
+    console.log('has key');
+    chatQuery = query(
+      collection(db, `chat/${chatId}/messages`),
+      orderBy('createAt', 'desc'),
+      endBefore(key),
+      limit(1),
+    );
+  } else {
+    console.log('no key');
+    chatQuery = query(
+      collection(db, `chat/${chatId}/messages`),
+      orderBy('createAt', 'desc'),
+      limit(1),
+    );
+  }
+
+  onSnapshot(chatQuery, (querySnapshot) => {
+    const newChat: ChatText[] = [];
     querySnapshot.forEach((doc) => {
-      const { msg, img, from, create_at } = doc.data();
+      const { msg, img, from, createAt } = doc.data();
       newChat.push({
         id: doc.id,
         from,
         msg,
         img,
-        create_at,
-        user,
+        createAt,
       });
     });
-    setMessages(newChat);
-    setLastKey(lastKey);
+    setMessages((current) => [...newChat, ...current]);
   });
-  return unsubscribe;
 };
 
-export const moreChatMessages = (
+export const moreChatMessages = async (
   chatId: queryType,
-  setMessages: Dispatch<SetStateAction<ChatText[]>>,
-  setLastKey: Dispatch<SetStateAction<Timestamp | null>>,
   key: Timestamp | null,
-  userData: UserType,
 ) => {
-  const user = {
-    nickname: userData.nickname,
-    job: userData.jobSector,
-  };
-
   const chatQuery = query(
     collection(db, `chat/${chatId}/messages`),
-    orderBy('create_at', 'desc'),
+    orderBy('createAt', 'desc'),
     startAfter(key),
     limit(20),
   );
 
-  onSnapshot(chatQuery, (querySnapshot) => {
-    const newChat: ChatText[] = [];
-    const lastKey =
-      querySnapshot.docs.length === 20
-        ? querySnapshot.docs[querySnapshot.docs.length - 1].data().create_at
-        : null;
+  const querySnapshot = await getDocs(chatQuery);
 
-    querySnapshot.forEach((doc) => {
-      const { msg, img, from, create_at } = doc.data();
-      newChat.push({
-        id: doc.id,
-        from,
-        msg,
-        img,
-        create_at,
-        user,
-      });
+  const moreMessage: ChatText[] = [];
+  const startKey =
+    querySnapshot.docs.length === 20
+      ? querySnapshot.docs[querySnapshot.docs.length - 1].data().createAt
+      : null;
+
+  querySnapshot.forEach((doc) => {
+    const { msg, img, from, createAt } = doc.data();
+    moreMessage.push({
+      id: doc.id,
+      from,
+      msg,
+      img,
+      createAt,
     });
-    setMessages((current) => [...current, ...newChat]);
-    setLastKey(lastKey);
   });
+  return {
+    moreMessage,
+    _startKey: startKey,
+  };
 };
 
 export const sendMessage = async (
   chatId: queryType,
   value: string,
   msgType: string,
-  userData: UserType,
+  user: string,
   file?: Blob | ArrayBuffer,
 ) => {
-  const user = {
-    nickname: userData.nickname,
-    job: userData.jobSector,
-  };
   const timestamp = Timestamp.now();
 
   const message = await addDoc(collection(db, `chat/${chatId}/messages`), {
-    from: user.nickname,
+    from: user,
     [msgType]: value,
-    create_at: timestamp,
+    createAt: timestamp,
   });
 
   await updateDoc(doc(db, 'chat', chatId as string), {
-    last_chat: msgType === 'msg' ? value : '사진을 보냈습니다.',
-    update_at: timestamp,
-    [`last_visited.${user.nickname}`]: timestamp,
+    lastChat: msgType === 'msg' ? value : '사진을 보냈습니다.',
+    updateAt: timestamp,
+    [`lastVisited.${user}`]: timestamp,
   });
 
-  if (msgType === 'img') {
-    uploadBytes(ref(storage, `chat/${message.id}`), file!).then(() => {
-      console.log('Uploaded a IMG!');
-    });
+  if (msgType === 'img' && file) {
+    uploadImg(message.id, file);
   }
 };
 
-export const leaveChat = async (chatId: queryType, userData: UserType) => {
-  const user = {
-    nickname: userData.nickname,
-    job: userData.jobSector,
-  };
-
-  await updateDoc(doc(db, 'chat', chatId as string), {
-    [`last_visited.${user.nickname}`]: Timestamp.now(),
+export const uploadImg = (id: string, file: Blob | ArrayBuffer) => {
+  uploadBytes(ref(storage, `chat/${id}`), file).then(() => {
+    console.log('Uploaded a IMG!');
   });
 };
 
-export const downMessage = (key: string) => {
+export const downloadImg = (key: string) => {
   getDownloadURL(ref(storage, `chat/${key}`)).then((url) => {
     const xhr = new XMLHttpRequest();
     xhr.responseType = 'blob';
@@ -201,18 +209,17 @@ export const downMessage = (key: string) => {
   });
 };
 
-export const exitChat = async (chatId: queryType, userData: UserType) => {
-  const user = {
-    nickname: userData.nickname,
-    job: userData.jobSector,
-  };
+export const leaveChat = async (chatId: queryType, user: string) => {
+  await updateDoc(doc(db, 'chat', chatId as string), {
+    [`lastVisited.${user}`]: Timestamp.now(),
+  });
+};
 
+export const exitChat = async (chatId: queryType, user: String) => {
   const chatRoom = await getDoc(doc(db, 'chat', chatId as string));
-  const other = chatRoom
-    .data()!
-    .users.find((me: any) => me.nickname !== user.nickname);
+  const other = chatRoom.data()!.userIds.find((me: string) => me !== user);
 
   await updateDoc(doc(db, 'chat', chatId as string), {
-    users: arrayRemove(other),
+    userIds: arrayRemove(other),
   });
 };
