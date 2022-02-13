@@ -1,11 +1,16 @@
+import Link from 'next/link';
+import { useSelector } from 'react-redux';
 import styled from '@emotion/styled';
+import LoginIcon from '@mui/icons-material/Login';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import ForumOutlinedIcon from '@mui/icons-material/ForumOutlined';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import MoreHorizOutlinedIcon from '@mui/icons-material/MoreHorizOutlined';
 import BorderColorOutlinedIcon from '@mui/icons-material/BorderColorOutlined';
-import Link from 'next/link';
+import GroupAddIcon from '@mui/icons-material/GroupAdd';
+
+import { StoreState } from '@interface/StoreInterface';
 
 const FooterDiv = styled.footer`
   ${({ theme }: any) =>
@@ -29,6 +34,9 @@ const FooterDiv = styled.footer`
     ${({ theme }: any) =>
       `border-top: 2px solid ${theme.customTheme.darkMode.footerBordertopColor};`};
   }
+`;
+const FooterDivNotLoggedIn = styled(FooterDiv)`
+  grid-template-columns: 1fr 1fr 1fr;
 `;
 const HomeOutlinedIconStyled = styled(HomeOutlinedIcon)`
   color: ${({ theme }: any) => theme.customTheme.defaultMode.footerIconColor};
@@ -74,33 +82,65 @@ const BorderColorOutlinedIconStyled = styled(BorderColorOutlinedIcon)`
       theme.customTheme.darkMode.footerWriteIconBackgroundColor};
   }
 `;
+const DivStyled = styled.div`
+  cursor: pointer;
+`;
 const Footer = () => {
+  const { user: myInfo } = useSelector((state: StoreState) => state.user);
+  if (!myInfo.id)
+    return (
+      <FooterDivNotLoggedIn>
+        <DivStyled>
+          <Link href="/user/login" passHref>
+            <div
+              style={{ display: 'flex', justifyContent: 'center', gap: '4px' }}
+            >
+              <LoginIcon />
+              Login
+            </div>
+          </Link>
+        </DivStyled>
+        <div />
+        <DivStyled>
+          <Link href="/user/signup" passHref>
+            <div
+              style={{ display: 'flex', justifyContent: 'center', gap: '4px' }}
+            >
+              <GroupAddIcon />
+              SignUp
+            </div>
+          </Link>
+        </DivStyled>
+      </FooterDivNotLoggedIn>
+    );
   return (
     <FooterDiv>
-      <Link href="/" passHref>
-        <div>
+      <DivStyled>
+        <Link href="/" passHref>
           <HomeOutlinedIconStyled fontSize="medium" />
-        </div>
-      </Link>
-      <div>
+        </Link>
+      </DivStyled>
+      <DivStyled>
         <Link href="/search" passHref>
           <SearchOutlinedIconStyled fontSize="medium" />
         </Link>
-      </div>
-      <Link href="/chat" passHref>
-        <div>
+      </DivStyled>
+      <DivStyled>
+        <Link href="/chat" passHref>
           <ForumOutlinedIconStyled fontSize="medium" />
-        </div>
-      </Link>
-      <div>
+        </Link>
+      </DivStyled>
+      <DivStyled>
         <NotificationsNoneOutlinedIconStyled fontSize="medium" />
-      </div>
-      <div>
+      </DivStyled>
+      <DivStyled>
         <MoreHorizOutlinedIconStyled fontSize="medium" />
-      </div>
-      <div>
-        <BorderColorOutlinedIconStyled fontSize="medium" />
-      </div>
+      </DivStyled>
+      <DivStyled>
+        <Link href="/write" passHref>
+          <BorderColorOutlinedIconStyled fontSize="medium" />
+        </Link>
+      </DivStyled>
     </FooterDiv>
   );
 };

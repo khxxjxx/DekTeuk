@@ -32,20 +32,20 @@ const MyPageProfile: React.FC<MyPageProfileProps> = ({ email, nickname }) => {
         </div>
       </header>
       <div>
-        <Link href={'/mypage/nickname'}>
+        <Link href={'/mypage/nickname'} passHref>
           <MyPageProfileLi>
             <span>이메일 변경하기</span>
             <ArrowForwardIosIcon color="disabled" />
           </MyPageProfileLi>
         </Link>
-        <Link href={'/mypage/password'}>
+        <Link href={'/mypage/password'} passHref>
           <MyPageProfileLi>
             <span>비밀번호 변경하기</span>
             <ArrowForwardIosIcon color="disabled" />
           </MyPageProfileLi>
         </Link>
 
-        <Link href={'/mypage/posts'}>
+        <Link href={'/mypage/posts'} passHref>
           <MyPageProfileLi>
             <span>내가 작성한 게시물 보기</span>
             <ArrowForwardIosIcon color="disabled" />

@@ -408,7 +408,7 @@ const PostForm = (props: any) => {
               alignItems: 'center',
             }}
           >
-            <img src={v[0]} style={{ maxWidth: '100%' }} key={i} />
+            <img src={v[0]} alt={v[0]} style={{ maxWidth: '100%' }} key={i} />
             <Button
               sx={{ position: 'relative' }}
               onClick={() => {
