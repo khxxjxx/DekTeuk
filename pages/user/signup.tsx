@@ -22,18 +22,21 @@ import { getStorage, ref, uploadString } from 'firebase/storage';
 import { useRouter } from 'next/router';
 import MenuItem from '@mui/material/MenuItem';
 import { UserInfo } from '@interface/StoreInterface';
-import nookies from 'nookies';
-import { firebaseAdmin } from '@firebase/firebaseAdmin';
-import { InferGetServerSidePropsType, GetServerSidePropsContext } from 'next';
+import useId from '@mui/material/utils/useId';
+
 const jobSectors = [
-  '외식·음료',
-  '매장관리·판매',
-  '서비스',
-  '사무직',
-  '고객상담·리서치·영업',
-  '생산·건설·노무',
-  'IT·기술',
-  '디자인',
+  '외식·음료', // food-service
+  '매장관리·판매', // store
+  '서비스', // service
+  '사무직', // office
+  '고객상담·리서치·영업', // sales-research
+  '생산·건설·노무', // construction
+  'IT·기술', // it-tech
+  '디자인', // design
+  '미디어', // media
+  '운전·배달', // drive
+  '병원·간호·연구', // hospital
+  '교육·강사', // education
 ];
 type InputHelperText = {
   email: string;
@@ -54,6 +57,7 @@ export default function Signup() {
   const [nickname, setNickname] = useState<string>('');
   const [isGoogle, setIsGoogle] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
+  const [fileError, setFileError] = useState<string>('');
   const [imageUrl, setImageUrl] = useState<string>('');
   const [imageExt, setImageExt] = useState<string>('');
   const [inputHelpers, setInputHelpers] = useState<InputHelperText>({
@@ -91,17 +95,6 @@ export default function Signup() {
     };
 
     setInputHelpers(newInputHelpers);
-    // switch (name) {
-    //   case 'password':
-    //     if (value.length < 6) {
-    //     }
-    // }
-
-    // const newUserInputs: any = {
-    //   ...userInputs,
-    //   [name]: value,
-    // };
-    // setUserInputs(newUserInputs);
   };
 
   const createUserWithEmail = async () => {
@@ -120,10 +113,12 @@ export default function Signup() {
 
   const SignUpSubmitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     if (checkPassword !== password) {
       alert('비밀번호가 다릅니다!');
     } else {
-      const userInitData: Omit<UserInfo, 'id'> = {
+      const uid = (await createUserWithEmail()) as string;
+      const userInitData: UserInfo = {
         nickname: nickname,
         jobSector: jobSector,
         validRounges: [
@@ -131,29 +126,22 @@ export default function Signup() {
             title: '타임라인',
             url: 'timeline',
           },
-        ],
-        myChattings: [
           {
-            roomName: '',
-            roomId: '',
-            isGroup: true,
-            lastMessage: {
-              content: '',
-              updatedAt: '',
-            },
-            unreadCount: 0,
+            title: '토픽',
+            url: 'topic',
           },
         ],
+        id: uid,
         hasNewNotification: true,
-        post: [],
+        posts: [],
         email: email,
       };
-      const user_id = await createUserWithEmail();
-      uploadImg(user_id!);
+
+      uploadImg(uid);
       console.log('success');
-      await setDoc(doc(db, 'user', user_id!), userInitData);
+      await setDoc(doc(db, 'user', uid), userInitData);
       await signOut(auth);
-      router.push('/');
+      router.push('/user/login');
     }
   };
 
@@ -188,7 +176,7 @@ export default function Signup() {
   };
 
   const onImageChange = (e: any) => {
-    const image = e.target.files[0]!;
+    const image = e.target.files[0] as File;
     const reader = new FileReader();
     reader.readAsDataURL(image);
     reader.onloadend = (finishedEvent: any) => {

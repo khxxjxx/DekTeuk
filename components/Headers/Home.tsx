@@ -70,12 +70,12 @@ const HeaderHome: React.FC = () => {
         url: `/list/${v.url}`,
       })),
     );
-  if (headerLinks.length === 0) {
-    headerLinks.push(
-      { title: '타임라인', url: 'timeline' },
-      { title: '토픽', url: 'topic' },
-    );
-  }
+  // if (headerLinks.length === 0) {
+  //   headerLinks.push(
+  //     { title: '타임라인', url: 'timeline' },
+  //     { title: '토픽', url: 'topic' },
+  //   );
+  // }
   const initialSlide = headerLinks.findIndex(
     ({ url }) => url === router.asPath,
   );

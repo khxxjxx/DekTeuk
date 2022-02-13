@@ -10,7 +10,6 @@ import {
   doc,
   setDoc,
   getDocs,
-  getDoc,
   collection,
   query,
   where,
@@ -19,9 +18,6 @@ import { getStorage, ref, uploadString } from 'firebase/storage';
 import { useRouter } from 'next/router';
 import MenuItem from '@mui/material/MenuItem';
 import { UserInfo } from '@interface/StoreInterface';
-import nookies from 'nookies';
-import { firebaseAdmin } from '@firebase/firebaseAdmin';
-import { InferGetServerSidePropsType, GetServerSidePropsContext } from 'next';
 
 const jobSectors = [
   '외식·음료',
@@ -32,11 +28,13 @@ const jobSectors = [
   '생산·건설·노무',
   'IT·기술',
   '디자인',
+  '미디어',
+  '운전·배달',
+  '병원·간호·연구',
+  '교육·강사',
 ];
+
 type UserInputData = {
-  email: string;
-  password: string;
-  checkPassword: string;
   nickname: string;
   jobSector: string;
 };
@@ -45,18 +43,14 @@ export default function Google() {
   const router = useRouter();
   const dispatch = useDispatch();
   const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [checkPassword, setCheckPassword] = useState<string>('');
+
   const [nickname, setNickname] = useState<string>('');
   const [isGoogle, setIsGoogle] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [imageUrl, setImageUrl] = useState<string>('');
   const [imageExt, setImageExt] = useState<string>('');
-  const [userInputs, setUserInputs] = useState<UserInputData>();
+
   const [inputHelpers, setInputHelpers] = useState<UserInputData>({
-    email: '',
-    password: '6자리 이상 입력 해 주세요',
-    checkPassword: '비밀번호가 같지 않습니다.',
     nickname: '',
     jobSector: '직종을 선택 해 주세요',
   });
@@ -67,9 +61,8 @@ export default function Google() {
     console.log('google account');
     setIsGoogle(true);
     setEmail(curUser?.email!);
-    setPassword(curUser?.email!);
-    setCheckPassword(curUser?.email!);
   }, []);
+
   const [jobSector, setJobSector] = useState('');
 
   const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,42 +70,13 @@ export default function Google() {
     let helperText;
     if (name === 'email') {
       setEmail(value);
-    } else if (name === 'password') {
-      if (value.length >= 6) {
-        helperText = '사용 가능한 비밀번호 입니다!';
-      }
-      setPassword(value);
-    } else if (name === 'checkPassword') {
-      if (password !== value) {
-        helperText = '비밀번호가 다릅니다!';
-      } else {
-        helperText = '비밀번호가 같습니다!';
-      }
-      setCheckPassword(value);
-    } else if (name === 'nickname') setNickname(value);
-    else if (name === 'jobSector') setJobSector(value);
-
-    const newInputHelpers = {
-      ...inputHelpers,
-      [name]: helperText,
-    };
-
-    setInputHelpers(newInputHelpers);
-    // switch (name) {
-    //   case 'password':
-    //     if (value.length < 6) {
-    //     }
-    // }
-
-    // const newUserInputs: any = {
-    //   ...userInputs,
-    //   [name]: value,
-    // };
-    // setUserInputs(newUserInputs);
+    } else if (name === 'jobSector') setJobSector(value);
   };
+
   const SignUpSubmitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const userInitData: Omit<UserInfo, 'id'> = {
+    const uid = auth.currentUser?.uid as string;
+    const userInitData: UserInfo = {
       nickname: nickname,
       jobSector: jobSector,
       validRounges: [
@@ -120,30 +84,23 @@ export default function Google() {
           title: '타임라인',
           url: 'timeline',
         },
-      ],
-      myChattings: [
         {
-          roomName: '',
-          roomId: '',
-          isGroup: true,
-          lastMessage: {
-            content: '',
-            updatedAt: '',
-          },
-          unreadCount: 0,
+          title: '토픽',
+          url: 'topic',
         },
       ],
+      id: uid,
       hasNewNotification: true,
-      post: [],
+      posts: [],
       email: email,
     };
-    const uid = auth.currentUser?.uid;
+
     uploadImg(uid!);
     console.log('success');
     const docSnap = await setDoc(doc(db, 'user', uid!), userInitData);
     console.log(docSnap);
     await signOut(auth);
-    router.push('/');
+    router.push('/user/login');
   };
 
   const uploadImg = async (uid: string) => {
@@ -202,41 +159,11 @@ export default function Google() {
               <TextFields
                 required
                 disabled
-                placeholder="Email 주소를 입력해 주세요."
                 name="email"
                 value={email}
                 onChange={onInputChange}
-                helperText={inputHelpers.email}
               />
             </WrapInput>
-            <WrapInput>
-              <Label>비밀번호</Label>
-              <TextFields
-                required
-                disabled
-                type="password"
-                placeholder="비밀번호는 6자리 이상 입력해주세요."
-                variant="outlined"
-                margin="dense"
-                name="password"
-                value={password}
-                onChange={onInputChange}
-                helperText={inputHelpers.password}
-              />
-              <TextFields
-                required
-                disabled
-                type="password"
-                placeholder="비밀번호를 한 번더 입력해 주세요."
-                variant="outlined"
-                margin="dense"
-                name="checkPassword"
-                value={checkPassword}
-                onChange={onInputChange}
-                helperText={inputHelpers.checkPassword}
-              />
-            </WrapInput>
-
             <WrapInput>
               <Label>닉네임</Label>
               <TextFields

@@ -41,7 +41,7 @@ export default function Login() {
 
   const loginWithGoogle = async () => {
     const uid = await checkSignIn();
-    const docSnap = await getDoc(doc(db, 'user', uid!));
+    const docSnap = await getDoc(doc(db, 'user', uid as string));
     if (docSnap.exists()) {
       dispatch(setNewUserInfo(docSnap.data()));
       router.push('/');
@@ -62,7 +62,7 @@ export default function Login() {
     e.preventDefault();
     const uid = await loginWithEmail();
     if (uid) {
-      const docSnap = await getDoc(doc(db, 'user', uid!));
+      const docSnap = await getDoc(doc(db, 'user', uid as string));
       dispatch(setNewUserInfo(docSnap.data()));
       router.push('/');
     }
