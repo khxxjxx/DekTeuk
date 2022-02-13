@@ -161,7 +161,7 @@ const PostForm = () => {
       const docRef = doc(db, 'user', user.id);
       const userPostUpdate = {
         ...user,
-        post: [...user.post, newId],
+        post: [...user.posts, newId],
       };
       updateDoc(docRef, userPostUpdate);
       //유저에 게시물 id 추가
@@ -182,7 +182,7 @@ const PostForm = () => {
       const docRef = doc(db, 'user', user.id);
       const userPostUpdate = {
         ...user,
-        post: [...user.post, newId],
+        post: [...user.posts, newId],
       };
       updateDoc(docRef, userPostUpdate);
       //나중에 topic 페이지로 이동하도록 변경하기
