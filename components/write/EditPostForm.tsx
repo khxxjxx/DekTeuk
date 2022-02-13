@@ -53,6 +53,8 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Modal from '@mui/material/Modal';
 import { StoreState, UserState } from '@interface/StoreInterface';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+
 const style = {
   position: 'absolute' as 'absolute',
   top: '50%',
@@ -72,16 +74,17 @@ const PostForm = (props: any) => {
   const [url, setUrl] = useState('');
   const [progress, setProgress] = useState(0);
   const [imgList, setImgList] = useState<any>(
-    postInfo.image
-      ? Object.entries(postInfo.image).map((v) => {
-          return v[1];
-        })
-      : [],
+    postInfo.image.map((v: any) => {
+      return [v.url, v.imgName, v.imgDetail];
+    }),
   );
+
   //텍스트 처리
   const { user }: UserState = useSelector((state: StoreState) => state.user);
 
   //유저
+  const [uid, setUid] = useState<string>('');
+
   const [userInfoList, setuserInfoList] = useState<any>('');
   const [alertType, setAlertType] = useState<
     'error' | 'info' | 'success' | 'warning'
@@ -123,58 +126,47 @@ const PostForm = (props: any) => {
     setAlertMessage(msg);
     setOpen(true);
   };
-  useEffect(() => {
-    const findUserInfo = async () => {
-      //id로 user 파악함
-      const docRef = doc(db, 'users', user.id);
+  const auth = getAuth();
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      // User is signed in, see docs for a list of available properties
+      // https://firebase.google.com/docs/reference/js/firebase.User
+      setUid(user.uid);
+    } else {
+      console.log('no user');
+      //console.log를 모달창으로 바꿀것
+    }
+  });
 
-      const docSnap = await getDoc(docRef);
+  // useEffect(() => {
+  //   const findUserInfo = async () => {
+  //     //id로 user 파악함
+  //     const docRef = doc(db, 'users', user.id);
 
-      setuserInfoList(docSnap.data());
-    };
-    findUserInfo();
-  }, []);
+  //     const docSnap = await getDoc(docRef);
+
+  //     setuserInfoList(docSnap.data());
+  //   };
+  //   findUserInfo();
+  // }, []);
 
   const handleClose: any = (event: any, reason: any) => {
-    setOpen(!open);
     setDiaOpen(!diaOpen);
+  };
+  const handAlertClose = () => {
+    setOpen(!open);
   };
 
   const onSubmit = async () => {
-    //post 업데이트 시(아직 미구현)
-    // if (post?.hasOwnProperty("timestamp")) {
-
-    //   const docRef = doc(db, "posts", post.id);
-    //   const postUpdated = { ...post, timestamp: serverTimestamp() };
-    //   updateDoc(docRef, postUpdated);
-    //   setPost({ title: "", detail: "" });
-    //   showAlert("success", `Post with id ${docRef.id} is updated successfully`);
-    // } else { }
-    //사진 정보 저장
-    let image: any = {};
-    console.log(imgList);
-
+    let image: Array<Object> = [];
+    //[이미지 다운로드 url, firebase에 저장한 이미지 이름, 이미지 설명]
     if (imgList.length >= 1) {
-      // imgURL = [
-      //   imgList.map((v: any) => {
-      //     return v[0];
-      //   }),
-      // ];
-      // imgDetail = [
-      //   imgList.map((v: any) => {
-      //     return v[2];
-      //   }),
-      // ];
-      for (let i = 0; i < imgList.length; i++) {
-        image[i] = imgList[i];
-      }
+      image = imgList.map((v: Array<Object>) => {
+        return { url: v[0], imgName: v[1], imgDetail: v[2] };
+      });
     } else {
-      image = {};
-    } //   const docRef = doc(db, "posts", post.id);
-    //   const postUpdated = { ...post, timestamp: serverTimestamp() };
-    //   updateDoc(docRef, postUpdated);
-    //   setPost({ title: "", detail: "" });
-    //   showAlert("success", `Post with id ${docRef.id} is updated successfully`);
+      image = [];
+    }
     if (post.title === '' || post.content === '') {
       showAlert('error', `필수항목을 작성해 주세요`);
     } else {
@@ -369,7 +361,7 @@ const PostForm = (props: any) => {
         autoHideDuration={6000}
       >
         <Alert
-          onClose={handleClose}
+          onClose={handAlertClose}
           severity={alertType}
           sx={{ width: '100%' }}
         >
@@ -400,21 +392,22 @@ const PostForm = (props: any) => {
       {imgList.map((v: any, i: number) => {
         return (
           <Box
-            key={v[1][0]}
+            key={i}
             sx={{
               justifyContent: 'center',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
+              mt: 2,
             }}
           >
-            <img src={v[0]} style={{ maxWidth: '100%' }} key={i} />
+            <img src={v[0]} style={{ maxWidth: '100%' }} alt={v[0]} />
             <Button
               sx={{ position: 'relative' }}
               onClick={() => {
+                deleteClick(imgList[i][1]);
                 let delArr = [...imgList];
                 delArr.splice(i, 1);
-                console.log(delArr);
                 setImgList(delArr);
               }}
             >
@@ -527,7 +520,12 @@ const PostForm = (props: any) => {
         aria-describedby="modal-modal-description"
       >
         <Box sx={style}>
-          <Typography id="modal-modal-title" variant="h6" component="h2">
+          <Typography
+            id="modal-modal-title"
+            variant="h6"
+            component="h2"
+            style={{ wordBreak: 'break-word' }}
+          >
             {post.title}
           </Typography>
           <Typography id="modal-modal-description" sx={{ mt: 2 }}>

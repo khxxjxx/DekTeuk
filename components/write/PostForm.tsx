@@ -8,6 +8,7 @@ import {
   Snackbar,
   Typography,
   TextField,
+  Modal,
 } from '@mui/material';
 import {
   getStorage,
@@ -26,7 +27,7 @@ import {
   getDocs,
 } from 'firebase/firestore';
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
-import { db } from '@firebase/firebase';
+import { db, firebase } from '@firebase/firebase';
 import { Box } from '@mui/system';
 
 import Router from 'next/router';
@@ -47,17 +48,32 @@ import type { RootReducer } from 'store/reducer';
 import { useSelector } from 'react-redux';
 import { withRouter } from 'next/router';
 import { StoreState, UserState } from '@interface/StoreInterface';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+
+const style = {
+  position: 'absolute' as 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 400,
+  bgcolor: 'background.paper',
+  borderRadius: '4px 4px 4px 4px',
+  boxShadow: 24,
+  p: 4,
+};
+
 const PostForm = () => {
   //이미지 업로드 부분
+  const [modalOpen, setModalOpen] = useState(false);
   const [postImage, setPostImage] = useState<any>(null);
   const [url, setUrl] = useState('');
   const [progress, setProgress] = useState(0);
   const [imgList, setImgList] = useState<any>([]);
   //텍스트 처리
   const { user }: UserState = useSelector((state: StoreState) => state.user);
-  console.log(user);
+
   //유저
-  const [userInfoList, setuserInfoList] = useState<any>('');
+  const [uid, setUid] = useState<string>('');
   const [alertType, setAlertType] = useState<
     'error' | 'info' | 'success' | 'warning'
   >('success');
@@ -97,52 +113,44 @@ const PostForm = () => {
     setAlertMessage(msg);
     setOpen(true);
   };
-  useEffect(() => {
-    const findUserInfo = async () => {
-      //id로 user 파악함
-      const docRef = doc(db, 'user', user.id);
+  const auth = getAuth();
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      // User is signed in, see docs for a list of available properties
+      // https://firebase.google.com/docs/reference/js/firebase.User
+      setUid(user.uid);
+    } else {
+      console.log('no user');
+      //console.log를 모달창으로 바꿀것
+    }
+  });
 
-      const docSnap = await getDoc(docRef);
-
-      setuserInfoList(docSnap.data());
-    };
-    findUserInfo();
-  }, []);
+  // useEffect(() => {
+  //   const findUserInfo = async () => {
+  //     //id로 user 파악함
+  //     const docRef = doc(db, 'user', user.id);
+  //     const docSnap = await getDoc(docRef);
+  //     setuserInfoList(docSnap.data());
+  //   };
+  //   findUserInfo();
+  // }, []);
 
   const handleClose: any = (event: any, reason: any) => {
     setOpen(!open);
   };
 
   const onSubmit = async () => {
-    //post 업데이트 시(아직 미구현)
-    // if (post?.hasOwnProperty("timestamp")) {
-
-    //   const docRef = doc(db, "posts", post.id);
-    //   const postUpdated = { ...post, timestamp: serverTimestamp() };
-    //   updateDoc(docRef, postUpdated);
-    //   setPost({ title: "", detail: "" });
-    //   showAlert("success", `Post with id ${docRef.id} is updated successfully`);
-    // } else { }
     //사진 정보 저장
-    let image: any = {};
-
+    let image: Array<Object> = [];
+    //[이미지 다운로드 url, firebase에 저장한 이미지 이름, 이미지 설명]
     if (imgList.length >= 1) {
-      // imgURL = [
-      //   imgList.map((v: any) => {
-      //     return v[0];
-      //   }),
-      // ];
-      // imgDetail = [
-      //   imgList.map((v: any) => {
-      //     return v[2];
-      //   }),
-      // ];
-      for (let i = 0; i < imgList.length; i++) {
-        image[i] = imgList[i];
-      }
+      image = imgList.map((v: Array<Object>) => {
+        return { url: v[0], imgName: v[1], imgDetail: v[2] };
+      });
     } else {
-      image = {};
+      image = [];
     }
+
     if (post.postType === '' || post.title === '' || post.content === '') {
       showAlert('error', `필수항목을 작성해 주세요`);
     } else if (post.postType === 'Topic' && post.topic === '') {
@@ -151,59 +159,47 @@ const PostForm = () => {
       const collectionRef = collection(db, 'posts');
       const { id: newId } = await addDoc(collectionRef, {
         ...post,
-        userId: user.id,
+        userId: uid,
         job: user.jobSector,
         nickname: user.nickname,
         rounge: '',
         createdAt: serverTimestamp(),
         image: image,
       });
-      const docRef = doc(db, 'user', user.id);
+      //새로 생성된 post id를 user 정보에 추가
+
+      const docRef = doc(db, 'user', uid);
       const userPostUpdate = {
         ...user,
         post: [...user.post, newId],
       };
       updateDoc(docRef, userPostUpdate);
       //유저에 게시물 id 추가
-
+      setModalOpen(true);
       //나중에 topic 페이지로 이동하도록 변경하기
-      Router.push('/');
     } else {
       const collectionRef = collection(db, 'posts');
       const { id: newId } = await addDoc(collectionRef, {
         ...post,
-        userId: user.id,
+        userId: uid,
         job: user.jobSector,
         nickname: user.nickname,
         topic: '',
         createdAt: serverTimestamp(),
         image: image,
       });
-      const docRef = doc(db, 'user', user.id);
+
+      const docRef = doc(db, 'user', uid);
       const userPostUpdate = {
         ...user,
         post: [...user.post, newId],
       };
       updateDoc(docRef, userPostUpdate);
       //나중에 topic 페이지로 이동하도록 변경하기
-      Router.push('/');
+      setModalOpen(true);
     }
     //원하는 타겟으로 나중에 변경하기
   };
-  // useEffect(() => {
-  //   const checkIfClickedOutside = (e) => {
-  //     if (!inputAreaRef.current.contains(e.target)) {
-  //       console.log("Outside input area");
-  //       setPost({ title: "", detail: "" });
-  //     } else {
-  //       console.log("Inside input area");
-  //     }
-  //   };
-  //   document.addEventListener("mousedown", checkIfClickedOutside);
-  //   return () => {
-  //     document.removeEventListener("mousedown", checkIfClickedOutside);
-  //   };
-  // }, []);
 
   //이미지 업로드
   //수정중, 복원이 어렵다면 notepad에 적어놓은거로 다시 돌려놓을것
@@ -215,7 +211,8 @@ const PostForm = () => {
   };
 
   const handleUpload = (postImage: any) => {
-    const storageRef = ref(storage, 'images/' + postImage.name);
+    const uploadImageName = postImage.name + String(Date.now());
+    const storageRef = ref(storage, 'images/' + uploadImageName);
     const uploadTask = uploadBytesResumable(storageRef, postImage, metadata);
 
     uploadTask.on(
@@ -234,7 +231,7 @@ const PostForm = () => {
           console.log('File available at', downloadURL);
           setUrl(url);
           //[이미지 다운로드 url, firebase에 저장한 이미지 이름, 이미지 설명]
-          setImgList([...imgList, [downloadURL, postImage.name, '']]);
+          setImgList([...imgList, [downloadURL, uploadImageName, '']]);
         });
       },
     );
@@ -335,14 +332,14 @@ const PostForm = () => {
               label="RoungeMenu"
               onChange={(e) => setPost({ ...post, rounge: e.target.value })}
             >
-              {console.log(user)}
-              {user.validRounges.map((v: any) => {
-                return (
-                  <MenuItem value={v.url} key={v.url}>
-                    {v.title}
-                  </MenuItem>
-                );
-              })}
+              {user.validRounges &&
+                user.validRounges.map((v: any, i: number) => {
+                  return (
+                    <MenuItem value={v.url} key={v.url}>
+                      {v.title}
+                    </MenuItem>
+                  );
+                })}
             </Select>
           </FormControl>
         </Box>
@@ -366,6 +363,7 @@ const PostForm = () => {
           fullWidth
           variant="standard"
           label="제목을 입력해주세요"
+          multiline
           sx={{ mt: 2 }}
           value={post.title}
           onChange={(e) => setPost({ ...post, title: e.target.value })}
@@ -381,10 +379,11 @@ const PostForm = () => {
         />
       </div>
       <Box sx={{ mt: 2 }}></Box>
-      {imgList.map((v: any, i: number) => {
-        return (
-          <>
+      {imgList &&
+        imgList.map((v: any, i: number) => {
+          return (
             <Box
+              key={i}
               sx={{
                 justifyContent: 'center',
                 display: 'flex',
@@ -392,7 +391,7 @@ const PostForm = () => {
                 alignItems: 'center',
               }}
             >
-              <img src={v[0]} style={{ maxWidth: '100%' }} key={i} alt={v[0]} />
+              <img src={v[0]} style={{ maxWidth: '100%' }} alt={v[0]} />
               <Button
                 sx={{ position: 'relative' }}
                 onClick={() => {
@@ -417,9 +416,8 @@ const PostForm = () => {
                 }}
               />
             </Box>
-          </>
-        );
-      })}
+          );
+        })}
 
       <div>
         <label
@@ -501,6 +499,28 @@ const PostForm = () => {
           게시물 작성
         </Button>
       </Box>
+      <Modal
+        open={modalOpen}
+        onClose={() => {
+          Router.push('/');
+        }}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+          <Typography
+            id="modal-modal-title"
+            variant="h6"
+            component="h2"
+            style={{ wordBreak: 'break-word' }}
+          >
+            {post.title}
+          </Typography>
+          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+            게시물을 등록하였습니다
+          </Typography>
+        </Box>
+      </Modal>
     </Container>
   );
 };

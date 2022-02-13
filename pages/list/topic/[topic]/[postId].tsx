@@ -44,6 +44,7 @@ import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutli
 import UpdateLink from '@components/post/UpdateLink';
 import DeleteLink from '@components/post/DeleteLink';
 import EditPostForm from '@components/write/EditPostForm';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 export const getServerSideProps: GetServerSideProps = async (
   // context: GetServerSidePropsContext,
@@ -82,16 +83,17 @@ export default function TopicPost({
 }) {
   const { user }: any = useSelector((state: RootReducer) => state.user);
   const [post, setPost] = useState(JSON.parse(postProps));
+  const [uid, setUid] = useState<string>('');
 
   //해당 게시물에 좋아요를 누른 사람의 배열과 현재 로그인한 유저의 이메일을 비교하여 판단함
-  const [userLike, setUserLike] = useState(post.pressPerson.includes(user.id));
+  const [userLike, setUserLike] = useState(post.pressPerson.includes(uid));
   const [postLikeCount, setPostLikeCount] = useState(post.pressPerson.length);
   const [editOpen, setEditOpen] = useState(false);
 
   const dispatch = useDispatch();
   const changeLike = async (id: any, e: any) => {
     //다른 태그에 이벤트가 전달되지 않게 하기 위함
-    console.log(post);
+
     e.stopPropagation();
     if (userLike) {
       setUserLike(false);
@@ -99,7 +101,7 @@ export default function TopicPost({
       const userDocRef = doc(db, 'posts', postId);
       //likeuser에서 현재 유저의 이메일 index를 찾아내서 제거함
       await updateDoc(userDocRef, {
-        pressPerson: arrayRemove(user.id),
+        pressPerson: arrayRemove(uid),
       });
     } else {
       setUserLike(true);
@@ -107,10 +109,22 @@ export default function TopicPost({
       const userDocRef = doc(db, 'posts', postId);
       //likeuser에서 현재 유저의 이메일 index를 추가함
       await updateDoc(userDocRef, {
-        pressPerson: arrayUnion(user.id),
+        pressPerson: arrayUnion(uid),
       });
     }
   };
+
+  const auth = getAuth();
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      // User is signed in, see docs for a list of available properties
+      // https://firebase.google.com/docs/reference/js/firebase.User
+      setUid(user.uid);
+    } else {
+      console.log('no user');
+      //console.log를 모달창으로 바꿀것
+    }
+  });
   const MomentDateChange = () => {
     const nowTime = Date.now(),
       startTime = new Date(post.createdAt.seconds * 1000);
@@ -212,12 +226,11 @@ export default function TopicPost({
               alignItems: 'center',
             }}
           >
-            {post.image &&
-              Object.entries(post.image).length !== 0 &&
-              Object.entries(post.image).map((v: Array<any>, i: number) => {
+            {post.image.length !== 0 &&
+              post.image.map((v: any, i: number) => {
                 return (
                   <Box
-                    key={v[1][0]}
+                    key={v.url}
                     sx={{
                       mt: 3,
                       justifyContent: 'center',
@@ -226,8 +239,13 @@ export default function TopicPost({
                       alignItems: 'center',
                     }}
                   >
-                    <img key={i} src={v[1][0]} />
-                    <Typography sx={{ mb: 2, mt: 1 }}>{v[1][2]}</Typography>
+                    <img src={v.url} style={{ maxWidth: '100%' }} />
+                    <Typography
+                      sx={{ mb: 2, mt: 1 }}
+                      style={{ whiteSpace: 'pre-line', wordBreak: 'break-all' }}
+                    >
+                      {v.imgDetail}
+                    </Typography>
                   </Box>
                 );
               })}
