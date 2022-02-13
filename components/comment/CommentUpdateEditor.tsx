@@ -2,8 +2,6 @@ import { useState } from 'react';
 import { updateComment } from '@utils/commentUtils';
 import ButtonComponent from '@components/items/ButtonComponent';
 import InputComponent from '@components/items/InputComponent';
-import { useSelector } from 'react-redux';
-import { RootReducer } from '@store/reducer';
 
 type CommentUpdateEditorProps = {
   originComment: string;
@@ -17,8 +15,6 @@ const CommentUpdateEditor: React.FC<CommentUpdateEditorProps> = ({
   setModify,
 }) => {
   const [revisedComment, setRevisedComment] = useState<string>(originComment);
-
-  const userInfo = useSelector((state: RootReducer) => state.user.user);
 
   const commentUpdate = () => {
     const timeStamp = new Date();

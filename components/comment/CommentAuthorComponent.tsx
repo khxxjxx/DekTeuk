@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from '@emotion/styled';
 import { getDateTime } from '@utils/function';
+import ChantOpen from '@components/items/Chatopen';
 
 const CommentAuthorDiv = styled.div`
   margin-bottom: 25px;
@@ -26,17 +27,36 @@ const CommentAuthorComponent: React.FC<authorProps> = ({
   nickname,
   job,
 }) => {
+  const [toggle, setToggle] = useState(false);
+
+  const onToggle = () => {
+    setToggle(false);
+  };
+
+  const openChat = () => {
+    console.log('오픈 채팅!');
+  };
+
   return (
-    <CommentAuthorDiv>
-      <div>{getDateTime(date)}</div>
-      <div>
-        <CommentNickname>{nickname}</CommentNickname>
+    <>
+      <CommentAuthorDiv>
+        <div>{getDateTime(date)}</div>
+        <div>
+          <CommentNickname
+            onClick={() => {
+              setToggle(true);
+            }}
+          >
+            {nickname}
+          </CommentNickname>
 
-        {`  `}
+          {`  `}
 
-        <CommentCompany>{job}</CommentCompany>
-      </div>
-    </CommentAuthorDiv>
+          <CommentCompany>{job}</CommentCompany>
+        </div>
+      </CommentAuthorDiv>
+      {toggle && <ChantOpen onToggle={onToggle} openChat={openChat} />}
+    </>
   );
 };
 
