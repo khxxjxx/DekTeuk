@@ -50,7 +50,7 @@ const MyPagePassword: React.FC = () => {
         <Container>
           <MyPageChangeCom>
             <header>
-              <Link href={'/mypage'}>
+              <Link href={'/mypage'} passHref>
                 <ArrowBackIosNewIcon />
               </Link>
               <h1>비밀번호 변경</h1>

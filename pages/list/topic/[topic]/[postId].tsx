@@ -251,7 +251,7 @@ export default function TopicPost({
               })}
           </Box>
           <CardActions>
-            <Link href="/">
+            <Link href="/" passHref>
               <Button size="small">뒤로가기</Button>
             </Link>
           </CardActions>

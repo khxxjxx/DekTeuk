@@ -44,7 +44,7 @@ const MyPageNickName: React.FC<MyPageNickNameProps> = ({ userId }) => {
         <Container>
           <MyPageChangeCom>
             <header>
-              <Link href={'/mypage'}>
+              <Link href={'/mypage'} passHref>
                 <ArrowBackIosNewIcon />
               </Link>
               <h1>닉네임 변경</h1>

@@ -121,20 +121,8 @@ export default function Google() {
           url: 'timeline',
         },
       ],
-      myChattings: [
-        {
-          roomName: '',
-          roomId: '',
-          isGroup: true,
-          lastMessage: {
-            content: '',
-            updatedAt: '',
-          },
-          unreadCount: 0,
-        },
-      ],
       hasNewNotification: true,
-      post: [],
+      posts: [],
       email: email,
     };
     const uid = auth.currentUser?.uid;
@@ -288,7 +276,9 @@ export default function Google() {
                 사진 지우기
               </Button>
             </WrapImageUpload>
-            {imageUrl && <img src={imageUrl} width="150px" height="200px" />}
+            {imageUrl && (
+              <img src={imageUrl} alt={imageUrl} width="150px" height="200px" />
+            )}
             <WrapInput>
               <Label>직종</Label>
               <TextFields

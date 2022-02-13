@@ -3,7 +3,6 @@ import {
   Fragment,
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -41,22 +40,20 @@ import debounce from 'lodash/debounce';
 import ImgPreviewModal from '@components/ImgPreviewModal';
 import ChatSetting from '@components/ChatSetting';
 
-const ChatRoom = ({ nickname, job }: { nickname: string; job: string }) => {
-  const user = useMemo(() => ({ nickname, job }), [nickname, job]);
+const ChatRoom = ({ user }: { user: Person }) => {
   const [messages, setMessages] = useState<ChatText[]>([]);
   const [newMessage, setNewMessage] = useState<boolean>(false);
-  const [lastMessage, setLastMessage] = useState<ChatText>();
+  const [lastMessage, setLastMessage] = useState<ChatText | null>(null);
   const [isScrollUp, setIsScrollUp] = useState<boolean>(false);
   const [scrollPosition, setScrollPosition] = useState<number>();
   const [startKey, setStartKey] = useState<Timestamp | null>(null);
   const [imgData, setImgData] = useState<FileType | null>(null);
   const [isClickedHeader, setIsClickedHeader] = useState<boolean>(false);
-  // const [ref, inView] = useInView();
   const messageRef = useRef<HTMLDivElement>(null);
   const bottomListRef = useRef<HTMLDivElement>(null);
   const inputValue = useRef<HTMLInputElement>(null);
   const router = useRouter();
-  const { chatId, other } = router.query;
+  const { chatId, other, id } = router.query;
 
   const onFileReset = () => {
     setImgData(null);
@@ -66,9 +63,9 @@ const ChatRoom = ({ nickname, job }: { nickname: string; job: string }) => {
     setIsClickedHeader(!isClickedHeader);
   };
 
-  const onLeaveChat = () => {
-    exitChat(chatId, user);
-    router.replace(`/chatting`);
+  const onExitChat = () => {
+    exitChat(chatId, user.id);
+    router.replace(`/chat`);
   };
 
   const onSubmitImg = (key?: string) => {
@@ -84,11 +81,16 @@ const ChatRoom = ({ nickname, job }: { nickname: string; job: string }) => {
 
   const onSendMessage = async (img?: string) => {
     if (img) {
-      await sendMessage(chatId, img, 'img', user);
+      await sendMessage(chatId, img, 'img', user.id);
     } else {
       const value = inputValue.current!.value;
       inputValue.current!.value = '';
-      await sendMessage(chatId, value, 'msg', user);
+      if (messages.length === 0 && id) {
+        // 첫 메세지일 경우
+        await sendMessage(chatId, value, 'msg', user.id, undefined, id);
+      } else {
+        await sendMessage(chatId, value, 'msg', user.id);
+      }
     }
     setIsScrollUp(false);
   };
@@ -102,30 +104,26 @@ const ChatRoom = ({ nickname, job }: { nickname: string; job: string }) => {
   }, 500);
 
   const getInitData = useCallback(async () => {
-    const { initMessage, _startKey, _endKey } = await getChatMessages(
-      chatId,
-      user,
-    );
+    const { initMessage, _startKey, _endKey } = await getChatMessages(chatId);
     setMessages(initMessage);
     setLastMessage(initMessage[0]);
     setStartKey(_startKey);
 
-    return chatMessages(chatId, setMessages, _endKey, user);
-  }, [user, chatId]);
+    return chatMessages(chatId, setMessages, _endKey);
+  }, [chatId]);
 
   const getMessages = useCallback(
     async (prevScrollHeight) => {
       const { moreMessage, _startKey } = await moreChatMessages(
         chatId,
         startKey,
-        user,
       );
       setMessages((current) => [...current, ...moreMessage]);
       setStartKey(_startKey);
       scrollKeep(prevScrollHeight);
       setScrollPosition(prevScrollHeight);
     },
-    [chatId, startKey, user],
+    [chatId, startKey],
   );
 
   const scrollKeep = (prevScrollHeight: number) => {
@@ -137,8 +135,9 @@ const ChatRoom = ({ nickname, job }: { nickname: string; job: string }) => {
     getInitData();
 
     return () => {
-      leaveChat(chatId, user);
       getInitData();
+      setStartKey(null);
+      leaveChat(chatId, user.id);
     };
   }, [getInitData, chatId, user]);
 
@@ -179,11 +178,11 @@ const ChatRoom = ({ nickname, job }: { nickname: string; job: string }) => {
         />
       )}
       {isClickedHeader && (
-        <ChatSetting onToggle={onToggle} onLeaveChat={onLeaveChat} />
+        <ChatSetting onToggle={onToggle} onExitChat={onExitChat} />
       )}
       <ChatHeader>
         <ArrowBackIosNewIcon
-          onClick={() => router.back()}
+          onClick={() => router.replace(`/chat`)}
           style={{ cursor: 'pointer' }}
         />
         <div>{other}</div>
@@ -203,8 +202,8 @@ const ChatRoom = ({ nickname, job }: { nickname: string; job: string }) => {
           {messages
             .slice()
             .reverse()
-            .map(({ id, from, msg, img }, idx) => (
-              <ChatText className={from === nickname ? 'mine' : ''} key={id}>
+            .map(({ id, from, msg, img }) => (
+              <ChatText className={from === user.id ? 'mine' : ''} key={id}>
                 {msg ? (
                   msg
                 ) : (
@@ -274,7 +273,7 @@ export default ChatRoom;
 export const getServerSideProps = wrapper.getServerSideProps(
   (store) => async (ctx) => {
     const data = store.getState();
-    console.log(data, '마이페이지 데이터');
+
     if (data.user.user.nickname == '') {
       // todo: 초기값을 판단하는 근거가 이상함...
       return {
@@ -287,8 +286,11 @@ export const getServerSideProps = wrapper.getServerSideProps(
 
     return {
       props: {
-        nickname: data.user.user.nickname,
-        job: data.user.user.jobSector,
+        user: {
+          nickname: data.user.user.nickname,
+          jobSector: data.user.user.jobSector,
+          id: data.user.user.id,
+        },
       },
     };
   },

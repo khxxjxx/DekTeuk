@@ -5,22 +5,13 @@ export interface ValidRounge {
   url: string;
 }
 
-export interface MyChatting {
-  roomName: string;
-  roomId: string;
-  isGroup: true;
-  lastMessage: { content: string; updatedAt: string };
-  unreadCount: number;
-}
-
 export interface UserInfo {
   nickname: string;
   jobSector: string;
   validRounges: Array<ValidRounge>;
-  myChattings: Array<MyChatting>;
   hasNewNotification: boolean;
   id: string;
-  post: Array<string>;
+  posts: Array<string>;
   email: string;
 }
 

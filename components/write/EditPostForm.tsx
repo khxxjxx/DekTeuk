@@ -401,7 +401,7 @@ const PostForm = (props: any) => {
               mt: 2,
             }}
           >
-            <img src={v[0]} style={{ maxWidth: '100%' }} alt={v[0]} />
+            <img src={v[0]} alt={v[0]} style={{ maxWidth: '100%' }} key={i} />
             <Button
               sx={{ position: 'relative' }}
               onClick={() => {
