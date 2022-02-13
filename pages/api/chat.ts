@@ -26,7 +26,7 @@ export const chatList = (
   const chatListQuery = query(
     collection(db, 'chat'),
     where('userIds', 'array-contains', user.id),
-    orderBy('update_at', 'desc'),
+    orderBy('updateAt', 'desc'),
     limit(20),
   );
 
@@ -51,7 +51,7 @@ export const chatList = (
 export const getChatMessages = async (chatId: queryType) => {
   const chatQuery = query(
     collection(db, `chat/${chatId}/messages`),
-    orderBy('create_at', 'desc'),
+    orderBy('createAt', 'desc'),
     limit(20),
   );
 
@@ -62,7 +62,10 @@ export const getChatMessages = async (chatId: queryType) => {
     querySnapshot.docs.length === 20
       ? querySnapshot.docs[querySnapshot.docs.length - 1].data().createAt
       : null;
-  const endKey = querySnapshot.docs[0].data().createAt;
+  const endKey =
+    querySnapshot.docs.length > 0
+      ? querySnapshot.docs[0].data().createAt
+      : null;
 
   querySnapshot.forEach((doc) => {
     const { msg, img, from, createAt } = doc.data();
@@ -87,12 +90,24 @@ export const chatMessages = (
   setMessages: Dispatch<SetStateAction<ChatText[]>>,
   key: Timestamp | null,
 ) => {
-  const chatQuery = query(
-    collection(db, `chat/${chatId}/messages`),
-    orderBy('create_at', 'desc'),
-    endBefore(key),
-    limit(1),
-  );
+  let chatQuery;
+
+  if (key) {
+    console.log('has key');
+    chatQuery = query(
+      collection(db, `chat/${chatId}/messages`),
+      orderBy('createAt', 'desc'),
+      endBefore(key),
+      limit(1),
+    );
+  } else {
+    console.log('no key');
+    chatQuery = query(
+      collection(db, `chat/${chatId}/messages`),
+      orderBy('createAt', 'desc'),
+      limit(1),
+    );
+  }
 
   onSnapshot(chatQuery, (querySnapshot) => {
     const newChat: ChatText[] = [];
@@ -116,7 +131,7 @@ export const moreChatMessages = async (
 ) => {
   const chatQuery = query(
     collection(db, `chat/${chatId}/messages`),
-    orderBy('create_at', 'desc'),
+    orderBy('createAt', 'desc'),
     startAfter(key),
     limit(20),
   );
@@ -163,7 +178,7 @@ export const sendMessage = async (
   await updateDoc(doc(db, 'chat', chatId as string), {
     lastChat: msgType === 'msg' ? value : '사진을 보냈습니다.',
     updateAt: timestamp,
-    [`last_visited.${user}`]: timestamp,
+    [`lastVisited.${user}`]: timestamp,
   });
 
   if (msgType === 'img' && file) {
@@ -196,7 +211,7 @@ export const downloadImg = (key: string) => {
 
 export const leaveChat = async (chatId: queryType, user: string) => {
   await updateDoc(doc(db, 'chat', chatId as string), {
-    [`last_visited.${user}`]: Timestamp.now(),
+    [`lastVisited.${user}`]: Timestamp.now(),
   });
 };
 

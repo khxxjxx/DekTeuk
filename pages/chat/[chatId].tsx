@@ -269,7 +269,7 @@ export default ChatRoom;
 export const getServerSideProps = wrapper.getServerSideProps(
   (store) => async (ctx) => {
     const data = store.getState();
-    console.log(data, '마이페이지 데이터');
+
     if (data.user.user.nickname == '') {
       // todo: 초기값을 판단하는 근거가 이상함...
       return {
