@@ -233,6 +233,98 @@ export const getHomePostsInfiniteFunction = async (
       return true;
     });
     const myInvalidRoungesUrls = myInvalidRounges.map((v) => v.url);
+    myInvalidRoungesUrls.pop(); // not-in 은 10개의 엘리먼트까지만 지원
+    const postsRef = collection(db, 'posts');
+    const returnArr: Array<TopicPost | RoungePost> = [];
+    //
+    //
+    //
+    // console.log(
+    //   (
+    //     await getDocs(
+    //       query(
+    //         postsRef,
+    //         where('postType', 'in', ['rounge', 'topic']),
+    //         where('rounge.url', 'in', myValidRounges),
+    //         limit(20),
+    //       ),
+    //     )
+    //   ).docs.length,
+    // );
+    // ).docs.forEach((v) => {
+    //   console.log(v.data().postType);
+    // });
+    //
+    //
+    //
+    let q_rounge;
+    if (pageParam > 0) {
+      const q_roungeCurrent = query(
+        postsRef,
+        where('rounge.url', 'not-in', myInvalidRoungesUrls),
+        orderBy('rounge.url', 'asc'),
+        orderBy('createdAt', 'desc'),
+        limit(pageParam * 20),
+      );
+      const currentSnapShot = await getDocs(q_roungeCurrent);
+      const lastVisible = currentSnapShot.docs[currentSnapShot.docs.length - 1];
+      q_rounge = query(
+        postsRef,
+        where('rounge.url', 'not-in', myInvalidRoungesUrls),
+        orderBy('rounge.url', 'asc'),
+        orderBy('createdAt', 'desc'),
+        startAfter(lastVisible),
+        limit(20),
+      );
+    } else
+      q_rounge = query(
+        postsRef,
+        where('rounge.url', 'not-in', myInvalidRoungesUrls),
+        orderBy('rounge.url', 'asc'),
+        orderBy('createdAt', 'desc'),
+        limit(20),
+      );
+    const snap = await getDocs(q_rounge);
+    snap.forEach((doc) => {
+      const docData = doc.data();
+      if (docData.postType === 'topic') {
+        const returnData: TopicPost = {
+          author: { nickname: docData.nickname, jobSector: docData.job },
+          content: docData.content,
+          commentsCount: docData.commentsCount || 0,
+          createdAt: docData.createdAt.seconds
+            .toString()
+            .padEnd(13, 0)
+            .toString(),
+          images: docData.images,
+          likeCount: docData.pressPerson.length,
+          postId: docData.postId,
+          postType: docData.postType,
+          title: docData.title,
+          topic: docData.topic,
+        };
+        returnArr.push(returnData);
+      } else if (docData.postType === 'rounge') {
+        const returnData: RoungePost = {
+          author: { nickname: docData.nickname, jobSector: docData.job },
+          content: docData.content,
+          commentsCount: docData.commentsCount || 0,
+          createdAt: docData.createdAt.seconds
+            .toString()
+            .padEnd(13, 0)
+            .toString(),
+          images: docData.images,
+          likeCount: docData.pressPerson.length,
+          postId: docData.postId,
+          postType: docData.postType,
+          title: docData.title,
+          rounge: docData.rounge,
+        };
+        returnArr.push(returnData);
+      }
+    });
+    if (returnArr.length === 0) return { result: returnArr, nextPage: -1 };
+    return { result: returnArr, nextPage: pageParam + 1 };
 
     // return;
   }
@@ -244,9 +336,54 @@ export const getHomePostsInfiniteFunction = async (
   }
   // 허용된 라운지에 접근중일 경우
   const postsRef = collection(db, 'posts');
+  const returnArr: Array<TopicPost> = [];
+  let q_rounge;
+  if (pageParam > 0) {
+    const q_roungeCurrent = query(
+      postsRef,
+      where('rounge.url', '==', list),
+      orderBy('createdAt', 'desc'),
+      limit(pageParam * 20),
+    );
+    const currentSnapShot = await getDocs(q_roungeCurrent);
+    const lastVisible = currentSnapShot.docs[currentSnapShot.docs.length - 1];
+    q_rounge = query(
+      postsRef,
+      where('rounge.url', '==', list),
+      orderBy('createdAt', 'desc'),
+      startAfter(lastVisible),
+      limit(20),
+    );
+  } else
+    q_rounge = query(
+      postsRef,
+      where('rounge.url', '==', list),
+      orderBy('createdAt', 'desc'),
+      limit(20),
+    );
+  const snap = await getDocs(q_rounge);
+  console.log(snap.docs.length);
+  snap.forEach((doc) => {
+    const docData = doc.data();
+    const returnData: TopicPost = {
+      author: { nickname: docData.nickname, jobSector: docData.job },
+      content: docData.content,
+      commentsCount: docData.commentsCount || 0,
+      createdAt: docData.createdAt.seconds.toString().padEnd(13, 0).toString(),
+      images: docData.images,
+      likeCount: docData.pressPerson.length,
+      postId: docData.postId,
+      postType: docData.postType,
+      title: docData.title,
+      topic: docData.topic,
+    };
+    returnArr.push(returnData);
+  });
+  if (returnArr.length === 0) return { result: returnArr, nextPage: -1 };
+  return { result: returnArr, nextPage: pageParam + 1 };
 
   // const q = query(postsRef, where('postType', 'not-in', ['Topic', 'Rounge']));
-  DefaultListsAndTopics;
+  // DefaultListsAndTopics;
 
   // DefaultListsAndTopics: 현재 존재하는 rounges와 topics가 key로 담겨있는 Object
   // validRounges: user 정보에 존재하는 validRounges(Array<ValidRounge>)
