@@ -5,13 +5,6 @@ export interface ValidRounge {
   url: string;
 }
 
-export interface MyChatting {
-  roomName: string;
-  roomId: string;
-  lastMessage: { content: string; updatedAt: string };
-  unreadCount: number;
-}
-
 export interface UserInfo {
   nickname: string;
   jobSector: string;
