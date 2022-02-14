@@ -1,7 +1,10 @@
 //@ts-ignore
 import { db } from '@firebase/firebase';
 import { TopicPost, RoungePost } from '@interface/CardInterface';
-import { HomeListString } from '@interface/GetPostsInterface';
+import {
+  DefaultListsAndTopics,
+  HomeListUrlString,
+} from '@interface/GetPostsInterface';
 import { UserInfo } from '@interface/StoreInterface';
 import delay from '@utils/delay';
 import {
@@ -112,9 +115,9 @@ export const getTopics = (list: string, pageParam: string) => {
 };
 
 export const getHomePostsInfiniteFunction = async (
-  list: HomeListString,
+  list: HomeListUrlString,
   pageParam: number,
-  validRounges?: Array<HomeListString>,
+  validRounges?: Array<HomeListUrlString>,
 ) => {
   // 비로그인 or 비인증 사용자 => topic만 반환
   if (
@@ -152,26 +155,9 @@ export const getHomePostsInfiniteFunction = async (
   const postsRef = collection(db, 'posts');
 
   // const q = query(postsRef, where('postType', 'not-in', ['Topic', 'Rounge']));
+  DefaultListsAndTopics;
 
-  const initial = {
-    rounges: [
-      { title: '외식·음료', url: 'food-service' },
-      { title: '매장관리·판매', url: 'store' },
-      { title: '서비스', url: 'service' },
-      { title: '사무직', url: 'white-collar' },
-      { title: '고객상담·리서치·영업', url: 'sales-research' },
-      { title: '생산·건설·노무', url: 'blue-collar' },
-      { title: 'IT·기술', url: 'it-tech' },
-      { title: '디자인', url: 'design' },
-      { title: '미디어', url: 'media' },
-      { title: '운전·배달', url: 'drive' },
-      { title: '병원·간호·연구', url: 'hospital' },
-      { title: '교육·강사', url: 'education' },
-    ],
-    topics: ['yunmal', 'market', 'blabla', 'stock'],
-  };
-
-  // initial: 현재 존재하는 rounges와 topics가 key로 담겨있는 Object
+  // DefaultListsAndTopics: 현재 존재하는 rounges와 topics가 key로 담겨있는 Object
   // validRounges: user 정보에 존재하는 validRounges(Array<ValidRounge>)
 
   // 테스트
@@ -179,7 +165,7 @@ export const getHomePostsInfiniteFunction = async (
     { title: '외식·음료', url: 'food-service' },
     { title: '매장관리·판매', url: 'store' },
   ];
-  const myInvalidRounges = initial.rounges.filter((rounge) => {
+  const myInvalidRounges = DefaultListsAndTopics.rounges.filter((rounge) => {
     for (const myRounge of myValidRounges)
       if (rounge.url === myRounge.url) return false; // url은 unique하므로 비교값으로 사용
     return true;
@@ -187,7 +173,7 @@ export const getHomePostsInfiniteFunction = async (
   const myInvalidRoungesUrl = myInvalidRounges.map((v) => v.url);
   console.log(myInvalidRoungesUrl);
 
-  // const inValidTopics = initial.topics.filter((v) => v !== myTopic);
+  // const inValidTopics = DefaultListsAndTopics.topics.filter((v) => v !== myTopic);
   // console.log(inValidTopics);
   // const q_timeline = query(
   //   postsRef,

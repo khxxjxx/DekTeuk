@@ -71,10 +71,7 @@ const HeaderHome: React.FC = () => {
       })),
     );
   if (headerLinks.length === 0) {
-    headerLinks.push(
-      { title: '타임라인', url: 'timeline' },
-      { title: '토픽', url: 'topic' },
-    );
+    headerLinks.push({ title: '토픽', url: 'topic' });
   }
   const initialSlide = headerLinks.findIndex(
     ({ url }) => url === router.asPath,
