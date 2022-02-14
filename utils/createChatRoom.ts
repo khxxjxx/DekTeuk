@@ -24,7 +24,7 @@ export const createChatRoom = async (
       [myInfo.id]: Timestamp.now(),
       [counterInfo.id]: Timestamp.now(),
     },
-    userIds: [myInfo.id, counterInfo.id],
+    userIds: [myInfo.id],
   });
 
   return id;

@@ -41,21 +41,20 @@ import debounce from 'lodash/debounce';
 import ImgPreviewModal from '@components/ImgPreviewModal';
 import ChatSetting from '@components/ChatSetting';
 
-const ChatRoom = ({ user }: { user: UserType }) => {
+const ChatRoom = ({ user }: { user: Person }) => {
   const [messages, setMessages] = useState<ChatText[]>([]);
   const [newMessage, setNewMessage] = useState<boolean>(false);
-  const [lastMessage, setLastMessage] = useState<ChatText>();
+  const [lastMessage, setLastMessage] = useState<ChatText | null>(null);
   const [isScrollUp, setIsScrollUp] = useState<boolean>(false);
   const [scrollPosition, setScrollPosition] = useState<number>();
   const [startKey, setStartKey] = useState<Timestamp | null>(null);
   const [imgData, setImgData] = useState<FileType | null>(null);
   const [isClickedHeader, setIsClickedHeader] = useState<boolean>(false);
-  // const [ref, inView] = useInView();
   const messageRef = useRef<HTMLDivElement>(null);
   const bottomListRef = useRef<HTMLDivElement>(null);
   const inputValue = useRef<HTMLInputElement>(null);
   const router = useRouter();
-  const { chatId, other } = router.query;
+  const { chatId, other, id } = router.query;
 
   const onFileReset = () => {
     setImgData(null);
@@ -67,7 +66,7 @@ const ChatRoom = ({ user }: { user: UserType }) => {
 
   const onExitChat = () => {
     exitChat(chatId, user.id);
-    router.replace(`/chatting`);
+    router.replace(`/chat`);
   };
 
   const onSubmitImg = (key?: string) => {
@@ -87,7 +86,12 @@ const ChatRoom = ({ user }: { user: UserType }) => {
     } else {
       const value = inputValue.current!.value;
       inputValue.current!.value = '';
-      await sendMessage(chatId, value, 'msg', user.id);
+      if (messages.length === 0 && id) {
+        // 첫 메세지일 경우
+        await sendMessage(chatId, value, 'msg', user.id, undefined, id);
+      } else {
+        await sendMessage(chatId, value, 'msg', user.id);
+      }
     }
     setIsScrollUp(false);
   };
@@ -128,18 +132,24 @@ const ChatRoom = ({ user }: { user: UserType }) => {
       messageRef.current!.scrollHeight - prevScrollHeight;
   };
 
+  const reversedMessages = useMemo(
+    () => messages.slice().reverse(),
+    [messages],
+  );
+
   useEffect(() => {
     getInitData();
 
     return () => {
-      leaveChat(chatId, user.id);
       getInitData();
+      setStartKey(null);
+      leaveChat(chatId, user.id);
     };
   }, [getInitData, chatId, user]);
 
   useEffect(() => {
     const newMsg = messages[0];
-    if (isScrollUp && newMsg !== lastMessage && newMsg.from !== user.nickname) {
+    if (isScrollUp && newMsg !== lastMessage && newMsg.from !== user.id) {
       setNewMessage(true);
       return;
     } else if (!isScrollUp) {
@@ -169,6 +179,7 @@ const ChatRoom = ({ user }: { user: UserType }) => {
       {imgData && (
         <ImgPreviewModal
           imgData={imgData}
+          setImgData={setImgData}
           onFileReset={onFileReset}
           onSubmitImg={onSubmitImg}
         />
@@ -184,48 +195,45 @@ const ChatRoom = ({ user }: { user: UserType }) => {
         <div>{other}</div>
         <DensityMediumIcon onClick={onToggle} />
       </ChatHeader>
-      {isScrollUp && !newMessage && (
-        <PageDownBtn
-          onClick={() => {
-            setIsScrollUp(false);
-          }}
-        >
-          <KeyboardArrowDownIcon />
-        </PageDownBtn>
-      )}
       <ChatList onScroll={onScroll} ref={messageRef}>
         <ChatBox>
-          {messages
-            .slice()
-            .reverse()
-            .map(({ id, from, msg, img }) => (
-              <ChatText className={from === user.id ? 'mine' : ''} key={id}>
-                {msg ? (
-                  msg
-                ) : (
-                  <ChatImg
-                    src={img as string}
-                    alt="preview-img"
-                    onClick={() =>
-                      setImgData({
-                        type: id as string,
-                        file: [],
-                        src: [img as string],
-                      })
-                    }
-                  />
-                )}
-              </ChatText>
-            ))}
+          {reversedMessages.map(({ id, from, msg, img }) => (
+            <ChatText className={from === user.id ? 'mine' : ''} key={id}>
+              {msg ? (
+                msg
+              ) : (
+                <ChatImg
+                  src={img as string}
+                  alt="preview-img"
+                  onClick={() =>
+                    setImgData({
+                      type: id as string,
+                      file: [],
+                      src: [img as string],
+                    })
+                  }
+                />
+              )}
+            </ChatText>
+          ))}
           <div ref={bottomListRef} />
         </ChatBox>
       </ChatList>
-      {newMessage && (
-        <NewMessage onClick={() => setIsScrollUp(false)}>
-          새로운 메세지가 있습니다
-        </NewMessage>
-      )}
       <ChatInputWrapper>
+        {isScrollUp && !newMessage && (
+          <PageDownBtn
+            onClick={() => {
+              setIsScrollUp(false);
+            }}
+          >
+            <KeyboardArrowDownIcon />
+          </PageDownBtn>
+        )}
+        {newMessage && (
+          <NewMessage onClick={() => setIsScrollUp(false)}>
+            새로운 메세지가 있습니다
+          </NewMessage>
+        )}
         <label htmlFor="file">
           <AddIcon style={{ cursor: 'pointer', color: 'white' }} />
         </label>
@@ -284,7 +292,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
       props: {
         user: {
           nickname: data.user.user.nickname,
-          job: data.user.user.jobSector,
+          jobSector: data.user.user.jobSector,
           id: data.user.user.id,
         },
       },

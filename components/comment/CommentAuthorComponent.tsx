@@ -53,7 +53,9 @@ const CommentAuthorComponent: React.FC<authorProps> = ({
     };
     const id = await createChatRoom(myInfo, counterInfo);
 
-    router.push(`chat/${id}`);
+    router.push(
+      `/chat/${id}?other=${counterInfo.nickname}&id=${counterInfo.id}`,
+    );
   };
 
   return (

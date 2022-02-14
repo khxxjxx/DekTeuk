@@ -40,34 +40,26 @@ const Test: NextPage = () => {
   //   jobSector: '닉네임',
   // };
 
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
   // const chatOpen = async () => {
   //   const chatRoom = await addDoc(collection(db, 'chat'), {
   //     users: [
-  //       { nickname: nickname, id: id, job: jobSector },
-  //       { nickname: counter.nickname, id: counter.id, job: counter.jobSector },
+  //       { nickname, id, jobSector },
+  //       {
+  //         nickname: counter.nickname,
+  //         id: counter.id,
+  //         jobSector: counter.jobSector,
+  //       },
   //     ],
-  //     updatedAt: '',
-  //     lastChat: '',
   //     lastVisited: { [id]: Timestamp.now(), [counter.id]: Timestamp.now() },
-  //     userIds: [id, counter.id],
+  //     userIds: [id],
   //   });
-  //   // console.log({ [id]: Timestamp.now(), [counter.id]: Timestamp.now() });
-  //   // console.log(chatRoom.id);
-  //   router.push(`/chat/${chatRoom.id}`);
+  //   router.push(
+  //     `/chat/${chatRoom.id}?other=${counter.nickname}&id=${counter.id}`,
+  //     `/chat/${chatRoom.id}`,
+  //   );
   // };
-  // return (
-  //   <div>
-  //     <button
-  //       onClick={() => {
-  //         chatOpen();
-  //       }}
-  //     >
-  //       채팅방 열기
-  //     </button>
-  //   </div>
-  // );
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
   return (
     <>
       {/* <input
