@@ -124,45 +124,55 @@ export const getHomePostsInfiniteFunction = async (
   pageParam: number,
   validRounges?: Array<HomeListUrlString>,
 ) => {
-  // for (let i = 0; i < 20; i++) {
-  //   const collectionRef = collection(db, 'posts');
-  //   const { id: newId } = await addDoc(collectionRef, {
-  //     title: faker.lorem.sentence(),
-  //     content: faker.lorem.paragraph(4),
-  //     pressPerson: [],
-  //     postId: '',
-  //     postType: 'rounge',
-  //     topic: '',
-  //     updatedAt: serverTimestamp(),
-  //     userId: 'jf4RswnBDeQAV3DPtzcHlDJbxTL92',
-  //     job: '매장관리·판매',
-  //     nickname: '닉네임2222222222',
-  //     rounge: '매장관리·판매',
-  //     createdAt: serverTimestamp(),
-  //     images: [],
-  //   });
-  //   const wroteDocRef = doc(db, 'posts', newId);
-  //   await updateDoc(wroteDocRef, { postId: newId });
+  const collectionRef = collection(db, 'posts');
+  console.log((await getDocs(collectionRef)).docs.length);
+  // for (let i = 0; i < 30; i++) {
+  //   for (const rounge of DefaultListsAndTopics.rounges) {
+  //     const collectionRef = collection(db, 'posts');
+  //     console.log(rounge);
+  //     const { id: newId } = await addDoc(collectionRef, {
+  //       title: faker.lorem.sentence(),
+  //       content: faker.lorem.paragraph(4),
+  //       pressPerson: [],
+  //       postId: '',
+  //       postType: 'rounge',
+  //       topic: '',
+  //       updatedAt: serverTimestamp(),
+  //       userId: 'jf4RswnBDeQAV3DPtzcHlDJbxTL92',
+  //       job: rounge.title,
+  //       nickname: '닉네임2222222222',
+  //       rounge,
+  //       createdAt: serverTimestamp(),
+  //       images: [],
+  //       urlKey: rounge.url,
+  //     });
+  //     const wroteDocRef = doc(db, 'posts', newId);
+  //     await updateDoc(wroteDocRef, { postId: newId });
+  //   }
   // }
-  // for (let i = 0; i < 20; i++) {
-  //   const collectionRef = collection(db, 'posts');
-  //   const { id: newId } = await addDoc(collectionRef, {
-  //     title: faker.lorem.sentence(),
-  //     content: faker.lorem.paragraph(4),
-  //     pressPerson: [],
-  //     postId: '',
-  //     postType: 'topic',
-  //     topic: { title: '블라블라', url: 'blabla' },
-  //     updatedAt: serverTimestamp(),
-  //     userId: 'jf22GhSujbZtWDPtzcHlDJbxTL92',
-  //     job: '서비스',
-  //     nickname: '닉네임',
-  //     rounge: '',
-  //     createdAt: serverTimestamp(),
-  //     images: [],
-  //   });
-  //   const wroteDocRef = doc(db, 'posts', newId);
-  //   await updateDoc(wroteDocRef, { postId: newId });
+  // for (let i = 0; i < 30; i++) {
+  //   for (const topic of DefaultListsAndTopics.topics) {
+  //     const collectionRef = collection(db, 'posts');
+  //     console.log(topic);
+  //     const { id: newId } = await addDoc(collectionRef, {
+  //       title: faker.lorem.sentence(),
+  //       content: faker.lorem.paragraph(4),
+  //       pressPerson: [],
+  //       postId: '',
+  //       postType: 'topic',
+  //       topic,
+  //       updatedAt: serverTimestamp(),
+  //       userId: 'jf22GhSujbZtWDPtzcHlDJbxTL92',
+  //       job: '서비스',
+  //       nickname: '닉네임',
+  //       rounge: '',
+  //       createdAt: serverTimestamp(),
+  //       images: [],
+  //       urlKey: 'topic',
+  //     });
+  //     const wroteDocRef = doc(db, 'posts', newId);
+  //     await updateDoc(wroteDocRef, { postId: newId });
+  //   }
   // }
 
   // 로그인 된 사용자가 topic에 접근 => topic만 반환
@@ -239,21 +249,30 @@ export const getHomePostsInfiniteFunction = async (
     //
     //
     //
-    // console.log(
-    //   (
-    //     await getDocs(
-    //       query(
-    //         postsRef,
-    //         where('postType', 'in', ['rounge', 'topic']),
-    //         where('rounge.url', 'in', myValidRounges),
-    //         limit(20),
-    //       ),
-    //     )
-    //   ).docs.length,
+    //
+    console.log(myInvalidRoungesUrls);
+    const { docs: docs_ } = await getDocs(
+      query(postsRef, where('urlKey', 'not-in', myValidRounges)),
+    );
+    docs_.forEach((v) => {
+      const {
+        postType,
+        rounge: { url },
+      } = v.data();
+      console.log(postType, ':', url);
+    });
+
+    // const { docs: docs__ } = await getDocs(
+    //   query(postsRef, where('postType', '==', 'topic')),
     // );
-    // ).docs.forEach((v) => {
-    //   console.log(v.data().postType);
+    // docs__.forEach((v) => {
+    //   const {
+    //     postType,
+    //     topic: { url },
+    //   } = v.data();
+    //   console.log(postType, ':', url);
     // });
+    //
     //
     //
     //
@@ -261,8 +280,8 @@ export const getHomePostsInfiniteFunction = async (
     if (pageParam > 0) {
       const q_roungeCurrent = query(
         postsRef,
-        where('rounge.url', 'not-in', myInvalidRoungesUrls),
-        orderBy('rounge.url', 'asc'),
+        where('urlKey', 'not-in', myInvalidRoungesUrls),
+        orderBy('urlKey'),
         orderBy('createdAt', 'desc'),
         limit(pageParam * 20),
       );
@@ -270,8 +289,8 @@ export const getHomePostsInfiniteFunction = async (
       const lastVisible = currentSnapShot.docs[currentSnapShot.docs.length - 1];
       q_rounge = query(
         postsRef,
-        where('rounge.url', 'not-in', myInvalidRoungesUrls),
-        orderBy('rounge.url', 'asc'),
+        where('urlKey', 'not-in', myInvalidRoungesUrls),
+        orderBy('urlKey'),
         orderBy('createdAt', 'desc'),
         startAfter(lastVisible),
         limit(20),
@@ -279,8 +298,8 @@ export const getHomePostsInfiniteFunction = async (
     } else
       q_rounge = query(
         postsRef,
-        where('rounge.url', 'not-in', myInvalidRoungesUrls),
-        orderBy('rounge.url', 'asc'),
+        where('urlKey', 'not-in', myInvalidRoungesUrls),
+        orderBy('urlKey'),
         orderBy('createdAt', 'desc'),
         limit(20),
       );
@@ -336,7 +355,7 @@ export const getHomePostsInfiniteFunction = async (
   }
   // 허용된 라운지에 접근중일 경우
   const postsRef = collection(db, 'posts');
-  const returnArr: Array<TopicPost> = [];
+  const returnArr: Array<TopicPost | RoungePost> = [];
   let q_rounge;
   if (pageParam > 0) {
     const q_roungeCurrent = query(
@@ -362,22 +381,43 @@ export const getHomePostsInfiniteFunction = async (
       limit(20),
     );
   const snap = await getDocs(q_rounge);
-  console.log(snap.docs.length);
   snap.forEach((doc) => {
     const docData = doc.data();
-    const returnData: TopicPost = {
-      author: { nickname: docData.nickname, jobSector: docData.job },
-      content: docData.content,
-      commentsCount: docData.commentsCount || 0,
-      createdAt: docData.createdAt.seconds.toString().padEnd(13, 0).toString(),
-      images: docData.images,
-      likeCount: docData.pressPerson.length,
-      postId: docData.postId,
-      postType: docData.postType,
-      title: docData.title,
-      topic: docData.topic,
-    };
-    returnArr.push(returnData);
+    if (docData.postType === 'topic') {
+      const returnData: TopicPost = {
+        author: { nickname: docData.nickname, jobSector: docData.job },
+        content: docData.content,
+        commentsCount: docData.commentsCount || 0,
+        createdAt: docData.createdAt.seconds
+          .toString()
+          .padEnd(13, 0)
+          .toString(),
+        images: docData.images,
+        likeCount: docData.pressPerson.length,
+        postId: docData.postId,
+        postType: docData.postType,
+        title: docData.title,
+        topic: docData.topic,
+      };
+      returnArr.push(returnData);
+    } else if (docData.postType === 'rounge') {
+      const returnData: RoungePost = {
+        author: { nickname: docData.nickname, jobSector: docData.job },
+        content: docData.content,
+        commentsCount: docData.commentsCount || 0,
+        createdAt: docData.createdAt.seconds
+          .toString()
+          .padEnd(13, 0)
+          .toString(),
+        images: docData.images,
+        likeCount: docData.pressPerson.length,
+        postId: docData.postId,
+        postType: docData.postType,
+        title: docData.title,
+        rounge: docData.rounge,
+      };
+      returnArr.push(returnData);
+    }
   });
   if (returnArr.length === 0) return { result: returnArr, nextPage: -1 };
   return { result: returnArr, nextPage: pageParam + 1 };
