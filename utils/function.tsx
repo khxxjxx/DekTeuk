@@ -1,6 +1,20 @@
 //@ts-ignore
-import { UserInfo, TopicPost, RoungePost } from '@interface/CardInterface';
+import { db } from '@firebase/firebase';
+import { TopicPost, RoungePost } from '@interface/CardInterface';
+import { HomeListString } from '@interface/GetPostsInterface';
+import { UserInfo } from '@interface/StoreInterface';
 import delay from '@utils/delay';
+import {
+  collection,
+  getDoc,
+  getDocs,
+  limit,
+  orderBy,
+  query,
+  where,
+} from 'firebase/firestore';
+import { getDatabase } from 'firebase/database';
+
 export const getMyInfo = async (result: any) => {
   //await delay(3000);
   // await delay(0);
@@ -48,8 +62,6 @@ export const getMyInfo = async (result: any) => {
     // hasNewNotification: true,
   } as UserInfo;
 };
-
-export const getTimelinePosts = async () => {};
 
 export const getTopics = (list: string, pageParam: string) => {
   const dummyTopicPost: TopicPost = {
@@ -100,9 +112,133 @@ export const getTopics = (list: string, pageParam: string) => {
 };
 
 export const getHomePostsInfiniteFunction = async (
-  list: string,
+  list: HomeListString,
   pageParam: number,
+  validRounges?: Array<HomeListString>,
 ) => {
+  // 비로그인 or 비인증 사용자 => topic만 반환
+  if (
+    !validRounges ||
+    (validRounges && validRounges.length === 1 && validRounges[0] === 'topic')
+  ) {
+    // return;
+  }
+
+  // 로그인 된 사용자가 timeline에 접근
+  if (list === 'timeline') {
+    // return;
+  }
+
+  // 로그인 된 사용자가 topic에 접근
+  if (list === 'topic') {
+    // const postRef = collection(db, 'post'); // todo: posts => post 변경되면 적용
+    const postsRef = collection(db, 'posts');
+
+    // const q = query(postsRef, where('postType', '==', 'topic')); // todo: Topic => topic 변경되면 적용
+    const q = query(postsRef, where('postType', '==', 'Topic'));
+    const snap = await getDocs(q);
+    snap.forEach((doc) => {
+      console.log(doc.data());
+    });
+    // return;
+  }
+
+  // 이외의 경우는 rounge페이지에 접근
+  // 허용되지 않은 라운지에 접근
+  if (validRounges?.indexOf(list) === -1) {
+    // return;
+  }
+  // 허용된 라운지에 접근중일 경우
+  const postsRef = collection(db, 'posts');
+
+  // const q = query(postsRef, where('postType', 'not-in', ['Topic', 'Rounge']));
+
+  const initial = {
+    rounges: [
+      { title: '외식·음료', url: 'food-service' },
+      { title: '매장관리·판매', url: 'store' },
+      { title: '서비스', url: 'service' },
+      { title: '사무직', url: 'white-collar' },
+      { title: '고객상담·리서치·영업', url: 'sales-research' },
+      { title: '생산·건설·노무', url: 'blue-collar' },
+      { title: 'IT·기술', url: 'it-tech' },
+      { title: '디자인', url: 'design' },
+      { title: '미디어', url: 'media' },
+      { title: '운전·배달', url: 'drive' },
+      { title: '병원·간호·연구', url: 'hospital' },
+      { title: '교육·강사', url: 'education' },
+    ],
+    topics: ['yunmal', 'market', 'blabla', 'stock'],
+  };
+
+  // initial: 현재 존재하는 rounges와 topics가 key로 담겨있는 Object
+  // validRounges: user 정보에 존재하는 validRounges(Array<ValidRounge>)
+
+  // 테스트
+  const myValidRounges = [
+    { title: '외식·음료', url: 'food-service' },
+    { title: '매장관리·판매', url: 'store' },
+  ];
+  const myInvalidRounges = initial.rounges.filter((rounge) => {
+    for (const myRounge of myValidRounges)
+      if (rounge.url === myRounge.url) return false; // url은 unique하므로 비교값으로 사용
+    return true;
+  });
+  const myInvalidRoungesUrl = myInvalidRounges.map((v) => v.url);
+  console.log(myInvalidRoungesUrl);
+
+  // const inValidTopics = initial.topics.filter((v) => v !== myTopic);
+  // console.log(inValidTopics);
+  // const q_timeline = query(
+  //   postsRef,
+  //   where('topic', 'not-in', inValidTopics),
+  //   orderBy('topic', 'desc'),
+  //   orderBy('createdAt', 'desc'),
+  //   limit(3),
+  // );
+  // // const q = query(postsRef);
+  // const snap_timeline = await getDocs(q_timeline);
+  // snap_timeline.forEach((doc) => {
+  //   console.log(doc.data().postType, doc.data().topic, doc.data().rounge);
+  // });
+  // const myRounges = ['education'];
+  // const inValidRounges = topics.filter((v) => {
+  //   for (const myRounge of myRounges) {
+  //     if (v === myRounge) return true;
+  //   }
+  // });
+  // const q_rounge = query(
+  //   postsRef,
+  //   where('rounge', 'not-in', inValidRounges),
+  //   orderBy('topic', 'desc'),
+  //   orderBy('createdAt', 'desc'),
+  //   limit(3),
+  // );
+  // // const q = query(postsRef);
+  // const snap_rounge = await getDocs(q_rounge);
+  // snap_rounge.forEach((doc) => {
+  //   console.log(doc.data().postType, doc.data().topic, doc.data().rounge);
+  // });
+
+  // const q_topic = query(
+  //   postsRef,
+  //   where('topic', 'not-in', inValidTopics),
+  //   orderBy('topic', 'desc'),
+  //   orderBy('createdAt', 'desc'),
+  //   limit(3),
+  // );
+  // // const q = query(postsRef);
+  // const snap_topic = await getDocs(q_topic);
+  // snap_timeline.forEach((doc) => {
+  //   console.log(doc.data().postType, doc.data().topic, doc.data().rounge);
+  // });
+  // return;
+  //
+  //
+  //
+  //
+  //
+  //
   // await delay(800);
   const dummyRoungePost: RoungePost = {
     postId: 'r8q394uf90q23urq89pd3oil',
