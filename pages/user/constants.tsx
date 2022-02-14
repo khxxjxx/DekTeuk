@@ -1,18 +1,18 @@
-export const userInputInitialState = {
+type userInputData = {
+  email: string;
+  password: string;
+  checkPassword: string;
+  nickname: string;
+  jobSector: string;
+};
+
+export const userInputInitialState: userInputData = {
   email: '',
   password: '',
   checkPassword: '',
   nickname: '',
   jobSector: '',
 };
-
-// export const userInputInitialState = {
-//     email: { value: '', helperText: '' },
-//     password: { value: '', helperText: '6자리 이상 입력해 주세요!' },
-//     checkPassword: { value: '', helperText: '비밀번호가 같지 않습니다!' },
-//     nickname: { value: '', helperText: '' },
-//     jobSector: { value: '', helperText: '직종을 선택해 주세요!' },
-//   };
 
 export const jobSectors = [
   { title: '외식·음료', url: 'food-service' },

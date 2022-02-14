@@ -81,19 +81,18 @@ export default function Login() {
                 variant="outlined"
                 margin="dense"
                 name="email"
-                onBlur={onChangeInput}
+                onChange={onChangeInput}
               />
             </WrapInput>
             <WrapInput>
               <Label>비밀번호</Label>
               <TextField
                 required
-                fullWidth
                 type="password"
                 variant="outlined"
                 margin="dense"
                 name="password"
-                onBlur={onChangeInput}
+                onChange={onChangeInput}
               />
             </WrapInput>
             <WrapButton>

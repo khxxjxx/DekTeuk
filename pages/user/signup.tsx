@@ -1,6 +1,5 @@
 import React, { useState, useReducer } from 'react';
 import { useDispatch } from 'react-redux';
-import Link from 'next/link';
 import styled from '@emotion/styled';
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
@@ -35,11 +34,9 @@ type InputHelperText = {
   nickname: string;
   jobSector: string;
 };
-
 const reducer = (state: any, action: any) => {
   return { ...state, [action.payload.name]: action.payload.value };
 };
-
 export default function Signup() {
   const router = useRouter();
   const dispatch = useDispatch();
@@ -51,7 +48,6 @@ export default function Signup() {
   const provider = new GoogleAuthProvider();
   const [isGoogle, setIsGoogle] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
-  const [fileError, setFileError] = useState<string>('');
   const [imageUrl, setImageUrl] = useState<string>('');
   const [imageExt, setImageExt] = useState<string>('');
   const [inputHelpers, setInputHelpers] = useState<InputHelperText>({
@@ -62,6 +58,7 @@ export default function Signup() {
     jobSector: '직종을 선택 해 주세요',
   });
 
+  const { email, password, checkPassword, nickname, jobSector } = inputState;
   const checkSignIn = async () => {
     try {
       const result = await signInWithPopup(auth, provider);
@@ -86,8 +83,8 @@ export default function Signup() {
     try {
       const { user: result } = await createUserWithEmailAndPassword(
         auth,
-        inputState.email,
-        inputState.password,
+        email,
+        password,
       );
       sendEmailVerification(result);
       return result.uid;
@@ -98,15 +95,14 @@ export default function Signup() {
 
   const SignUpSubmitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    //console.log(inputState);
     const uid = (await createUserWithEmail()) as string;
 
-    if (inputState.checkPassword !== inputState.password) {
+    if (checkPassword !== password) {
       alert('비밀번호가 다릅니다!');
     } else {
       const userData: UserInfo = {
-        nickname: inputState.nickname,
-        jobSector: inputState.jobSector,
+        nickname: nickname,
+        jobSector: jobSector,
         validRounges: [
           {
             title: '타임라인',
@@ -117,16 +113,15 @@ export default function Signup() {
             url: 'topic',
           },
           {
-            title: inputState.jobSector,
-            url: jobSectors.find((v) => v.title === inputState.jobSector)
-              ?.url as string,
+            title: jobSector,
+            url: jobSectors.find((v) => v.title === jobSector)?.url as string,
             // type error 잡아야 함
           },
         ],
         id: uid,
         hasNewNotification: true,
         posts: [],
-        email: inputState.email,
+        email: email,
       };
 
       uploadImg(uid);
@@ -150,11 +145,11 @@ export default function Signup() {
   const checkNickname = async () => {
     const nicknameCheckQuery = query(
       collection(db, 'user'),
-      where('nickname', '==', inputState.nickname),
+      where('nickname', '==', nickname),
     );
     let nicknameHelperText;
     const nicknameCheckSnap = await getDocs(nicknameCheckQuery);
-    if (nicknameCheckSnap.docs.length !== 0 || inputState.nickname.length < 3) {
+    if (nicknameCheckSnap.docs.length !== 0 || nickname.length < 3) {
       nicknameHelperText = '사용 불가능한 닉네임 입니다!';
     } else {
       nicknameHelperText = '사용 가능한 닉네임 입니다!';
@@ -168,6 +163,7 @@ export default function Signup() {
   };
 
   const onImageChange = (e: any) => {
+    console.log(e.target.name);
     const image = e.target.files[0] as File;
     const reader = new FileReader();
     reader.readAsDataURL(image);
@@ -181,8 +177,13 @@ export default function Signup() {
     e.target.value = '';
   };
   const onClearImg = () => setImageUrl('');
-  const setInputs = (target: any) => {
-    inputDispatch({ payload: { value: target.value, name: target.name } });
+  const setInputs = (e: any) => {
+    const { name, value } = e.target;
+    if (name === 'image') {
+    }
+    inputDispatch({
+      payload: { name: name, value: value },
+    });
   };
   return (
     <>
@@ -199,9 +200,9 @@ export default function Signup() {
                 required
                 placeholder="Email 주소를 입력해 주세요."
                 name="email"
-                value={inputState.email}
-                onChange={(e) => setInputs(e.target)}
-                helperText={inputHelpers.email}
+                value={email}
+                onChange={setInputs}
+                helperText={email.helperText}
               />
             </WrapInput>
             <WrapInput>
@@ -213,9 +214,9 @@ export default function Signup() {
                 variant="outlined"
                 margin="dense"
                 name="password"
-                value={inputState.password}
-                onChange={(e) => setInputs(e.target)}
-                helperText={inputHelpers.password}
+                value={password}
+                onChange={setInputs}
+                helperText={password.helperText}
               />
               <TextFields
                 required
@@ -224,9 +225,9 @@ export default function Signup() {
                 variant="outlined"
                 margin="dense"
                 name="checkPassword"
-                value={inputState.checkPassword}
-                onChange={(e) => setInputs(e.target)}
-                helperText={inputHelpers.checkPassword}
+                value={checkPassword}
+                onChange={setInputs}
+                helperText={checkPassword.helperText}
               />
             </WrapInput>
 
@@ -247,9 +248,9 @@ export default function Signup() {
                 margin="dense"
                 name="nickname"
                 placeholder="닉네임을 입력해 주세요."
-                value={inputState.nickname}
-                onChange={(e) => setInputs(e.target)}
-                helperText={inputHelpers.nickname}
+                value={nickname}
+                onChange={setInputs}
+                helperText={nickname.helperText}
               />
             </WrapInput>
             <WrapImageUpload>
@@ -259,6 +260,7 @@ export default function Signup() {
                 style={{ display: 'flex', flexDirection: 'column' }}
               >
                 <Input
+                  name="image"
                   accept="image/*"
                   id="contained-button-file"
                   type="file"
@@ -291,9 +293,9 @@ export default function Signup() {
                 variant="outlined"
                 margin="dense"
                 name="jobSector"
-                value={inputState.jobSector}
-                onChange={(e) => setInputs(e.target)}
-                helperText={inputHelpers.jobSector}
+                value={jobSector}
+                onChange={setInputs}
+                helperText={jobSector.helperText}
               >
                 {jobSectors.map((value, idx) => (
                   <MenuItem key={idx} value={value.title}>
