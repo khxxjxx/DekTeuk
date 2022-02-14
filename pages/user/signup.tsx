@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useReducer } from 'react';
 import { useDispatch } from 'react-redux';
 import Link from 'next/link';
 import styled from '@emotion/styled';
@@ -9,6 +9,7 @@ import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
   signInWithPopup,
+  GoogleAuthProvider,
   signOut,
 } from 'firebase/auth';
 import { db, auth } from '@firebase/firebase';
@@ -16,6 +17,7 @@ import {
   doc,
   setDoc,
   getDocs,
+  getDoc,
   collection,
   query,
   where,
@@ -24,22 +26,8 @@ import { getStorage, ref, uploadString } from 'firebase/storage';
 import { useRouter } from 'next/router';
 import MenuItem from '@mui/material/MenuItem';
 import { UserInfo } from '@interface/StoreInterface';
-import useId from '@mui/material/utils/useId';
-
-const jobSectors = [
-  { title: '외식·음료', url: 'food-service' },
-  { title: '매장관리·판매', url: 'store' },
-  { title: '서비스', url: 'service' },
-  { title: '사무직', url: 'white-collar' },
-  { title: '고객상담·리서치·영업', url: 'sales-research' },
-  { title: '생산·건설·노무', url: 'blue-collar' },
-  { title: 'IT·기술', url: 'it-tech' },
-  { title: '디자인', url: 'design' },
-  { title: '미디어', url: 'media' },
-  { title: '운전·배달', url: 'drive' },
-  { title: '병원·간호·연구', url: 'hospital' },
-  { title: '교육·강사', url: 'education' },
-];
+import { setNewUserInfo } from '@store/reducer';
+import { userInputInitialState, jobSectors } from './constants';
 type InputHelperText = {
   email: string;
   password: string;
@@ -48,15 +36,19 @@ type InputHelperText = {
   jobSector: string;
 };
 
+const reducer = (state: any, action: any) => {
+  return { ...state, [action.payload.name]: action.payload.value };
+};
+
 export default function Signup() {
   const router = useRouter();
   const dispatch = useDispatch();
   const storage = getStorage();
-
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [checkPassword, setCheckPassword] = useState<string>('');
-  const [nickname, setNickname] = useState<string>('');
+  const [inputState, inputDispatch] = useReducer(
+    reducer,
+    userInputInitialState,
+  );
+  const provider = new GoogleAuthProvider();
   const [isGoogle, setIsGoogle] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [fileError, setFileError] = useState<string>('');
@@ -69,42 +61,33 @@ export default function Signup() {
     nickname: '',
     jobSector: '직종을 선택 해 주세요',
   });
-  const [jobSector, setJobSector] = useState('');
 
-  const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    let helperText;
-    if (name === 'email') {
-      setEmail(value);
-    } else if (name === 'password') {
-      if (value.length >= 6) {
-        helperText = '사용 가능한 비밀번호 입니다!';
-      }
-      setPassword(value);
-    } else if (name === 'checkPassword') {
-      if (password !== value) {
-        helperText = '비밀번호가 다릅니다!';
-      } else {
-        helperText = '비밀번호가 같습니다!';
-      }
-      setCheckPassword(value);
-    } else if (name === 'nickname') setNickname(value);
-    else if (name === 'jobSector') setJobSector(value);
+  const checkSignIn = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      return result.user.uid;
+    } catch (err: any) {
+      console.error(err);
+    }
+  };
 
-    const newInputHelpers = {
-      ...inputHelpers,
-      [name]: helperText,
-    };
-
-    setInputHelpers(newInputHelpers);
+  const loginWithGoogle = async () => {
+    const uid = await checkSignIn();
+    const docSnap = await getDoc(doc(db, 'user', uid as string));
+    if (docSnap.exists()) {
+      dispatch(setNewUserInfo(docSnap.data()));
+      router.push('/');
+    } else {
+      router.push('/user/google');
+    }
   };
 
   const createUserWithEmail = async () => {
     try {
       const { user: result } = await createUserWithEmailAndPassword(
         auth,
-        email,
-        password,
+        inputState.email,
+        inputState.password,
       );
       sendEmailVerification(result);
       return result.uid;
@@ -115,14 +98,15 @@ export default function Signup() {
 
   const SignUpSubmitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    //console.log(inputState);
     const uid = (await createUserWithEmail()) as string;
 
-    if (checkPassword !== password) {
+    if (inputState.checkPassword !== inputState.password) {
       alert('비밀번호가 다릅니다!');
     } else {
-      const userInitData: UserInfo = {
-        nickname: nickname,
-        jobSector: jobSector,
+      const userData: UserInfo = {
+        nickname: inputState.nickname,
+        jobSector: inputState.jobSector,
         validRounges: [
           {
             title: '타임라인',
@@ -133,20 +117,21 @@ export default function Signup() {
             url: 'topic',
           },
           {
-            title: jobSector,
-            url: jobSectors.find((v) => v.title === jobSector)?.url as string,
+            title: inputState.jobSector,
+            url: jobSectors.find((v) => v.title === inputState.jobSector)
+              ?.url as string,
             // type error 잡아야 함
           },
         ],
         id: uid,
         hasNewNotification: true,
         posts: [],
-        email: email,
+        email: inputState.email,
       };
 
       uploadImg(uid);
       console.log('success');
-      await setDoc(doc(db, 'user', uid), userInitData);
+      await setDoc(doc(db, 'user', uid), userData);
       await signOut(auth);
       router.push('/user/login');
     }
@@ -165,11 +150,11 @@ export default function Signup() {
   const checkNickname = async () => {
     const nicknameCheckQuery = query(
       collection(db, 'user'),
-      where('nickname', '==', nickname),
+      where('nickname', '==', inputState.nickname),
     );
     let nicknameHelperText;
     const nicknameCheckSnap = await getDocs(nicknameCheckQuery);
-    if (nicknameCheckSnap.docs.length !== 0 || nickname.length < 3) {
+    if (nicknameCheckSnap.docs.length !== 0 || inputState.nickname.length < 3) {
       nicknameHelperText = '사용 불가능한 닉네임 입니다!';
     } else {
       nicknameHelperText = '사용 가능한 닉네임 입니다!';
@@ -196,12 +181,14 @@ export default function Signup() {
     e.target.value = '';
   };
   const onClearImg = () => setImageUrl('');
+  const setInputs = (target: any) => {
+    inputDispatch({ payload: { value: target.value, name: target.name } });
+  };
   return (
     <>
       <Main>
         <h1 style={{ color: '#8946A6' }}>회원가입</h1>
-        <GoogleButton //onClick={signInWithPopup}
-        >
+        <GoogleButton onClick={loginWithGoogle}>
           구글 계정으로 가입하기
         </GoogleButton>
         <form onSubmit={SignUpSubmitHandler}>
@@ -212,8 +199,8 @@ export default function Signup() {
                 required
                 placeholder="Email 주소를 입력해 주세요."
                 name="email"
-                value={email}
-                onChange={onInputChange}
+                value={inputState.email}
+                onChange={(e) => setInputs(e.target)}
                 helperText={inputHelpers.email}
               />
             </WrapInput>
@@ -226,8 +213,8 @@ export default function Signup() {
                 variant="outlined"
                 margin="dense"
                 name="password"
-                value={password}
-                onChange={onInputChange}
+                value={inputState.password}
+                onChange={(e) => setInputs(e.target)}
                 helperText={inputHelpers.password}
               />
               <TextFields
@@ -237,8 +224,8 @@ export default function Signup() {
                 variant="outlined"
                 margin="dense"
                 name="checkPassword"
-                value={checkPassword}
-                onChange={onInputChange}
+                value={inputState.checkPassword}
+                onChange={(e) => setInputs(e.target)}
                 helperText={inputHelpers.checkPassword}
               />
             </WrapInput>
@@ -260,8 +247,8 @@ export default function Signup() {
                 margin="dense"
                 name="nickname"
                 placeholder="닉네임을 입력해 주세요."
-                value={nickname}
-                onChange={onInputChange}
+                value={inputState.nickname}
+                onChange={(e) => setInputs(e.target)}
                 helperText={inputHelpers.nickname}
               />
             </WrapInput>
@@ -304,8 +291,8 @@ export default function Signup() {
                 variant="outlined"
                 margin="dense"
                 name="jobSector"
-                value={jobSector}
-                onChange={onInputChange}
+                value={inputState.jobSector}
+                onChange={(e) => setInputs(e.target)}
                 helperText={inputHelpers.jobSector}
               >
                 {jobSectors.map((value, idx) => (
