@@ -13,15 +13,13 @@ export const createChatRoom = async (
 ) => {
   const { id } = await addDoc(collection(db, 'chat'), {
     users: [
-      { nickname: myInfo.nickname, id: myInfo.id, job: myInfo.jobSector },
+      { nickname: myInfo.nickname, id: myInfo.id, jobSector: myInfo.jobSector },
       {
         nickname: counterInfo.nickname,
         id: counterInfo.id,
-        job: counterInfo.jobSector,
+        jobSector: counterInfo.jobSector,
       },
     ],
-    updatedAt: '',
-    lastChat: '',
     lastVisited: {
       [myInfo.id]: Timestamp.now(),
       [counterInfo.id]: Timestamp.now(),

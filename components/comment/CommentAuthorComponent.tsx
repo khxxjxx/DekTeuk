@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import styled from '@emotion/styled';
 import { getDateTime } from '@utils/function';
 import AuthorClickMenu from '@components/items/AuthorClickMenu';
-import { ChatDefault, createChatRoom } from '@utils/chatOpen';
+import { ChatDefault, createChatRoom } from '@utils/createChatRoom';
 import { useRouter } from 'next/router';
 import { useSelector } from 'react-redux';
 import { RootReducer } from '@store/reducer';
