@@ -91,18 +91,20 @@ const ListPage = () => {
             await getHomePostsInfiniteFunction(
               router.asPath.split('/')[2] as HomeListUrlString,
               0,
+              myInfo.validRounges.map((v) => v.url),
             ),
           ),
         );
       })();
   }, [view]);
   useEffect(() => {
-    if (inView) {
+    if (inView && view[view.length - 1].nextPage !== -1) {
       (async () => {
         setIsLoading(true);
         const nextResults = await getHomePostsInfiniteFunction(
           router.asPath.split('/')[2] as HomeListUrlString,
           view[view.length - 1].nextPage,
+          myInfo.validRounges.map((v) => v.url),
         );
         dispatch(setViewAction(nextResults));
         setIsLoading(false);
@@ -171,11 +173,12 @@ export const getServerSideProps = wrapper.getServerSideProps(
     async (props): Promise<any> => {
       const { list } = props.params as { list: HomeListUrlString };
       store.dispatch(setSearchValueAction(''));
-      console.log('ListPage GetServerSideProps');
-      console.log('store.getState(): ', store.getState());
-      console.log('list: ', list);
-      console.log('ListPage GetServerSideProps');
       const state: StoreState = store.getState();
+      const {
+        user: {
+          user: { validRounges },
+        },
+      } = state;
       switch (list) {
         case 'timeline': // topic, rounge 데이터 다 갖고와서 view에 dispatch
           store.dispatch(
@@ -183,7 +186,7 @@ export const getServerSideProps = wrapper.getServerSideProps(
               await getHomePostsInfiniteFunction(
                 list,
                 0,
-                state.user.user.validRounges.map((v) => v.url),
+                validRounges.map((v) => v.url),
               ),
             ),
           );
@@ -195,7 +198,13 @@ export const getServerSideProps = wrapper.getServerSideProps(
           break;
         default:
           store.dispatch(
-            initialViewAction(await getHomePostsInfiniteFunction(list, 0)),
+            initialViewAction(
+              await getHomePostsInfiniteFunction(
+                list,
+                0,
+                validRounges.map((v) => v.url),
+              ),
+            ),
           );
           break;
       }

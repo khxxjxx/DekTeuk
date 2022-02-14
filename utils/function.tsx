@@ -1,4 +1,3 @@
-//@ts-ignore
 import { db } from '@firebase/firebase';
 import { TopicPost, RoungePost } from '@interface/CardInterface';
 import {
@@ -8,15 +7,21 @@ import {
 import { UserInfo } from '@interface/StoreInterface';
 import delay from '@utils/delay';
 import {
+  addDoc,
   collection,
+  doc,
   getDoc,
   getDocs,
   limit,
   orderBy,
   query,
+  serverTimestamp,
+  updateDoc,
   where,
+  startAt,
+  startAfter,
 } from 'firebase/firestore';
-import { getDatabase } from 'firebase/database';
+import { faker } from '@faker-js/faker';
 
 export const getMyInfo = async (result: any) => {
   //await delay(3000);
@@ -119,30 +124,116 @@ export const getHomePostsInfiniteFunction = async (
   pageParam: number,
   validRounges?: Array<HomeListUrlString>,
 ) => {
+  // for (let i = 0; i < 20; i++) {
+  //   const collectionRef = collection(db, 'posts');
+  //   const { id: newId } = await addDoc(collectionRef, {
+  //     title: faker.lorem.sentence(),
+  //     content: faker.lorem.paragraph(4),
+  //     pressPerson: [],
+  //     postId: '',
+  //     postType: 'rounge',
+  //     topic: '',
+  //     updatedAt: serverTimestamp(),
+  //     userId: 'jf4RswnBDeQAV3DPtzcHlDJbxTL92',
+  //     job: '매장관리·판매',
+  //     nickname: '닉네임2222222222',
+  //     rounge: '매장관리·판매',
+  //     createdAt: serverTimestamp(),
+  //     images: [],
+  //   });
+  //   const wroteDocRef = doc(db, 'posts', newId);
+  //   await updateDoc(wroteDocRef, { postId: newId });
+  // }
+  // for (let i = 0; i < 20; i++) {
+  //   const collectionRef = collection(db, 'posts');
+  //   const { id: newId } = await addDoc(collectionRef, {
+  //     title: faker.lorem.sentence(),
+  //     content: faker.lorem.paragraph(4),
+  //     pressPerson: [],
+  //     postId: '',
+  //     postType: 'topic',
+  //     topic: { title: '블라블라', url: 'blabla' },
+  //     updatedAt: serverTimestamp(),
+  //     userId: 'jf22GhSujbZtWDPtzcHlDJbxTL92',
+  //     job: '서비스',
+  //     nickname: '닉네임',
+  //     rounge: '',
+  //     createdAt: serverTimestamp(),
+  //     images: [],
+  //   });
+  //   const wroteDocRef = doc(db, 'posts', newId);
+  //   await updateDoc(wroteDocRef, { postId: newId });
+  // }
+
+  // 로그인 된 사용자가 topic에 접근 => topic만 반환
   // 비로그인 or 비인증 사용자 => topic만 반환
   if (
     !validRounges ||
-    (validRounges && validRounges.length === 1 && validRounges[0] === 'topic')
+    (validRounges &&
+      validRounges.length === 1 &&
+      validRounges[0] === 'topic') ||
+    list === 'topic'
   ) {
-    // return;
+    const postsRef = collection(db, 'posts');
+    const returnArr: Array<TopicPost> = [];
+    let q_topic;
+    if (pageParam > 0) {
+      const q_topicCurrent = query(
+        postsRef,
+        where('postType', '==', 'topic'),
+        orderBy('createdAt', 'desc'),
+        limit(pageParam * 20),
+      );
+      const currentSnapShot = await getDocs(q_topicCurrent);
+      const lastVisible = currentSnapShot.docs[currentSnapShot.docs.length - 1];
+      q_topic = query(
+        postsRef,
+        where('postType', '==', 'topic'),
+        orderBy('createdAt', 'desc'),
+        startAfter(lastVisible),
+        limit(20),
+      );
+    } else
+      q_topic = query(
+        postsRef,
+        where('postType', '==', 'topic'),
+        orderBy('createdAt', 'desc'),
+        limit(20),
+      );
+    const snap = await getDocs(q_topic);
+    snap.forEach((doc) => {
+      const docData = doc.data();
+      const returnData: TopicPost = {
+        author: { nickname: docData.nickname, jobSector: docData.job },
+        content: docData.content,
+        commentsCount: docData.commentsCount || 0,
+        createdAt: docData.createdAt.seconds
+          .toString()
+          .padEnd(13, 0)
+          .toString(),
+        images: docData.images,
+        likeCount: docData.pressPerson.length,
+        postId: docData.postId,
+        postType: docData.postType,
+        title: docData.title,
+        topic: docData.topic,
+      };
+      returnArr.push(returnData);
+    });
+    if (returnArr.length === 0) return { result: returnArr, nextPage: -1 };
+    return { result: returnArr, nextPage: pageParam + 1 };
   }
 
   // 로그인 된 사용자가 timeline에 접근
   if (list === 'timeline') {
-    // return;
-  }
-
-  // 로그인 된 사용자가 topic에 접근
-  if (list === 'topic') {
-    // const postRef = collection(db, 'post'); // todo: posts => post 변경되면 적용
-    const postsRef = collection(db, 'posts');
-
-    // const q = query(postsRef, where('postType', '==', 'topic')); // todo: Topic => topic 변경되면 적용
-    const q = query(postsRef, where('postType', '==', 'Topic'));
-    const snap = await getDocs(q);
-    snap.forEach((doc) => {
-      console.log(doc.data());
+    const myValidRounges = validRounges ? [...validRounges] : [];
+    const myInvalidRounges = DefaultListsAndTopics.rounges.filter((rounge) => {
+      for (const myRoungeUrl of myValidRounges)
+        if (rounge.url === myRoungeUrl) return false; // url은 unique하므로 비교값으로 사용
+      return true;
     });
+    const myInvalidRoungesUrls = myInvalidRounges.map((v) => v.url);
+
     // return;
   }
 
@@ -161,17 +252,17 @@ export const getHomePostsInfiniteFunction = async (
   // validRounges: user 정보에 존재하는 validRounges(Array<ValidRounge>)
 
   // 테스트
-  const myValidRounges = [
-    { title: '외식·음료', url: 'food-service' },
-    { title: '매장관리·판매', url: 'store' },
-  ];
-  const myInvalidRounges = DefaultListsAndTopics.rounges.filter((rounge) => {
-    for (const myRounge of myValidRounges)
-      if (rounge.url === myRounge.url) return false; // url은 unique하므로 비교값으로 사용
-    return true;
-  });
-  const myInvalidRoungesUrl = myInvalidRounges.map((v) => v.url);
-  console.log(myInvalidRoungesUrl);
+  // const myValidRounges = [
+  //   { title: '외식·음료', url: 'food-service' },
+  //   { title: '매장관리·판매', url: 'store' },
+  // ];
+  // const myInvalidRounges = DefaultListsAndTopics.rounges.filter((rounge) => {
+  //   for (const myRounge of myValidRounges)
+  //     if (rounge.url === myRounge.url) return false; // url은 unique하므로 비교값으로 사용
+  //   return true;
+  // });
+  // const myInvalidRoungesUrl = myInvalidRounges.map((v) => v.url);
+  // console.log(myInvalidRoungesUrl);
 
   // const inValidTopics = DefaultListsAndTopics.topics.filter((v) => v !== myTopic);
   // console.log(inValidTopics);
