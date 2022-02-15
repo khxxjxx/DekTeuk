@@ -106,9 +106,7 @@ const PostForm = (props: any) => {
     nickname: postInfo.nickname,
     image: postInfo.image,
   });
-  console.log(post.image);
-  console.log(post.title);
-  console.log(post.content);
+
   //photoupload 확인 아이콘-아직 미구현
   const [loading, setLoading] = React.useState(false);
   const [success, setSuccess] = React.useState(false);

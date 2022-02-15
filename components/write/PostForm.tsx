@@ -61,7 +61,10 @@ const style = {
   boxShadow: 24,
   p: 4,
 };
-
+interface postSubTheme {
+  title: string;
+  url: string;
+}
 const PostForm = () => {
   //이미지 업로드 부분
   const [modalOpen, setModalOpen] = useState(false);
@@ -87,15 +90,20 @@ const PostForm = () => {
     postId: '',
     postType: '',
     userId: '',
-    topic: '',
-    rounge: '',
     createdAt: '',
     updatedAt: '',
-    deletedAt: '',
-    isDeleted: false,
     job: '',
     nickname: '',
     image: [],
+    commentsCount: 0,
+  });
+  const [postTopic, setPostTopic] = useState<any>({
+    title: '',
+    url: '',
+  });
+  const [postRounge, setPostRounge] = useState<any>({
+    title: '',
+    url: '',
   });
   //photoupload 확인 아이콘-아직 미구현
   const [loading, setLoading] = React.useState(false);
@@ -153,19 +161,34 @@ const PostForm = () => {
 
     if (post.postType === '' || post.title === '' || post.content === '') {
       showAlert('error', `필수항목을 작성해 주세요`);
-    } else if (post.postType === 'Topic' && post.topic === '') {
+    } else if (
+      post.postType === 'topic' &&
+      postTopic === { title: '', url: '' }
+    ) {
       showAlert('error', `토픽 주제를 선택해 주세요`);
-    } else if (post.postType === 'Topic') {
-      const collectionRef = collection(db, 'posts');
-      const { id: newId } = await addDoc(collectionRef, {
-        ...post,
+    } else if (
+      post.postType === 'rounge' &&
+      postRounge === { title: '', url: '' }
+    ) {
+      showAlert('error', `라운지 분류를 선택해 주세요`);
+    } else if (post.postType === 'topic') {
+      const collectionRef = collection(db, 'post');
+      const putObj = {
+        title: post.title,
+        content: post.content,
+        pressPerson: [],
+        postId: '',
+        postType: 'topic',
+        topic: postTopic,
+        updatedAt: '',
         userId: uid,
         job: user.jobSector,
         nickname: user.nickname,
-        rounge: '',
         createdAt: serverTimestamp(),
         image: image,
-      });
+      };
+
+      const { id: newId } = await addDoc(collectionRef, { putObj });
       //새로 생성된 post id를 user 정보에 추가
 
       const docRef = doc(db, 'user', uid);
@@ -174,20 +197,35 @@ const PostForm = () => {
         post: [...user.posts, newId],
       };
       updateDoc(docRef, userPostUpdate);
+      //새로 생성된 post id를 post 정보에 추가
+      const docPostRef = doc(db, 'post', newId);
+      const PostUpdate = {
+        ...post,
+        postId: newId,
+      };
+      updateDoc(docPostRef, PostUpdate);
       //유저에 게시물 id 추가
       setModalOpen(true);
       //나중에 topic 페이지로 이동하도록 변경하기
     } else {
-      const collectionRef = collection(db, 'posts');
-      const { id: newId } = await addDoc(collectionRef, {
-        ...post,
+      const collectionRef = collection(db, 'post');
+      const putObj = {
+        title: post.title,
+        content: post.content,
+        pressPerson: [],
+        postId: '',
+        postType: 'topic',
+        rounge: postRounge,
+        updatedAt: '',
         userId: uid,
         job: user.jobSector,
         nickname: user.nickname,
-        topic: '',
         createdAt: serverTimestamp(),
         image: image,
-      });
+      };
+
+      const { id: newId } = await addDoc(collectionRef, { putObj });
+      //새로 생성된 post id를 user 정보에 추가
 
       const docRef = doc(db, 'user', uid);
       const userPostUpdate = {
@@ -195,8 +233,16 @@ const PostForm = () => {
         post: [...user.posts, newId],
       };
       updateDoc(docRef, userPostUpdate);
-      //나중에 topic 페이지로 이동하도록 변경하기
+      //새로 생성된 post id를 post 정보에 추가
+      const docPostRef = doc(db, 'post', newId);
+      const PostUpdate = {
+        ...post,
+        postId: newId,
+      };
+      updateDoc(docPostRef, PostUpdate);
+      //유저에 게시물 id 추가
       setModalOpen(true);
+      //나중에 topic 페이지로 이동하도록 변경하기
     }
     //원하는 타겟으로 나중에 변경하기
   };
@@ -297,45 +343,55 @@ const PostForm = () => {
             label="postMenu"
             onChange={(e) => setPost({ ...post, postType: e.target.value })}
           >
-            <MenuItem value={'Rounge'}>라운지</MenuItem>
-            <MenuItem value={'Topic'}>토픽</MenuItem>
+            <MenuItem value={'rounge'}>라운지</MenuItem>
+            <MenuItem value={'topic'}>토픽</MenuItem>
           </Select>
         </FormControl>
       </Box>
-      {post.postType === 'Topic' && (
+      {post.postType === 'topic' && (
         <Box sx={{ minWidth: 120, mt: 3 }}>
           <FormControl fullWidth>
             <InputLabel id="demo-simple-select-label">토픽</InputLabel>
             <Select
               labelId="demo-simple-select-label"
               id="demo-simple-select"
-              value={post.topic}
+              value={postTopic.title}
               label="postMenu"
-              onChange={(e) => setPost({ ...post, topic: e.target.value })}
+              onChange={(e) =>
+                setPostTopic({
+                  title: e.target.value[1],
+                  url: e.target.value[0],
+                })
+              }
             >
-              <MenuItem value={'yunmal'}>연말정산</MenuItem>
-              <MenuItem value={'market'}>자유시장</MenuItem>
-              <MenuItem value={'blabla'}>블라블라</MenuItem>
-              <MenuItem value={'stock'}>주식투자</MenuItem>
+              <MenuItem value={['hometax', '연말정산']}>연말정산</MenuItem>
+              <MenuItem value={['travel', '여행']}>여행</MenuItem>
+              <MenuItem value={['blabla', '블라블라']}>블라블라</MenuItem>
+              <MenuItem value={['stock', '주식투자']}>주식투자</MenuItem>
             </Select>
           </FormControl>
         </Box>
       )}
-      {post.postType === 'Rounge' && (
+      {post.postType === 'rounge' && (
         <Box sx={{ minWidth: 120, mt: 3 }}>
           <FormControl fullWidth>
             <InputLabel id="demo-simple-select-label">라운지</InputLabel>
             <Select
               labelId="demo-simple-select-label"
               id="demo-simple-select"
-              value={post.rounge}
+              value={postRounge}
               label="RoungeMenu"
-              onChange={(e) => setPost({ ...post, rounge: e.target.value })}
+              onChange={(e) =>
+                setPostRounge({
+                  title: e.target.value.title,
+                  url: e.target.value.url,
+                })
+              }
             >
               {user.validRounges &&
                 user.validRounges.map((v: any, i: number) => {
                   return (
-                    <MenuItem value={v.url} key={v.url}>
+                    <MenuItem value={v} key={v.url}>
                       {v.title}
                     </MenuItem>
                   );

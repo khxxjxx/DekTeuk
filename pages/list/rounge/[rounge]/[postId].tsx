@@ -95,8 +95,8 @@ export default function RoungePost({
   postProps: string;
   postId: string;
 }) {
-  // const { user } = useSelector((state: RootReducer) => state.user);
-  const [user, setUser] = useState<any>({});
+  const { user } = useSelector((state: RootReducer) => state.user);
+  // const [user, setUser] = useState<any>({});
   const [post, setPost] = useState(JSON.parse(postProps));
   const [uid, setUid] = useState<string>('');
   const [modalOpen, setModalOpen] = useState(false);
@@ -108,14 +108,14 @@ export default function RoungePost({
   const [accessPost, setAccessPost] = useState('');
   const dispatch = useDispatch();
   // useEffect(() => {
-  const getUser = async () => {
-    if (uid !== '') {
-      const docRef = doc(db, 'user', uid);
-      const docSnap = await getDoc(docRef);
-      setUser(docSnap.data());
-    }
-  };
-  getUser();
+  // const getUser = async () => {
+  //   if (uid !== '') {
+  //     const docRef = doc(db, 'user', uid);
+  //     const docSnap = await getDoc(docRef);
+  //     setUser(docSnap.data());
+  //   }
+  // };
+  // getUser();
   // }, [uid]);
 
   const changeLike = async (id: any, e: any) => {
@@ -186,14 +186,6 @@ export default function RoungePost({
 
   return (
     <Container maxWidth="sm">
-      <Button
-        onClick={() => {
-          console.log(user.validRounges.map((v: any) => v.url));
-          console.log(accessPost);
-        }}
-      >
-        test
-      </Button>
       {accessPost === '' ? (
         <Box sx={{ mt: 6 }}>
           <Stack spacing={2}>
@@ -252,7 +244,7 @@ export default function RoungePost({
               <Skeleton variant="rectangular" width="sm" height={118} />
             </Stack>
           </Box>
-          {/* <Modal
+          <Modal
             open={notRoungemodalOpen}
             onClose={() => {
               Router.push('/');
@@ -270,7 +262,7 @@ export default function RoungePost({
                 해당 게시물의 라운지에 속해 있지 않아 게시물을 볼 수 없습니다
               </Typography>
             </Box>
-          </Modal> */}
+          </Modal>
         </>
       ) : (
         ''
