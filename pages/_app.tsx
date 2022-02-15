@@ -130,7 +130,7 @@ MyApp.getInitialProps = wrapper.getInitialAppProps(
             } = await fetch('http://localhost:3000/api/validate', {
               headers,
             }).then((res) => res.json());
-
+            console.log(id);
             const data: UserInfo = {
               ...userData,
               id,

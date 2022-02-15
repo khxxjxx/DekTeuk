@@ -125,11 +125,11 @@ export const getHomePostsInfiniteFunction = async (
   validRounges?: Array<HomeListUrlString>,
 ) => {
   //
-  // 아라 주석은 전체 posts 갯수 출력과 랜덤 데이터 생성을 코드임
+  // 아래 주석은 전체 posts 갯수 출력과 랜덤 데이터 생성을 코드임
   //
-  // const collectionRef = collection(db, 'posts');
-  // console.log((await getDocs(collectionRef)).docs.length);
-  // for (let i = 0; i < 30; i++) {
+  const collectionRef = collection(db, 'posts');
+  console.log((await getDocs(collectionRef)).docs.length);
+  // for (let i = 0; i < 5; i++) {
   //   for (const rounge of DefaultListsAndTopics.rounges) {
   //     const collectionRef = collection(db, 'posts');
   //     console.log(rounge);
@@ -141,7 +141,7 @@ export const getHomePostsInfiniteFunction = async (
   //       postType: 'rounge',
   //       topic: '',
   //       updatedAt: serverTimestamp(),
-  //       userId: 'jf4RswnBDeQAV3DPtzcHlDJbxTL92',
+  //       userId: 'rBbTwMFvMdZULOcNqYyDleySd5n2',
   //       job: rounge.title,
   //       nickname: '닉네임2222222222',
   //       rounge,
@@ -153,7 +153,7 @@ export const getHomePostsInfiniteFunction = async (
   //     await updateDoc(wroteDocRef, { postId: newId });
   //   }
   // }
-  // for (let i = 0; i < 30; i++) {
+  // for (let i = 0; i < 5; i++) {
   //   for (const topic of DefaultListsAndTopics.topics) {
   //     const collectionRef = collection(db, 'posts');
   //     console.log(topic);
@@ -165,7 +165,7 @@ export const getHomePostsInfiniteFunction = async (
   //       postType: 'topic',
   //       topic,
   //       updatedAt: serverTimestamp(),
-  //       userId: 'jf22GhSujbZtWDPtzcHlDJbxTL92',
+  //       userId: 'rBbTwMFvMdZULOcNqYyDleySd5n2',
   //       job: '서비스',
   //       nickname: '닉네임',
   //       rounge: '',
@@ -193,7 +193,7 @@ export const getHomePostsInfiniteFunction = async (
     if (pageParam > 0) {
       const q_topicCurrent = query(
         postsRef,
-        where('postType', '==', 'topic'),
+        where('urlKey', '==', 'topic'),
         orderBy('createdAt', 'desc'),
         limit(pageParam * 20),
       );
@@ -201,7 +201,7 @@ export const getHomePostsInfiniteFunction = async (
       const lastVisible = currentSnapShot.docs[currentSnapShot.docs.length - 1];
       q_topic = query(
         postsRef,
-        where('postType', '==', 'topic'),
+        where('urlKey', '==', 'topic'),
         orderBy('createdAt', 'desc'),
         startAfter(lastVisible),
         limit(20),
@@ -209,7 +209,7 @@ export const getHomePostsInfiniteFunction = async (
     } else
       q_topic = query(
         postsRef,
-        where('postType', '==', 'topic'),
+        where('urlKey', '==', 'topic'),
         orderBy('createdAt', 'desc'),
         limit(20),
       );
@@ -264,13 +264,12 @@ export const getHomePostsInfiniteFunction = async (
     // });
     //
     //
-
+    console.log(myValidRounges);
     let q_rounge;
     if (pageParam > 0) {
       const q_roungeCurrent = query(
         postsRef,
-        where('urlKey', 'not-in', myInvalidRoungesUrls),
-        orderBy('urlKey'),
+        where('urlKey', 'in', myValidRounges),
         orderBy('createdAt', 'desc'),
         limit(pageParam * 20),
       );
@@ -278,8 +277,7 @@ export const getHomePostsInfiniteFunction = async (
       const lastVisible = currentSnapShot.docs[currentSnapShot.docs.length - 1];
       q_rounge = query(
         postsRef,
-        where('urlKey', 'not-in', myInvalidRoungesUrls),
-        orderBy('urlKey'),
+        where('urlKey', 'in', myValidRounges),
         orderBy('createdAt', 'desc'),
         startAfter(lastVisible),
         limit(20),
@@ -287,8 +285,7 @@ export const getHomePostsInfiniteFunction = async (
     } else
       q_rounge = query(
         postsRef,
-        where('urlKey', 'not-in', myInvalidRoungesUrls),
-        orderBy('urlKey'),
+        where('urlKey', 'in', myValidRounges),
         orderBy('createdAt', 'desc'),
         limit(20),
       );
@@ -349,7 +346,7 @@ export const getHomePostsInfiniteFunction = async (
   if (pageParam > 0) {
     const q_roungeCurrent = query(
       postsRef,
-      where('rounge.url', '==', list),
+      where('urlKey', '==', list),
       orderBy('createdAt', 'desc'),
       limit(pageParam * 20),
     );
@@ -357,7 +354,7 @@ export const getHomePostsInfiniteFunction = async (
     const lastVisible = currentSnapShot.docs[currentSnapShot.docs.length - 1];
     q_rounge = query(
       postsRef,
-      where('rounge.url', '==', list),
+      where('urlKey', '==', list),
       orderBy('createdAt', 'desc'),
       startAfter(lastVisible),
       limit(20),
@@ -365,7 +362,7 @@ export const getHomePostsInfiniteFunction = async (
   } else
     q_rounge = query(
       postsRef,
-      where('rounge.url', '==', list),
+      where('urlKey', '==', list),
       orderBy('createdAt', 'desc'),
       limit(20),
     );
