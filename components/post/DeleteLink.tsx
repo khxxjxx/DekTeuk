@@ -38,7 +38,7 @@ export default function DeleteLink(props: any) {
   const handleConfirm = async (e: any) => {
     // e.stopPropagation();
     try {
-      const docRef = doc(db, 'posts', props.thisPost);
+      const docRef = doc(db, 'post', props.thisPost);
       await deleteDoc(docRef);
       setOpen(false);
       setModalOpen(true);
@@ -65,7 +65,6 @@ export default function DeleteLink(props: any) {
         aria-describedby="alert-dialog-description"
       >
         <DialogTitle id="alert-dialog-title" style={{ wordBreak: 'break-all' }}>
-          {' '}
           {props.thisPostTitle}
         </DialogTitle>
         <DialogContent>

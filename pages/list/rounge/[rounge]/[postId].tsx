@@ -49,6 +49,7 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import Router from 'next/router';
+import Layout from '@layouts/Layout';
 const style = {
   position: 'absolute' as 'absolute',
   top: '50%',
@@ -68,7 +69,7 @@ export const getServerSideProps: GetServerSideProps = async (
   if (context.params?.postId) {
     id = context.params.postId;
   } else id = null;
-  const docRef = doc(db, 'posts', id as string);
+  const docRef = doc(db, 'post', id as string);
   const docSnap = await getDoc(docRef);
   if (context.req.headers.referer && context.req.url)
     return {
@@ -125,7 +126,7 @@ export default function RoungePost({
     if (userLike) {
       setUserLike(false);
       setPostLikeCount(postLikeCount - 1);
-      const userDocRef = doc(db, 'posts', postId);
+      const userDocRef = doc(db, 'post', postId);
       //likeuser에서 현재 유저의 이메일 index를 찾아내서 제거함
       await updateDoc(userDocRef, {
         pressPerson: arrayRemove(uid),
@@ -133,7 +134,7 @@ export default function RoungePost({
     } else {
       setUserLike(true);
       setPostLikeCount(postLikeCount + 1);
-      const userDocRef = doc(db, 'posts', postId);
+      const userDocRef = doc(db, 'post', postId);
       //likeuser에서 현재 유저의 이메일 index를 추가함
       await updateDoc(userDocRef, {
         pressPerson: arrayUnion(uid),
@@ -154,8 +155,10 @@ export default function RoungePost({
   });
   const MomentDateChange = () => {
     const nowTime = Date.now(),
-      startTime = new Date(post.createdAt.seconds * 1000);
-
+      startTime =
+        post.updatedAt === ''
+          ? new Date(post.createdAt.seconds * 1000)
+          : new Date(post.updatedAt.seconds * 1000);
     return <Moment fromNow>{startTime}</Moment>;
   };
 
@@ -174,9 +177,9 @@ export default function RoungePost({
       dispatch(setScrollAction(0));
     }
   }, []);
-  console.log(user);
+
   useEffect(() => {
-    if (user.validRounges.map((v: any) => v.url).includes(post.rounge)) {
+    if (user.validRounges.map((v: any) => v.url).includes(post.rounge.url)) {
       setAccessPost('accessAvailable');
     } else {
       setAccessPost('noAuthority');
@@ -185,21 +188,9 @@ export default function RoungePost({
   }, []);
 
   return (
-    <Container maxWidth="sm">
-      {accessPost === '' ? (
-        <Box sx={{ mt: 6 }}>
-          <Stack spacing={2}>
-            <Skeleton variant="rectangular" width="sm" height={58} />
-            <Skeleton variant="circular" width={40} height={40} />
-            <Skeleton variant="text" width="sm" />
-            <Skeleton variant="rectangular" width="sm" height={118} />
-            <Skeleton variant="circular" width={40} height={40} />
-            <Skeleton variant="text" width="sm" />
-            <Skeleton variant="rectangular" width="sm" height={118} />
-          </Stack>
-        </Box>
-      ) : accessPost === 'noUser' ? (
-        <>
+    <Layout>
+      <Container maxWidth="sm">
+        {accessPost === '' ? (
           <Box sx={{ mt: 6 }}>
             <Stack spacing={2}>
               <Skeleton variant="rectangular" width="sm" height={58} />
@@ -211,175 +202,192 @@ export default function RoungePost({
               <Skeleton variant="rectangular" width="sm" height={118} />
             </Stack>
           </Box>
-          <Modal
-            open={modalOpen}
-            onClose={() => {
-              Router.push('/user/login');
-            }}
-            aria-labelledby="modal-modal-title"
-            aria-describedby="modal-modal-description"
-          >
-            <Box sx={style}>
-              <Typography
-                id="modal-modal-title"
-                variant="h6"
-                component="h2"
-                style={{ wordBreak: 'break-word' }}
-              >
-                로그인 후 이용해주세요
-              </Typography>
+        ) : accessPost === 'noUser' ? (
+          <>
+            <Box sx={{ mt: 6 }}>
+              <Stack spacing={2}>
+                <Skeleton variant="rectangular" width="sm" height={58} />
+                <Skeleton variant="circular" width={40} height={40} />
+                <Skeleton variant="text" width="sm" />
+                <Skeleton variant="rectangular" width="sm" height={118} />
+                <Skeleton variant="circular" width={40} height={40} />
+                <Skeleton variant="text" width="sm" />
+                <Skeleton variant="rectangular" width="sm" height={118} />
+              </Stack>
             </Box>
-          </Modal>
-        </>
-      ) : accessPost === 'noAuthority' ? (
-        <>
-          <Box sx={{ mt: 6 }}>
-            <Stack spacing={2}>
-              <Skeleton variant="rectangular" width="sm" height={58} />
-              <Skeleton variant="circular" width={40} height={40} />
-              <Skeleton variant="text" width="sm" />
-              <Skeleton variant="rectangular" width="sm" height={118} />
-              <Skeleton variant="circular" width={40} height={40} />
-              <Skeleton variant="text" width="sm" />
-              <Skeleton variant="rectangular" width="sm" height={118} />
-            </Stack>
-          </Box>
-          <Modal
-            open={notRoungemodalOpen}
-            onClose={() => {
-              Router.push('/');
-            }}
-            aria-labelledby="modal-modal-title"
-            aria-describedby="modal-modal-description"
-          >
-            <Box sx={style}>
-              <Typography
-                id="modal-modal-title"
-                variant="h6"
-                component="h2"
-                style={{ wordBreak: 'break-word' }}
-              >
-                해당 게시물의 라운지에 속해 있지 않아 게시물을 볼 수 없습니다
-              </Typography>
+            <Modal
+              open={modalOpen}
+              onClose={() => {
+                Router.push('/user/login');
+              }}
+              aria-labelledby="modal-modal-title"
+              aria-describedby="modal-modal-description"
+            >
+              <Box sx={style}>
+                <Typography
+                  id="modal-modal-title"
+                  variant="h6"
+                  component="h2"
+                  style={{ wordBreak: 'break-word' }}
+                >
+                  로그인 후 이용해주세요
+                </Typography>
+              </Box>
+            </Modal>
+          </>
+        ) : accessPost === 'noAuthority' ? (
+          <>
+            <Box sx={{ mt: 6 }}>
+              <Stack spacing={2}>
+                <Skeleton variant="rectangular" width="sm" height={58} />
+                <Skeleton variant="circular" width={40} height={40} />
+                <Skeleton variant="text" width="sm" />
+                <Skeleton variant="rectangular" width="sm" height={118} />
+                <Skeleton variant="circular" width={40} height={40} />
+                <Skeleton variant="text" width="sm" />
+                <Skeleton variant="rectangular" width="sm" height={118} />
+              </Stack>
             </Box>
-          </Modal>
-        </>
-      ) : (
-        ''
-      )}
-      {accessPost === 'accessAvailable' &&
-        (editOpen ? (
-          <EditPostForm
-            setEditOpen={setEditOpen}
-            setPost={setPost}
-            thisPostId={postId}
-            postInfo={post}
-          />
+            <Modal
+              open={notRoungemodalOpen}
+              onClose={() => {
+                Router.push('/');
+              }}
+              aria-labelledby="modal-modal-title"
+              aria-describedby="modal-modal-description"
+            >
+              <Box sx={style}>
+                <Typography
+                  id="modal-modal-title"
+                  variant="h6"
+                  component="h2"
+                  style={{ wordBreak: 'break-word' }}
+                >
+                  해당 게시물의 라운지에 속해 있지 않아 게시물을 볼 수 없습니다
+                </Typography>
+              </Box>
+            </Modal>
+          </>
         ) : (
-          accessPost === 'accessAvailable' && (
-            <Box sx={{ minWidth: 120, mt: 6 }}>
-              <CustomSeparator menu={post} />
-              <Typography
-                variant="h5"
-                component="div"
-                sx={{ mb: 2 }}
-                style={{ wordBreak: 'break-all' }}
-              >
-                {post.title}
-              </Typography>
-              <Typography
-                component="span"
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  flexWrap: 'wrap',
-                }}
-              >
-                {userLike ? (
-                  <FavoriteIcon
-                    onClick={(e) => changeLike(postId, e)}
-                    sx={{ mr: 1 }}
-                  />
-                ) : (
-                  <FavoriteBorderIcon
-                    onClick={(e) => changeLike(postId, e)}
-                    sx={{ mr: 1 }}
-                  />
-                )}
-                {postLikeCount}
-                <AccessTimeIcon sx={{ ml: 3, mr: 1 }} />
-                <MomentDateChange />
-                {/* <DriveFileRenameOutlineIcon sx={{ ml: 3, mr: 1 }} />
+          ''
+        )}
+        {accessPost === 'accessAvailable' &&
+          (editOpen ? (
+            <EditPostForm
+              setEditOpen={setEditOpen}
+              setPost={setPost}
+              thisPostId={postId}
+              postInfo={post}
+            />
+          ) : (
+            accessPost === 'accessAvailable' && (
+              <Box sx={{ minWidth: 120, mt: 6 }}>
+                <CustomSeparator menu={post} />
+                <Typography
+                  variant="h5"
+                  component="div"
+                  sx={{ mb: 2 }}
+                  style={{ wordBreak: 'break-all' }}
+                >
+                  {post.title}
+                </Typography>
+                <Typography
+                  component="div"
+                  sx={{ mb: 2 }}
+                  style={{ wordBreak: 'break-all' }}
+                >
+                  {post.nickname} ({post.job})
+                </Typography>
+                <Typography
+                  component="span"
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  {userLike ? (
+                    <FavoriteIcon
+                      onClick={(e) => changeLike(postId, e)}
+                      sx={{ mr: 1 }}
+                    />
+                  ) : (
+                    <FavoriteBorderIcon
+                      onClick={(e) => changeLike(postId, e)}
+                      sx={{ mr: 1 }}
+                    />
+                  )}
+                  {postLikeCount}
+                  <AccessTimeIcon sx={{ ml: 3, mr: 1 }} />
+                  <MomentDateChange />
+                  {post.updatedAt === '' ? '' : '(수정됨)'}
+                  {/* <DriveFileRenameOutlineIcon sx={{ ml: 3, mr: 1 }} />
           수정하기 */}
-                {post.userId === uid ? (
-                  <>
-                    <UpdateLink
-                      thisUser={user.id}
-                      thisPost={postId}
-                      setEditOpen={setEditOpen}
-                    />
-                    <DeleteLink
-                      thisUser={user.id}
-                      thisPost={postId}
-                      thisPostTitle={post.title}
-                    />
-                  </>
-                ) : (
-                  ''
-                )}
-              </Typography>
-              <Divider sx={{ mt: 1, mb: 2 }} />
-              <Typography
-                sx={{ mb: 2 }}
-                style={{ whiteSpace: 'pre-line', wordBreak: 'break-all' }}
-              >
-                {/* <div style={{ whiteSpace: 'pre-line' }}>{post.content}</div> */}
-                {post.content}
-              </Typography>
-              <Box
-                sx={{
-                  mt: 3,
-                  justifyContent: 'center',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                }}
-              >
-                {post.image.length !== 0 &&
-                  post.image.map((v: any, i: number) => {
-                    return (
-                      <Box
-                        key={v.url}
-                        sx={{
-                          mt: 3,
-                          justifyContent: 'center',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                        }}
-                      >
-                        <img src={v.url} style={{ maxWidth: '100%' }} />
-                        <Typography
-                          sx={{ mb: 2, mt: 1 }}
-                          style={{
-                            whiteSpace: 'pre-line',
-                            wordBreak: 'break-all',
+                  {post.userId === uid ? (
+                    <>
+                      <UpdateLink
+                        thisUser={uid}
+                        thisPost={postId}
+                        setEditOpen={setEditOpen}
+                      />
+                      <DeleteLink
+                        thisUser={uid}
+                        thisPost={postId}
+                        thisPostTitle={post.title}
+                      />
+                    </>
+                  ) : (
+                    ''
+                  )}
+                </Typography>
+                <Divider sx={{ mt: 1, mb: 2 }} />
+                <Typography
+                  sx={{ mb: 2 }}
+                  style={{ whiteSpace: 'pre-line', wordBreak: 'break-all' }}
+                >
+                  {/* <div style={{ whiteSpace: 'pre-line' }}>{post.content}</div> */}
+                  {post.content}
+                </Typography>
+                <Box
+                  sx={{
+                    mt: 3,
+                    justifyContent: 'center',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                  }}
+                >
+                  {post.image.length !== 0 &&
+                    post.image.map((v: any, i: number) => {
+                      return (
+                        <Box
+                          key={v.url}
+                          sx={{
+                            mt: 3,
+                            justifyContent: 'center',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
                           }}
                         >
-                          {v.imgDetail}
-                        </Typography>
-                      </Box>
-                    );
-                  })}
+                          <img src={v.url} style={{ maxWidth: '100%' }} />
+                          <Typography
+                            sx={{ mb: 2, mt: 1 }}
+                            style={{
+                              whiteSpace: 'pre-line',
+                              wordBreak: 'break-all',
+                            }}
+                          >
+                            {v.imgDetail}
+                          </Typography>
+                        </Box>
+                      );
+                    })}
+                </Box>
               </Box>
-              <CardActions>
-                <Link href="/">
-                  <Button size="small">뒤로가기</Button>
-                </Link>
-              </CardActions>
-            </Box>
-          )
-        ))}
-    </Container>
+            )
+          ))}
+      </Container>
+    </Layout>
   );
 }

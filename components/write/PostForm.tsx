@@ -49,6 +49,8 @@ import { useSelector } from 'react-redux';
 import { withRouter } from 'next/router';
 import { StoreState, UserState } from '@interface/StoreInterface';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { ValidRounge } from '../../interface/StoreInterface';
+import Layout from '@layouts/Layout';
 
 const style = {
   position: 'absolute' as 'absolute',
@@ -105,6 +107,9 @@ const PostForm = () => {
     title: '',
     url: '',
   });
+  //memuselector
+  const [topicMenu, setTopicMenu] = useState<any>('');
+  const [roungeMenu, setRoungeMenu] = useState<any>('');
   //photoupload 확인 아이콘-아직 미구현
   const [loading, setLoading] = React.useState(false);
   const [success, setSuccess] = React.useState(false);
@@ -116,6 +121,30 @@ const PostForm = () => {
   const metadata = {
     contentType: 'image/jpeg',
   };
+
+  //rounge,topic 바뀔때마다 세부주제value값 menu에 반영
+  useEffect(() => {
+    if (post.postType === 'topic') {
+      const topicArr = [
+        { title: '연말정산', url: 'hometax' },
+        { title: '여행', url: 'travel' },
+        { title: '블라블라', url: 'blabla' },
+        { title: '주식투자', url: 'stock' },
+      ];
+      for (let i = 0; i < 4; i++) {
+        if (topicArr[i].title === topicMenu) {
+          setPostTopic(topicArr[i]);
+        }
+      }
+    } else if (post.postType === 'rounge') {
+      for (let i = 0; i < user.validRounges.length; i++) {
+        if (user.validRounges[i].title === roungeMenu) {
+          setPostRounge(user.validRounges[i]);
+        }
+      }
+    }
+  }, [topicMenu, roungeMenu]);
+
   const showAlert = (type: any, msg: any) => {
     setAlertType(type);
     setAlertMessage(msg);
@@ -186,9 +215,11 @@ const PostForm = () => {
         nickname: user.nickname,
         createdAt: serverTimestamp(),
         image: image,
+        commentsCount: 0,
+        urlKey: 'topic',
       };
 
-      const { id: newId } = await addDoc(collectionRef, { putObj });
+      const { id: newId } = await addDoc(collectionRef, putObj);
       //새로 생성된 post id를 user 정보에 추가
 
       const docRef = doc(db, 'user', uid);
@@ -200,7 +231,7 @@ const PostForm = () => {
       //새로 생성된 post id를 post 정보에 추가
       const docPostRef = doc(db, 'post', newId);
       const PostUpdate = {
-        ...post,
+        ...putObj,
         postId: newId,
       };
       updateDoc(docPostRef, PostUpdate);
@@ -214,7 +245,7 @@ const PostForm = () => {
         content: post.content,
         pressPerson: [],
         postId: '',
-        postType: 'topic',
+        postType: 'rounge',
         rounge: postRounge,
         updatedAt: '',
         userId: uid,
@@ -222,9 +253,11 @@ const PostForm = () => {
         nickname: user.nickname,
         createdAt: serverTimestamp(),
         image: image,
+        commentsCount: 0,
+        urlKey: postRounge.url,
       };
 
-      const { id: newId } = await addDoc(collectionRef, { putObj });
+      const { id: newId } = await addDoc(collectionRef, putObj);
       //새로 생성된 post id를 user 정보에 추가
 
       const docRef = doc(db, 'user', uid);
@@ -236,7 +269,7 @@ const PostForm = () => {
       //새로 생성된 post id를 post 정보에 추가
       const docPostRef = doc(db, 'post', newId);
       const PostUpdate = {
-        ...post,
+        ...putObj,
         postId: newId,
       };
       updateDoc(docPostRef, PostUpdate);
@@ -332,163 +365,154 @@ const PostForm = () => {
   // };
 
   return (
-    <Container maxWidth="sm">
-      <Box sx={{ minWidth: 120, mt: 6 }}>
-        <FormControl fullWidth>
-          <InputLabel id="demo-simple-select-label">등록위치</InputLabel>
-          <Select
-            labelId="demo-simple-select-label"
-            id="demo-simple-select"
-            value={post.postType}
-            label="postMenu"
-            onChange={(e) => setPost({ ...post, postType: e.target.value })}
-          >
-            <MenuItem value={'rounge'}>라운지</MenuItem>
-            <MenuItem value={'topic'}>토픽</MenuItem>
-          </Select>
-        </FormControl>
-      </Box>
-      {post.postType === 'topic' && (
-        <Box sx={{ minWidth: 120, mt: 3 }}>
+    <Layout>
+      <Container maxWidth="sm">
+        <Box sx={{ minWidth: 120, mt: 6 }}>
           <FormControl fullWidth>
-            <InputLabel id="demo-simple-select-label">토픽</InputLabel>
+            <InputLabel id="demo-simple-select-label">등록위치</InputLabel>
             <Select
               labelId="demo-simple-select-label"
               id="demo-simple-select"
-              value={postTopic.title}
+              value={post.postType}
               label="postMenu"
-              onChange={(e) =>
-                setPostTopic({
-                  title: e.target.value[1],
-                  url: e.target.value[0],
-                })
-              }
+              onChange={(e) => setPost({ ...post, postType: e.target.value })}
             >
-              <MenuItem value={['hometax', '연말정산']}>연말정산</MenuItem>
-              <MenuItem value={['travel', '여행']}>여행</MenuItem>
-              <MenuItem value={['blabla', '블라블라']}>블라블라</MenuItem>
-              <MenuItem value={['stock', '주식투자']}>주식투자</MenuItem>
+              <MenuItem value={'rounge'}>라운지</MenuItem>
+              <MenuItem value={'topic'}>토픽</MenuItem>
             </Select>
           </FormControl>
         </Box>
-      )}
-      {post.postType === 'rounge' && (
-        <Box sx={{ minWidth: 120, mt: 3 }}>
-          <FormControl fullWidth>
-            <InputLabel id="demo-simple-select-label">라운지</InputLabel>
-            <Select
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
-              value={postRounge}
-              label="RoungeMenu"
-              onChange={(e) =>
-                setPostRounge({
-                  title: e.target.value.title,
-                  url: e.target.value.url,
-                })
-              }
-            >
-              {user.validRounges &&
-                user.validRounges.map((v: any, i: number) => {
-                  return (
-                    <MenuItem value={v} key={v.url}>
-                      {v.title}
-                    </MenuItem>
-                  );
-                })}
-            </Select>
-          </FormControl>
-        </Box>
-      )}
-      <Snackbar
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        open={open}
-        autoHideDuration={6000}
-      >
-        <Alert
-          onClose={handleClose}
-          severity={alertType}
-          sx={{ width: '100%' }}
+        {post.postType === 'topic' && (
+          <Box sx={{ minWidth: 120, mt: 3 }}>
+            <FormControl fullWidth>
+              <InputLabel id="demo-simple-select-label">토픽</InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={topicMenu}
+                label="postMenu"
+                onChange={(e) => setTopicMenu(e.target.value)}
+              >
+                <MenuItem value={'연말정산'}>연말정산</MenuItem>
+                <MenuItem value={'여행'}>여행</MenuItem>
+                <MenuItem value={'블라블라'}>블라블라</MenuItem>
+                <MenuItem value={'주식투자'}>주식투자</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+        )}
+        {post.postType === 'rounge' && (
+          <Box sx={{ minWidth: 120, mt: 3 }}>
+            <FormControl fullWidth>
+              <InputLabel id="demo-simple-select-label">라운지</InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={roungeMenu}
+                label="RoungeMenu"
+                onChange={(e) => setRoungeMenu(e.target.value)}
+              >
+                {user.validRounges &&
+                  user.validRounges.map((v: any, i: number) => {
+                    return (
+                      <MenuItem value={v.title} key={v.url}>
+                        {v.title}
+                      </MenuItem>
+                    );
+                  })}
+              </Select>
+            </FormControl>
+          </Box>
+        )}
+        <Snackbar
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          open={open}
+          autoHideDuration={6000}
         >
-          {alertMessage}
-        </Alert>
-      </Snackbar>
+          <Alert
+            onClose={handleClose}
+            severity={alertType}
+            sx={{ width: '100%' }}
+          >
+            {alertMessage}
+          </Alert>
+        </Snackbar>
 
-      <div>
-        <TextField
-          fullWidth
-          variant="standard"
-          label="제목을 입력해주세요"
-          multiline
-          sx={{ mt: 2 }}
-          value={post.title}
-          onChange={(e) => setPost({ ...post, title: e.target.value })}
-        />
-        <TextField
-          sx={{ mt: 2 }}
-          fullWidth
-          variant="standard"
-          label="내용을 입력해주세요"
-          multiline
-          value={post.content}
-          onChange={(e) => setPost({ ...post, content: e.target.value })}
-        />
-      </div>
-      <Box sx={{ mt: 2 }}></Box>
-      {imgList &&
-        imgList.map((v: any, i: number) => {
-          return (
-            <Box
-              key={i}
-              sx={{
-                justifyContent: 'center',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-              }}
-            >
-              <img src={v[0]} style={{ maxWidth: '100%' }} alt={v[0]} />
-              <Button
-                sx={{ position: 'relative' }}
-                onClick={() => {
-                  deleteClick(imgList[i][1]);
-                  let delArr = [...imgList];
-                  delArr.splice(i, 1);
-                  setImgList(delArr);
+        <div>
+          <TextField
+            fullWidth
+            variant="standard"
+            label="제목을 입력해주세요"
+            multiline
+            sx={{ mt: 2 }}
+            value={post.title}
+            onChange={(e) => setPost({ ...post, title: e.target.value })}
+          />
+          <TextField
+            sx={{ mt: 2 }}
+            fullWidth
+            variant="standard"
+            label="내용을 입력해주세요"
+            multiline
+            value={post.content}
+            onChange={(e) => setPost({ ...post, content: e.target.value })}
+          />
+        </div>
+        <Box sx={{ mt: 2 }}></Box>
+        {imgList &&
+          imgList.map((v: any, i: number) => {
+            return (
+              <Box
+                key={i}
+                sx={{
+                  justifyContent: 'center',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
                 }}
               >
-                삭제하기
-              </Button>
-              <TextField
-                sx={{ mt: 2 }}
-                fullWidth
-                variant="standard"
-                label="사진에 대한 설명을 입력해주세요(선택)"
-                multiline
-                onChange={(e) => {
-                  let ImgArr = [...imgList];
-                  ImgArr[i][2] = e.target.value;
-                  setImgList(ImgArr);
-                }}
-              />
-            </Box>
-          );
-        })}
+                <img src={v[0]} style={{ maxWidth: '100%' }} alt={v[0]} />
+                <Button
+                  sx={{ position: 'relative' }}
+                  onClick={() => {
+                    deleteClick(imgList[i][1]);
+                    let delArr = [...imgList];
+                    delArr.splice(i, 1);
+                    setImgList(delArr);
+                  }}
+                >
+                  삭제하기
+                </Button>
+                <TextField
+                  sx={{ mt: 2 }}
+                  fullWidth
+                  variant="standard"
+                  label="사진에 대한 설명을 입력해주세요(선택)"
+                  multiline
+                  onChange={(e) => {
+                    let ImgArr = [...imgList];
+                    ImgArr[i][2] = e.target.value;
+                    setImgList(ImgArr);
+                  }}
+                />
+              </Box>
+            );
+          })}
 
-      <div>
-        <label
-          htmlFor="ex_file"
-          style={{
-            display: 'inline-block',
-            fontSize: 'inherit',
-            lineHeight: 'normal',
-            verticalAlign: 'middle',
-            cursor: 'pointer',
-          }}
-        >
-          {/* photoupload아이콘 */}
-          {/* 우선 미구현 */}
-          {/* <Box sx={{ position: 'relative' }}>
+        <div>
+          <label
+            htmlFor="ex_file"
+            style={{
+              display: 'inline-block',
+              fontSize: 'inherit',
+              lineHeight: 'normal',
+              verticalAlign: 'middle',
+              cursor: 'pointer',
+            }}
+          >
+            {/* photoupload아이콘 */}
+            {/* 우선 미구현 */}
+            {/* <Box sx={{ position: 'relative' }}>
             <Fab aria-label="save" color="primary" sx={buttonSx}>
               {success ? <CheckIcon /> : <SaveIcon />}
             </Fab>
@@ -506,78 +530,89 @@ const PostForm = () => {
             )}
           </Box> */}
 
-          <AddAPhotoIcon sx={{ mt: 4, fontSize: 40 }} />
+            <AddAPhotoIcon sx={{ mt: 4, fontSize: 40 }} />
+            <br />
+
+            {progress === 100 ? (
+              <div>업로드 완료</div>
+            ) : progress === 0 ? (
+              ''
+            ) : (
+              <div>{progress}% 업로드중...</div>
+            )}
+
+            <progress value={progress} max="100" />
+          </label>
+          <input
+            type="file"
+            id="ex_file"
+            style={{
+              position: 'absolute',
+              width: '0',
+              height: '0',
+              padding: '0',
+              margin: '-1px',
+              overflow: 'hidden',
+              clip: 'rect(0, 0, 0, 0)',
+              border: '0',
+            }}
+            onChange={handleUploadChange}
+          />
+          {/* <Button onClick={handleUpload}>Upload</Button> */}
           <br />
+          {url}
+          <br />
+        </div>
 
-          {progress === 100 ? (
-            <div>업로드 완료</div>
-          ) : progress === 0 ? (
-            ''
-          ) : (
-            <div>{progress}% 업로드중...</div>
-          )}
-
-          <progress value={progress} max="100" />
-        </label>
-        <input
-          type="file"
-          id="ex_file"
-          style={{
-            position: 'absolute',
-            width: '0',
-            height: '0',
-            padding: '0',
-            margin: '-1px',
-            overflow: 'hidden',
-            clip: 'rect(0, 0, 0, 0)',
-            border: '0',
+        <Box
+          sx={{
+            mt: 3,
+            display: 'flex',
+            justifyContent: 'space-between',
+            borderRadius: 1,
           }}
-          onChange={handleUploadChange}
-        />
-        {/* <Button onClick={handleUpload}>Upload</Button> */}
-        <br />
-        {url}
-        <br />
-      </div>
-
-      <Box
-        sx={{
-          mt: 3,
-          display: 'flex',
-          justifyContent: 'space-between',
-          borderRadius: 1,
-        }}
-      >
-        <Link href="/" passHref>
-          <Button variant="contained">메인으로 이동</Button>
-        </Link>
-        <Button variant="contained" onClick={onSubmit}>
-          게시물 작성
-        </Button>
-      </Box>
-      <Modal
-        open={modalOpen}
-        onClose={() => {
-          Router.push('/');
-        }}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box sx={style}>
-          <Typography
-            id="modal-modal-title"
-            variant="h6"
-            component="h2"
-            style={{ wordBreak: 'break-word' }}
-          >
-            {post.title}
-          </Typography>
-          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-            게시물을 등록하였습니다
-          </Typography>
+        >
+          <Link href="/" passHref>
+            <Button variant="contained">메인으로 이동</Button>
+          </Link>
+          <Button variant="contained" onClick={onSubmit}>
+            게시물 작성
+          </Button>
         </Box>
-      </Modal>
-    </Container>
+        <Box
+          sx={{
+            mt: 10,
+            display: 'flex',
+            justifyContent: 'space-between',
+            borderRadius: 1,
+          }}
+        >
+          <Typography></Typography>
+        </Box>
+        <Modal
+          open={modalOpen}
+          onClose={() => {
+            Router.push('/');
+          }}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+        >
+          <Box sx={style}>
+            <Typography
+              id="modal-modal-title"
+              variant="h6"
+              component="h2"
+              style={{ wordBreak: 'break-word' }}
+            >
+              {post.title}
+            </Typography>
+            <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+              게시물을 등록하였습니다
+            </Typography>
+          </Box>
+        </Modal>
+      </Container>
+    </Layout>
   );
 };
 

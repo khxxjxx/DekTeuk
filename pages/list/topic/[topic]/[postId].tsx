@@ -45,6 +45,7 @@ import UpdateLink from '@components/post/UpdateLink';
 import DeleteLink from '@components/post/DeleteLink';
 import EditPostForm from '@components/write/EditPostForm';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import Layout from '@layouts/Layout';
 
 export const getServerSideProps: GetServerSideProps = async (
   // context: GetServerSidePropsContext,
@@ -54,7 +55,7 @@ export const getServerSideProps: GetServerSideProps = async (
   if (context.params?.postId) {
     id = context.params.postId;
   } else id = null;
-  const docRef = doc(db, 'posts', id as string);
+  const docRef = doc(db, 'post', id as string);
   const docSnap = await getDoc(docRef);
   if (context.req.headers.referer && context.req.url)
     return {
@@ -98,7 +99,7 @@ export default function TopicPost({
     if (userLike) {
       setUserLike(false);
       setPostLikeCount(postLikeCount - 1);
-      const userDocRef = doc(db, 'posts', postId);
+      const userDocRef = doc(db, 'post', postId);
       //likeuser에서 현재 유저의 이메일 index를 찾아내서 제거함
       await updateDoc(userDocRef, {
         pressPerson: arrayRemove(uid),
@@ -106,14 +107,14 @@ export default function TopicPost({
     } else {
       setUserLike(true);
       setPostLikeCount(postLikeCount + 1);
-      const userDocRef = doc(db, 'posts', postId);
+      const userDocRef = doc(db, 'post', postId);
       //likeuser에서 현재 유저의 이메일 index를 추가함
       await updateDoc(userDocRef, {
         pressPerson: arrayUnion(uid),
       });
     }
   };
-
+  //postid,postuserid가 필요
   const auth = getAuth();
   onAuthStateChanged(auth, (user) => {
     if (user) {
@@ -127,7 +128,10 @@ export default function TopicPost({
   });
   const MomentDateChange = () => {
     const nowTime = Date.now(),
-      startTime = new Date(post.createdAt.seconds * 1000);
+      startTime =
+        post.updatedAt === ''
+          ? new Date(post.createdAt.seconds * 1000)
+          : new Date(post.updatedAt.seconds * 1000);
 
     return <Moment fromNow>{startTime}</Moment>;
   };
@@ -149,114 +153,122 @@ export default function TopicPost({
   }, []);
 
   return (
-    <Container maxWidth="sm">
-      {editOpen ? (
-        <EditPostForm
-          setEditOpen={setEditOpen}
-          setPost={setPost}
-          thisPostId={postId}
-          postInfo={post}
-        />
-      ) : (
-        <Box sx={{ minWidth: 120, mt: 6 }}>
-          <CustomSeparator menu={post} />
-          <Typography
-            variant="h5"
-            component="div"
-            sx={{ mb: 2 }}
-            style={{ wordBreak: 'break-all' }}
-          >
-            {post.title}
-          </Typography>
-          <Typography
-            component="span"
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              flexWrap: 'wrap',
-            }}
-          >
-            {userLike ? (
-              <FavoriteIcon
-                onClick={(e) => changeLike(postId, e)}
-                sx={{ mr: 1 }}
-              />
-            ) : (
-              <FavoriteBorderIcon
-                onClick={(e) => changeLike(postId, e)}
-                sx={{ mr: 1 }}
-              />
-            )}
-            {postLikeCount}
-            <AccessTimeIcon sx={{ ml: 3, mr: 1 }} />
-            <MomentDateChange />
-            {/* <DriveFileRenameOutlineIcon sx={{ ml: 3, mr: 1 }} />
+    <Layout>
+      <Container maxWidth="sm">
+        {editOpen ? (
+          <EditPostForm
+            setEditOpen={setEditOpen}
+            setPost={setPost}
+            thisPostId={postId}
+            postInfo={post}
+          />
+        ) : (
+          <Box sx={{ minWidth: 120, mt: 6 }}>
+            <CustomSeparator menu={post} />
+            <Typography
+              variant="h4"
+              component="div"
+              sx={{ mb: 2 }}
+              style={{ wordBreak: 'break-all' }}
+            >
+              {post.title}
+            </Typography>
+            <Typography
+              component="div"
+              sx={{ mb: 2 }}
+              style={{ wordBreak: 'break-all' }}
+            >
+              {post.nickname} ({post.job})
+            </Typography>
+            <Typography
+              component="span"
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+              }}
+            >
+              {userLike ? (
+                <FavoriteIcon
+                  onClick={(e) => changeLike(postId, e)}
+                  sx={{ mr: 1 }}
+                />
+              ) : (
+                <FavoriteBorderIcon
+                  onClick={(e) => changeLike(postId, e)}
+                  sx={{ mr: 1 }}
+                />
+              )}
+              {postLikeCount}
+              <AccessTimeIcon sx={{ ml: 3, mr: 1 }} />
+              <MomentDateChange />
+              {post.updatedAt === '' ? '' : '(수정됨)'}
+              {/* <DriveFileRenameOutlineIcon sx={{ ml: 3, mr: 1 }} />
           수정하기 */}
-            {post.userId === user.id ? (
-              <>
-                <UpdateLink
-                  thisUser={user.id}
-                  thisPost={postId}
-                  setEditOpen={setEditOpen}
-                />
-                <DeleteLink
-                  thisUser={user.id}
-                  thisPost={postId}
-                  thisPostTitle={post.title}
-                />
-              </>
-            ) : (
-              ''
-            )}
-          </Typography>
-          <Divider sx={{ mt: 1, mb: 2 }} />
-          <Typography
-            sx={{ mb: 2 }}
-            style={{ whiteSpace: 'pre-line', wordBreak: 'break-all' }}
-          >
-            {/* <div style={{ whiteSpace: 'pre-line' }}>{post.content}</div> */}
-            {post.content}
-          </Typography>
-          <Box
-            sx={{
-              mt: 3,
-              justifyContent: 'center',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-            }}
-          >
-            {post.image.length !== 0 &&
-              post.image.map((v: any, i: number) => {
-                return (
-                  <Box
-                    key={v.url}
-                    sx={{
-                      mt: 3,
-                      justifyContent: 'center',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <img src={v.url} style={{ maxWidth: '100%' }} />
-                    <Typography
-                      sx={{ mb: 2, mt: 1 }}
-                      style={{ whiteSpace: 'pre-line', wordBreak: 'break-all' }}
+              {post.userId === uid ? (
+                <>
+                  <UpdateLink
+                    thisUser={uid}
+                    thisPost={postId}
+                    setEditOpen={setEditOpen}
+                  />
+                  <DeleteLink
+                    thisUser={uid}
+                    thisPost={postId}
+                    thisPostTitle={post.title}
+                  />
+                </>
+              ) : (
+                ''
+              )}
+            </Typography>
+            <Divider sx={{ mt: 1, mb: 2 }} />
+            <Typography
+              sx={{ mb: 2 }}
+              style={{ whiteSpace: 'pre-line', wordBreak: 'break-all' }}
+            >
+              {/* <div style={{ whiteSpace: 'pre-line' }}>{post.content}</div> */}
+              {post.content}
+            </Typography>
+            <Box
+              sx={{
+                mt: 3,
+                justifyContent: 'center',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+              }}
+            >
+              {post.image.length !== 0 &&
+                post.image.map((v: any, i: number) => {
+                  return (
+                    <Box
+                      key={v.url}
+                      sx={{
+                        mt: 3,
+                        justifyContent: 'center',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                      }}
                     >
-                      {v.imgDetail}
-                    </Typography>
-                  </Box>
-                );
-              })}
+                      <img src={v.url} style={{ maxWidth: '100%' }} />
+                      <Typography
+                        sx={{ mb: 2, mt: 1 }}
+                        style={{
+                          whiteSpace: 'pre-line',
+                          wordBreak: 'break-all',
+                        }}
+                      >
+                        {v.imgDetail}
+                      </Typography>
+                    </Box>
+                  );
+                })}
+            </Box>
           </Box>
-          <CardActions>
-            <Link href="/" passHref>
-              <Button size="small">뒤로가기</Button>
-            </Link>
-          </CardActions>
-        </Box>
-      )}
-    </Container>
+        )}
+      </Container>
+    </Layout>
   );
 }
