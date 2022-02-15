@@ -74,15 +74,19 @@ const ChatRoom = ({ user }: { user: Person }) => {
       downloadImg(key);
     } else {
       for (let i = 0; i < imgData!.src.length; i++) {
-        onSendMessage(imgData!.src[i] as string);
+        const img = {
+          src: imgData!.src[i],
+          file: imgData!.file[i],
+        };
+        onSendMessage(img);
       }
     }
     setImgData(null);
   };
 
-  const onSendMessage = async (img?: string) => {
+  const onSendMessage = async (img?: ImgType) => {
     if (img) {
-      await sendMessage(chatId, img, 'img', user.id);
+      await sendMessage(chatId, img.src as string, 'img', user.id, img.file);
     } else {
       const value = inputValue.current!.value;
       inputValue.current!.value = '';
@@ -176,7 +180,7 @@ const ChatRoom = ({ user }: { user: Person }) => {
 
   return (
     <Fragment>
-      {imgData && (
+      {imgData && imgData.src.length > 0 && (
         <ImgPreviewModal
           imgData={imgData}
           setImgData={setImgData}
@@ -279,7 +283,6 @@ export const getServerSideProps = wrapper.getServerSideProps(
     const data = store.getState();
 
     if (data.user.user.nickname == '') {
-      // todo: 초기값을 판단하는 근거가 이상함...
       return {
         redirect: {
           destination: '/404',
