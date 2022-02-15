@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useReducer } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import styled from '@emotion/styled';
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
@@ -17,14 +17,13 @@ import {
 import { getStorage, ref, uploadString } from 'firebase/storage';
 import { useRouter } from 'next/router';
 import MenuItem from '@mui/material/MenuItem';
-import { UserInfo } from '@interface/StoreInterface';
 import { UserInputData, userInputInitialState, jobSectors } from './constants';
 import { getAuth } from 'firebase/auth';
 import { userInputValidation } from '@utils/userInputValidation';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-
+import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 const reducer = (state: UserInputData, action: any) => {
   return {
     ...state,
@@ -38,7 +37,6 @@ export default function Google() {
     reducer,
     userInputInitialState,
   );
-  const [error, setError] = useState<boolean>(false);
   const [email, setEmail] = useState<string>('');
   const [imageUrl, setImageUrl] = useState<string>('');
   const [imageExt, setImageExt] = useState<string>('');
@@ -64,7 +62,7 @@ export default function Google() {
       alert('증명서 파일을 찾을 수 없습니다!');
       return;
     }
-    const userInitData = {
+    const userData = {
       nickname: nickname.value,
       jobSector: jobSector.value,
       validRounges: [
@@ -89,7 +87,7 @@ export default function Google() {
     };
     uploadImg(uid!);
     console.log('success');
-    const docSnap = await setDoc(doc(db, 'user', uid!), userInitData);
+    const docSnap = await setDoc(doc(db, 'user', uid!), userData);
     console.log(docSnap);
     await signOut(auth);
     router.push('/user/login');
@@ -114,10 +112,8 @@ export default function Google() {
     let nicknameHelperText;
     if (nicknameCheckSnap.docs.length !== 0 || nickname.value.length < 3) {
       nicknameHelperText = '사용 불가능한 닉네임 입니다!';
-      setError(true);
     } else {
       nicknameHelperText = '사용 가능한 닉네임 입니다!';
-      setError(false);
     }
   };
 
@@ -238,6 +234,17 @@ export default function Google() {
     </>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async (
+  context: GetServerSidePropsContext,
+) => {
+  if (!context.req.headers.referer) {
+    context.res.statusCode = 302;
+    context.res.setHeader('Location', `/`);
+    context.res.end();
+  }
+  return { props: {} };
+};
 
 const Main = styled.div`
   display: flex;

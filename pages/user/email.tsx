@@ -7,7 +7,6 @@ import Button from '@mui/material/Button';
 import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
-  signInWithPopup,
   GoogleAuthProvider,
   signOut,
 } from 'firebase/auth';
@@ -16,7 +15,6 @@ import {
   doc,
   setDoc,
   getDocs,
-  getDoc,
   collection,
   query,
   where,
@@ -24,8 +22,6 @@ import {
 import { getStorage, ref, uploadString } from 'firebase/storage';
 import { useRouter } from 'next/router';
 import MenuItem from '@mui/material/MenuItem';
-import { UserInfo } from '@interface/StoreInterface';
-import { setNewUserInfo } from '@store/reducer';
 import {
   userInputInitialState,
   jobSectors,
@@ -39,6 +35,7 @@ import {
   userInputValidation,
   inputErrorCheck,
 } from '@utils/userInputValidation';
+import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 
 const reducer = (state: UserInputData, action: any) => {
   return {
@@ -55,17 +52,9 @@ export default function Signup() {
     reducer,
     userInputInitialState,
   );
-  const provider = new GoogleAuthProvider();
-  const [error, setError] = useState<boolean>(false);
+
   const [imageUrl, setImageUrl] = useState<string>('');
   const [imageExt, setImageExt] = useState<string>('');
-  const [inputHelpers, setInputHelpers] = useState<InputHelperText>({
-    email: '',
-    password: '6자리 이상 입력 해 주세요',
-    checkPassword: '비밀번호가 같지 않습니다.',
-    nickname: '',
-    jobSector: '직종을 선택 해 주세요',
-  });
 
   const { email, password, checkPassword, nickname, jobSector } = inputState;
 
@@ -319,6 +308,17 @@ export default function Signup() {
   );
 }
 
+export const getServerSideProps: GetServerSideProps = async (
+  context: GetServerSidePropsContext,
+) => {
+  if (!context.req.headers.referer) {
+    context.res.statusCode = 302;
+    context.res.setHeader('Location', `/`);
+    context.res.end();
+  }
+  return { props: {} };
+};
+
 const Main = styled.div`
   display: flex;
   align-items: center;
@@ -360,19 +360,6 @@ const CheckButton = styled.button`
   }
 `;
 
-const GoogleButton = styled(Button)`
-  background: #8946a6;
-  border-radius: 5px;
-  border: none;
-  color: white;
-
-  margin: 5px;
-  font-size: 12px;
-  cursor: pointer;
-  :hover {
-    opacity: 0.8;
-  }
-`;
 const SubmitButton = styled.button`
   background: #8946a6;
   border-radius: 5px;

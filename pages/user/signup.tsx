@@ -10,7 +10,7 @@ import { setNewUserInfo } from '@store/reducer';
 import GoogleIcon from '@mui/icons-material/Google';
 import EmailIcon from '@mui/icons-material/Email';
 import LoginIcon from '@mui/icons-material/Login';
-
+import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 export default function SignUpIndex() {
   const router = useRouter();
   const provider = new GoogleAuthProvider();
@@ -42,12 +42,12 @@ export default function SignUpIndex() {
         <h1 style={{ color: '#8946A6' }}>회원가입</h1>
         <WrapContents>
           <WrapInput>
-            <SignupButton>
-              <EmailIcon />
-              <Link href="/user/email" passHref>
+            <Link href="/user/email" passHref>
+              <SignupButton>
+                <EmailIcon />
                 이메일 계정으로 회원가입
-              </Link>
-            </SignupButton>
+              </SignupButton>
+            </Link>
             <SignupButton onClick={loginWithGoogle}>
               <GoogleIcon />
               구글 계정으로 회원가입
@@ -56,17 +56,28 @@ export default function SignUpIndex() {
           <WrapButton>
             <Label>이미 가입되어 있으시다면</Label>
           </WrapButton>
-          <SignupButton>
-            <LoginIcon />
-            <Link href="/user/login" passHref>
+          <Link href="/user/login" passHref>
+            <SignupButton>
+              <LoginIcon />
               로그인 페이지로 이동하기
-            </Link>
-          </SignupButton>
+            </SignupButton>
+          </Link>
         </WrapContents>
       </Main>
     </>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async (
+  context: GetServerSidePropsContext,
+) => {
+  if (!context.req.headers.referer) {
+    context.res.statusCode = 302;
+    context.res.setHeader('Location', `/`);
+    context.res.end();
+  }
+  return { props: {} };
+};
 
 const Main = styled.div`
   display: flex;

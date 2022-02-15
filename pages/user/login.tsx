@@ -12,12 +12,14 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db, auth } from '@firebase/firebase';
 import { useRouter } from 'next/router';
 import { setNewUserInfo } from '@store/reducer';
-import nookies from 'nookies';
-import { firebaseAdmin } from '@firebase/firebaseAdmin';
-import { InferGetServerSidePropsType, GetServerSidePropsContext } from 'next';
+
+import { GetServerSideProps, GetServerSidePropsContext } from 'next';
+
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import GoogleIcon from '@mui/icons-material/Google';
 import LoginIcon from '@mui/icons-material/Login';
+import Layout from '@layouts/Layout';
+
 export default function Login() {
   const router = useRouter();
   const provider = new GoogleAuthProvider();
@@ -101,8 +103,11 @@ export default function Login() {
             <WrapButton>
               <Button>
                 <GroupAddIcon style={{ marginRight: '10px' }} />
-                <Link href="/user/signup">회원가입</Link>
+                <Link href="/user/signup" passHref>
+                  회원가입
+                </Link>
               </Button>
+
               <Button type="button" onClick={loginWithGoogle}>
                 <GoogleIcon style={{ marginRight: '10px' }} />
                 Google
@@ -118,7 +123,16 @@ export default function Login() {
     </>
   );
 }
-
+export const getServerSideProps: GetServerSideProps = async (
+  context: GetServerSidePropsContext,
+) => {
+  if (!context.req.headers.referer) {
+    context.res.statusCode = 302;
+    context.res.setHeader('Location', `/`);
+    context.res.end();
+  }
+  return { props: {} };
+};
 const Main = styled.div`
   display: flex;
   align-items: center;
