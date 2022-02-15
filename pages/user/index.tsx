@@ -7,6 +7,10 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db, auth } from '@firebase/firebase';
 import { useRouter } from 'next/router';
 import { setNewUserInfo } from '@store/reducer';
+import GoogleIcon from '@mui/icons-material/Google';
+import EmailIcon from '@mui/icons-material/Email';
+import LoginIcon from '@mui/icons-material/Login';
+
 export default function SignUpIndex() {
   const router = useRouter();
   const provider = new GoogleAuthProvider();
@@ -39,9 +43,13 @@ export default function SignUpIndex() {
         <WrapContents>
           <WrapInput>
             <SignupButton>
-              <Link href="/user/signup">이메일 계정으로 회원가입</Link>
+              <EmailIcon />
+              <Link href="/user/signup" passHref>
+                이메일 계정으로 회원가입
+              </Link>
             </SignupButton>
             <SignupButton onClick={loginWithGoogle}>
+              <GoogleIcon />
               구글 계정으로 회원가입
             </SignupButton>
           </WrapInput>
@@ -49,7 +57,10 @@ export default function SignUpIndex() {
             <Label>이미 가입되어 있으시다면</Label>
           </WrapButton>
           <SignupButton>
-            <Link href="/user/signup">로그인 페이지로 이동하기</Link>
+            <LoginIcon />
+            <Link href="/user/login" passHref>
+              로그인 페이지로 이동하기
+            </Link>
           </SignupButton>
         </WrapContents>
       </Main>
@@ -81,10 +92,11 @@ const Button = styled.button`
   border-radius: 5px;
   border: none;
   color: white;
-  width: 80px;
-  height: 24px;
+  width: 200px;
+  height: 50px;
   font-size: 12px;
   cursor: pointer;
+  vertical-align: middle;
   :hover {
     opacity: 0.8;
   }

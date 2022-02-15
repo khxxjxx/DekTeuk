@@ -26,16 +26,18 @@ import { useRouter } from 'next/router';
 import MenuItem from '@mui/material/MenuItem';
 import { UserInfo } from '@interface/StoreInterface';
 import { setNewUserInfo } from '@store/reducer';
-import { userInputInitialState, jobSectors } from './constants';
-type InputHelperText = {
-  email: string;
-  password: string;
-  checkPassword: string;
-  nickname: string;
-  jobSector: string;
-};
-const reducer = (state: any, action: any) => {
-  return { ...state, [action.payload.name]: action.payload.value };
+import {
+  userInputInitialState,
+  jobSectors,
+  UserInputData,
+  InputHelperText,
+} from './constants';
+import GroupAddIcon from '@mui/icons-material/GroupAdd';
+import CameraAltIcon from '@mui/icons-material/CameraAlt';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+
+const reducer = (state: UserInputData, action: any) => {
+  return { ...state, [action.type]: action.payload };
 };
 export default function Signup() {
   const router = useRouter();
@@ -47,7 +49,6 @@ export default function Signup() {
   );
   const provider = new GoogleAuthProvider();
   const [isGoogle, setIsGoogle] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
   const [imageUrl, setImageUrl] = useState<string>('');
   const [imageExt, setImageExt] = useState<string>('');
   const [inputHelpers, setInputHelpers] = useState<InputHelperText>({
@@ -59,6 +60,7 @@ export default function Signup() {
   });
 
   const { email, password, checkPassword, nickname, jobSector } = inputState;
+
   const checkSignIn = async () => {
     try {
       const result = await signInWithPopup(auth, provider);
@@ -89,7 +91,7 @@ export default function Signup() {
       sendEmailVerification(result);
       return result.uid;
     } catch (err: any) {
-      setError(err.code);
+      console.error(err);
     }
   };
 
@@ -177,21 +179,14 @@ export default function Signup() {
     e.target.value = '';
   };
   const onClearImg = () => setImageUrl('');
-  const setInputs = (e: any) => {
+  const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    if (name === 'image') {
-    }
-    inputDispatch({
-      payload: { name: name, value: value },
-    });
+    inputDispatch({ type: name, payload: value });
   };
   return (
     <>
       <Main>
         <h1 style={{ color: '#8946A6' }}>회원가입</h1>
-        <GoogleButton onClick={loginWithGoogle}>
-          구글 계정으로 가입하기
-        </GoogleButton>
         <form onSubmit={SignUpSubmitHandler}>
           <WrapContents>
             <WrapInput>
@@ -201,8 +196,8 @@ export default function Signup() {
                 placeholder="Email 주소를 입력해 주세요."
                 name="email"
                 value={email}
-                onChange={setInputs}
-                helperText={email.helperText}
+                onChange={onInputChange}
+                helperText={inputHelpers.email}
               />
             </WrapInput>
             <WrapInput>
@@ -215,8 +210,8 @@ export default function Signup() {
                 margin="dense"
                 name="password"
                 value={password}
-                onChange={setInputs}
-                helperText={password.helperText}
+                onChange={onInputChange}
+                helperText={inputHelpers.password}
               />
               <TextFields
                 required
@@ -226,8 +221,8 @@ export default function Signup() {
                 margin="dense"
                 name="checkPassword"
                 value={checkPassword}
-                onChange={setInputs}
-                helperText={checkPassword.helperText}
+                onChange={onInputChange}
+                helperText={inputHelpers.checkPassword}
               />
             </WrapInput>
 
@@ -249,8 +244,8 @@ export default function Signup() {
                 name="nickname"
                 placeholder="닉네임을 입력해 주세요."
                 value={nickname}
-                onChange={setInputs}
-                helperText={nickname.helperText}
+                onChange={onInputChange}
+                helperText={inputHelpers.nickname}
               />
             </WrapInput>
             <WrapImageUpload>
@@ -271,6 +266,7 @@ export default function Signup() {
                   component="span"
                   style={{ background: '#8946a6', marginLeft: 10 }}
                 >
+                  <CameraAltIcon />
                   파일 선택
                 </Button>
               </label>
@@ -280,6 +276,7 @@ export default function Signup() {
                 onClick={onClearImg}
                 style={{ background: '#8946a6', marginLeft: 10 }}
               >
+                <DeleteForeverIcon />
                 사진 지우기
               </Button>
             </WrapImageUpload>
@@ -294,8 +291,8 @@ export default function Signup() {
                 margin="dense"
                 name="jobSector"
                 value={jobSector}
-                onChange={setInputs}
-                helperText={jobSector.helperText}
+                onChange={onInputChange}
+                helperText={inputHelpers.jobSector}
               >
                 {jobSectors.map((value, idx) => (
                   <MenuItem key={idx} value={value.title}>
@@ -304,7 +301,11 @@ export default function Signup() {
                 ))}
               </TextFields>
             </WrapInput>
-            <SubmitButton type="submit">회원가입</SubmitButton>
+
+            <SubmitButton type="submit">
+              <GroupAddIcon />
+              회원가입
+            </SubmitButton>
           </WrapContents>
         </form>
       </Main>

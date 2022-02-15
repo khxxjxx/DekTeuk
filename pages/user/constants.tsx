@@ -1,4 +1,4 @@
-type userInputData = {
+export type UserInputData = {
   email: string;
   password: string;
   checkPassword: string;
@@ -6,7 +6,15 @@ type userInputData = {
   jobSector: string;
 };
 
-export const userInputInitialState: userInputData = {
+export type InputHelperText = {
+  email: string;
+  password: string;
+  checkPassword: string;
+  nickname: string;
+  jobSector: string;
+};
+
+export const userInputInitialState: UserInputData = {
   email: '',
   password: '',
   checkPassword: '',

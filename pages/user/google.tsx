@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useReducer } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from '@emotion/styled';
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
@@ -18,46 +18,38 @@ import { getStorage, ref, uploadString } from 'firebase/storage';
 import { useRouter } from 'next/router';
 import MenuItem from '@mui/material/MenuItem';
 import { UserInfo } from '@interface/StoreInterface';
-import { jobSectors } from './constants';
-
-type UserInputData = {
-  nickname: string;
-  jobSector: string;
+import { UserInputData, userInputInitialState, jobSectors } from './constants';
+import { getAuth } from 'firebase/auth';
+const reducer = (state: UserInputData, action: any) => {
+  return { ...state, [action.name]: action.payload };
 };
 
 export default function Google() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const [inputState, inputDispatch] = useReducer(
+    reducer,
+    userInputInitialState,
+  );
+  //const [error, setError] = useState<boolean>('');
   const [email, setEmail] = useState<string>('');
-
-  const [nickname, setNickname] = useState<string>('');
-  const [isGoogle, setIsGoogle] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
   const [imageUrl, setImageUrl] = useState<string>('');
   const [imageExt, setImageExt] = useState<string>('');
-
-  const [inputHelpers, setInputHelpers] = useState<UserInputData>({
+  const [inputHelpers, setInputHelpers] = useState<
+    Omit<UserInputData, 'email' | 'password' | 'checkPassword'>
+  >({
     nickname: '',
     jobSector: '직종을 선택 해 주세요',
   });
   const storage = getStorage();
-
+  const { nickname, jobSector } = inputState;
   useEffect(() => {
+    const auth = getAuth();
     const curUser = auth.currentUser;
     console.log('google account');
-    setIsGoogle(true);
     setEmail(curUser?.email!);
+    console.log(inputState);
   }, []);
-
-  const [jobSector, setJobSector] = useState('');
-
-  const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    let helperText;
-    if (name === 'email') {
-      setEmail(value);
-    } else if (name === 'jobSector') setJobSector(value);
-  };
 
   const SignUpSubmitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -68,6 +60,7 @@ export default function Google() {
     }
     if (!imageUrl) {
       alert('증명서 파일을 찾을 수 없습니다!');
+      return;
     }
     const userInitData: UserInfo = {
       nickname: nickname,
@@ -144,6 +137,12 @@ export default function Google() {
     e.target.value = '';
   };
   const onClearImg = () => setImageUrl('');
+
+  const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    inputDispatch({ type: name, payload: value });
+  };
+
   return (
     <>
       <Main>
@@ -152,13 +151,7 @@ export default function Google() {
           <WrapContents>
             <WrapInput>
               <Label>Email</Label>
-              <TextFields
-                required
-                disabled
-                name="email"
-                value={email}
-                onChange={onInputChange}
-              />
+              <TextFields required disabled name="email" value={email} />
             </WrapInput>
             <WrapInput>
               <Label>닉네임</Label>
