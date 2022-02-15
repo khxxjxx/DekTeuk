@@ -39,6 +39,7 @@ import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 const reducer = (state: UserInputData, action: any) => {
   return { ...state, [action.type]: action.payload };
 };
+
 export default function Signup() {
   const router = useRouter();
   const dispatch = useDispatch();
@@ -49,6 +50,7 @@ export default function Signup() {
   );
   const provider = new GoogleAuthProvider();
   const [isGoogle, setIsGoogle] = useState<boolean>(false);
+  const [error, setError] = useState<boolean>(false);
   const [imageUrl, setImageUrl] = useState<string>('');
   const [imageExt, setImageExt] = useState<string>('');
   const [inputHelpers, setInputHelpers] = useState<InputHelperText>({
@@ -60,26 +62,6 @@ export default function Signup() {
   });
 
   const { email, password, checkPassword, nickname, jobSector } = inputState;
-
-  const checkSignIn = async () => {
-    try {
-      const result = await signInWithPopup(auth, provider);
-      return result.user.uid;
-    } catch (err: any) {
-      console.error(err);
-    }
-  };
-
-  const loginWithGoogle = async () => {
-    const uid = await checkSignIn();
-    const docSnap = await getDoc(doc(db, 'user', uid as string));
-    if (docSnap.exists()) {
-      dispatch(setNewUserInfo(docSnap.data()));
-      router.push('/');
-    } else {
-      router.push('/user/google');
-    }
-  };
 
   const createUserWithEmail = async () => {
     try {
@@ -101,37 +83,42 @@ export default function Signup() {
 
     if (checkPassword !== password) {
       alert('비밀번호가 다릅니다!');
-    } else {
-      const userData: UserInfo = {
-        nickname: nickname,
-        jobSector: jobSector,
-        validRounges: [
-          {
-            title: '타임라인',
-            url: 'timeline',
-          },
-          {
-            title: '토픽',
-            url: 'topic',
-          },
-          {
-            title: jobSector,
-            url: jobSectors.find((v) => v.title === jobSector)?.url as string,
-            // type error 잡아야 함
-          },
-        ],
-        id: uid,
-        hasNewNotification: true,
-        posts: [],
-        email: email,
-      };
-
-      uploadImg(uid);
-      console.log('success');
-      await setDoc(doc(db, 'user', uid), userData);
-      await signOut(auth);
-      router.push('/user/login');
+      return;
     }
+    if (!imageUrl) {
+      alert('증명서 파일을 찾을 수 없습니다!');
+      return;
+    }
+
+    const userData: UserInfo = {
+      nickname: nickname,
+      jobSector: jobSector,
+      validRounges: [
+        {
+          title: '타임라인',
+          url: 'timeline',
+        },
+        {
+          title: '토픽',
+          url: 'topic',
+        },
+        {
+          title: jobSector,
+          url: jobSectors.find((v) => v.title === jobSector)?.url as string,
+          // type error 잡아야 함
+        },
+      ],
+      id: uid,
+      hasNewNotification: true,
+      posts: [],
+      email: email,
+    };
+
+    uploadImg(uid);
+    console.log('success');
+    await setDoc(doc(db, 'user', uid), userData);
+    await signOut(auth);
+    router.push('/user/login');
   };
 
   const uploadImg = async (uid: string) => {
