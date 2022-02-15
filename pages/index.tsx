@@ -11,13 +11,17 @@ import { firebaseAdmin } from '@firebase/firebaseAdmin';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useSelector } from 'react-redux';
-import { UserState } from '@interface/StoreInterface';
+import { StoreState, UserState } from '@interface/StoreInterface';
 
 const Home: NextPage = () => {
+  const { user: myInfo }: UserState = useSelector(
+    (state: StoreState) => state.user,
+  );
   const router = useRouter();
 
   useEffect(() => {
-    router.push('/list/timeline');
+    if (myInfo.validRounges.length > 1) router.push('/list/timeline');
+    else router.push('/list/topic');
   }, [router]);
   return <div></div>;
 };

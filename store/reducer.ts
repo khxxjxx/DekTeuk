@@ -11,10 +11,7 @@ const initialUserState: UserState = {
   user: {
     nickname: '',
     jobSector: '',
-    validRounges: [
-      { title: '타임라인', url: 'timeline' },
-      { title: '토픽', url: 'topic' },
-    ],
+    validRounges: [{ title: '토픽', url: 'topic' }],
     id: '',
     hasNewNotification: false,
     posts: [],
