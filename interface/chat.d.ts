@@ -26,6 +26,10 @@ interface ChatText {
   createAt: Timestamp;
 }
 
+interface NoticeProps {
+  isRead: boolean;
+}
+
 interface FileType {
   type: string;
   file: (Blob | ArrayBuffer)[];

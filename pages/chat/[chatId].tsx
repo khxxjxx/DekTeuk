@@ -45,13 +45,13 @@ const ChatRoom = ({ user }: { user: Person }) => {
   const [messages, setMessages] = useState<ChatText[]>([]);
   const [newMessage, setNewMessage] = useState<boolean>(false);
   const [lastMessage, setLastMessage] = useState<ChatText | null>(null);
-  const [isScrollUp, setIsScrollUp] = useState<boolean>(false);
+  const [isBottom, setIsBottom] = useState<boolean>(true);
   const [scrollPosition, setScrollPosition] = useState<number>();
   const [startKey, setStartKey] = useState<Timestamp | null>(null);
   const [imgData, setImgData] = useState<FileType | null>(null);
   const [isClickedHeader, setIsClickedHeader] = useState<boolean>(false);
-  const messageRef = useRef<HTMLDivElement>(null);
-  const bottomListRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
   const inputValue = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const { chatId, other, id } = router.query;
@@ -97,16 +97,12 @@ const ChatRoom = ({ user }: { user: Person }) => {
         await sendMessage(chatId, value, 'msg', user.id);
       }
     }
-    setIsScrollUp(false);
   };
 
-  const onScroll = debounce(() => {
-    setIsScrollUp(
-      messageRef.current!.scrollHeight - messageRef.current!.scrollTop >
-        messageRef.current!.clientHeight * 2,
-    );
-    setScrollPosition(messageRef.current!.scrollTop);
-  }, 500);
+  const reversedMessages = useMemo(
+    () => messages.slice().reverse(),
+    [messages],
+  );
 
   const getInitData = useCallback(async () => {
     const { initMessage, _startKey, _endKey } = await getChatMessages(chatId);
@@ -124,27 +120,39 @@ const ChatRoom = ({ user }: { user: Person }) => {
         startKey,
       );
       setMessages((current) => [...current, ...moreMessage]);
+      setScrollPosition(prevScrollHeight);
       setStartKey(_startKey);
       scrollKeep(prevScrollHeight);
-      setScrollPosition(prevScrollHeight);
     },
     [chatId, startKey],
   );
 
+  const onScroll = debounce(() => {
+    if (listRef.current) {
+      setIsBottom(
+        listRef.current.clientHeight - window.innerHeight <
+          window.scrollY + window.innerHeight,
+      );
+      setScrollPosition(window.scrollY);
+    }
+  }, 500);
+
   const scrollKeep = (prevScrollHeight: number) => {
-    messageRef.current!.scrollTop =
-      messageRef.current!.scrollHeight - prevScrollHeight;
+    const currentScroll =
+      listRef.current!.clientHeight - window.innerHeight - prevScrollHeight;
+    window.scrollTo(0, currentScroll);
   };
 
-  const reversedMessages = useMemo(
-    () => messages.slice().reverse(),
-    [messages],
-  );
+  const onPageDown = () => {
+    bottomRef.current!.scrollIntoView({ behavior: 'smooth' });
+  };
 
   useEffect(() => {
     getInitData();
+    window.addEventListener('scroll', onScroll);
 
     return () => {
+      window.removeEventListener('scroll', onScroll);
       getInitData();
       setStartKey(null);
       leaveChat(chatId, user.id);
@@ -153,33 +161,34 @@ const ChatRoom = ({ user }: { user: Person }) => {
 
   useEffect(() => {
     const newMsg = messages[0];
-    if (isScrollUp && newMsg !== lastMessage && newMsg.from !== user.id) {
-      setNewMessage(true);
-      return;
-    } else if (!isScrollUp) {
+    if (!isBottom && newMsg !== lastMessage && newMsg.from !== user.id) {
+      // 스크롤이 올라가있고 내가 보낸 메세지가 아닌 타인이 보낸 새로운 메세지가 있을 경우
+      // 페이지를 내리지 않고 팝업으로 새메세지가 왔다는걸 표시
+      return setNewMessage(true);
+    } else {
       // Page Down
-      bottomListRef.current!.scrollIntoView({ behavior: 'smooth' });
+      onPageDown();
     }
     setLastMessage(newMsg);
-  }, [messages, isScrollUp]);
+  }, [messages]);
 
   useEffect(() => {
-    // 스크롤이 맨 위로 올라올 경우 이전 데이터를 불러옴
+    // 이전데이터가 있고, 스크롤이 맨 위로 올라올 경우 이전 데이터를 불러옴
     if (scrollPosition! < 60 && startKey) {
-      // 현재 스크롤 위치 저장
       const prevScrollHeight =
-        messageRef.current!.scrollHeight - messageRef.current!.scrollTop;
+        listRef.current!.clientHeight - window.innerHeight;
       getMessages(prevScrollHeight);
     } else if (
-      scrollPosition! + messageRef.current!.clientHeight ===
-      messageRef.current!.scrollHeight
+      listRef.current!.clientHeight - window.innerHeight ===
+      window.scrollY
     ) {
+      // 스크롤이 맨 밑으로 내려갔을 경우
       setNewMessage(false);
     }
-  }, [scrollPosition]);
+  }, [scrollPosition, startKey, getMessages]);
 
   return (
-    <Fragment>
+    <div style={{ height: '100vh' }}>
       {imgData && imgData.src.length > 0 && (
         <ImgPreviewModal
           imgData={imgData}
@@ -199,7 +208,7 @@ const ChatRoom = ({ user }: { user: Person }) => {
         <div>{other}</div>
         <DensityMediumIcon onClick={onToggle} />
       </ChatHeader>
-      <ChatList onScroll={onScroll} ref={messageRef}>
+      <ChatList ref={listRef}>
         <ChatBox>
           {reversedMessages.map(({ id, from, msg, img }) => (
             <ChatText className={from === user.id ? 'mine' : ''} key={id}>
@@ -220,23 +229,17 @@ const ChatRoom = ({ user }: { user: Person }) => {
               )}
             </ChatText>
           ))}
-          <div ref={bottomListRef} />
+          <div ref={bottomRef} />
         </ChatBox>
       </ChatList>
-      <ChatInputWrapper>
-        {isScrollUp && !newMessage && (
-          <PageDownBtn
-            onClick={() => {
-              setIsScrollUp(false);
-            }}
-          >
+      <ChatInputWrapper className="input">
+        {!isBottom && !newMessage && (
+          <PageDownBtn onClick={onPageDown}>
             <KeyboardArrowDownIcon />
           </PageDownBtn>
         )}
         {newMessage && (
-          <NewMessage onClick={() => setIsScrollUp(false)}>
-            새로운 메세지가 있습니다
-          </NewMessage>
+          <NewMessage onClick={onPageDown}>새로운 메세지가 있습니다</NewMessage>
         )}
         <label htmlFor="file">
           <AddIcon style={{ cursor: 'pointer', color: 'white' }} />
@@ -272,7 +275,7 @@ const ChatRoom = ({ user }: { user: Person }) => {
           <SendIconStyled onClick={() => onSendMessage()} />
         </FormBox>
       </ChatInputWrapper>
-    </Fragment>
+    </div>
   );
 };
 
