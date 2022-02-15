@@ -1,6 +1,28 @@
-//@ts-ignore
-import { UserInfo, TopicPost, RoungePost } from '@interface/CardInterface';
+import { db } from '@firebase/firebase';
+import { TopicPost, RoungePost } from '@interface/CardInterface';
+import {
+  DefaultListsAndTopics,
+  HomeListUrlString,
+} from '@interface/GetPostsInterface';
+import { UserInfo } from '@interface/StoreInterface';
 import delay from '@utils/delay';
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  limit,
+  orderBy,
+  query,
+  serverTimestamp,
+  updateDoc,
+  where,
+  startAt,
+  startAfter,
+} from 'firebase/firestore';
+import { faker } from '@faker-js/faker';
+
 export const getMyInfo = async (result: any) => {
   //await delay(3000);
   // await delay(0);
@@ -48,8 +70,6 @@ export const getMyInfo = async (result: any) => {
     // hasNewNotification: true,
   } as UserInfo;
 };
-
-export const getTimelinePosts = async () => {};
 
 export const getTopics = (list: string, pageParam: string) => {
   const dummyTopicPost: TopicPost = {
@@ -100,140 +120,296 @@ export const getTopics = (list: string, pageParam: string) => {
 };
 
 export const getHomePostsInfiniteFunction = async (
-  list: string,
+  list: HomeListUrlString,
   pageParam: number,
+  validRounges?: Array<HomeListUrlString>,
 ) => {
-  // await delay(800);
-  const dummyRoungePost: RoungePost = {
-    postId: 'r8q394uf90q23urq89pd3oil',
-    postType: 'rounge',
-    rounge: { title: '외식·음료', url: 'food-service' },
-    title: '라운지 글 제목',
-    content:
-      `조회하고 있는 list는 ${list}이고` +
-      `전달된 pageParam은 ${pageParam}입니다` +
-      '블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 ',
-    commentsCount: Math.floor(Math.random() * 5),
-    author: { nickname: '닉네임', jobSector: '외식·음료' },
-    likeCount: Math.floor(Math.random() * 5),
-    createdAt: Date.now().toString(),
-    images: [],
-  };
-  const dummyTopicPost: TopicPost = {
-    postId: 'r8qur390wjfioajwfeio394uf90q23urq89pd3oil',
-    postType: 'topic',
-    topic: { title: '블라블라', url: 'blabla' },
-    title: '토픽 글 제목',
-    content:
-      `조회하고 있는 list는 ${list}이고` +
-      `전달된 pageParam은 ${pageParam}입니다` +
-      '블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 ',
-    commentsCount: Math.floor(Math.random() * 5),
-    author: { nickname: '닉네임', jobSector: '외식·음료' },
-    likeCount: Math.floor(Math.random() * 5),
-    createdAt: Date.now().toString(),
-    images: [],
-  };
+  //
+  // 아라 주석은 전체 posts 갯수 출력과 랜덤 데이터 생성을 코드임
+  //
+  // const collectionRef = collection(db, 'posts');
+  // console.log((await getDocs(collectionRef)).docs.length);
+  // for (let i = 0; i < 30; i++) {
+  //   for (const rounge of DefaultListsAndTopics.rounges) {
+  //     const collectionRef = collection(db, 'posts');
+  //     console.log(rounge);
+  //     const { id: newId } = await addDoc(collectionRef, {
+  //       title: faker.lorem.sentence(),
+  //       content: faker.lorem.paragraph(4),
+  //       pressPerson: [],
+  //       postId: '',
+  //       postType: 'rounge',
+  //       topic: '',
+  //       updatedAt: serverTimestamp(),
+  //       userId: 'jf4RswnBDeQAV3DPtzcHlDJbxTL92',
+  //       job: rounge.title,
+  //       nickname: '닉네임2222222222',
+  //       rounge,
+  //       createdAt: serverTimestamp(),
+  //       images: [],
+  //       urlKey: rounge.url,
+  //     });
+  //     const wroteDocRef = doc(db, 'posts', newId);
+  //     await updateDoc(wroteDocRef, { postId: newId });
+  //   }
+  // }
+  // for (let i = 0; i < 30; i++) {
+  //   for (const topic of DefaultListsAndTopics.topics) {
+  //     const collectionRef = collection(db, 'posts');
+  //     console.log(topic);
+  //     const { id: newId } = await addDoc(collectionRef, {
+  //       title: faker.lorem.sentence(),
+  //       content: faker.lorem.paragraph(4),
+  //       pressPerson: [],
+  //       postId: '',
+  //       postType: 'topic',
+  //       topic,
+  //       updatedAt: serverTimestamp(),
+  //       userId: 'jf22GhSujbZtWDPtzcHlDJbxTL92',
+  //       job: '서비스',
+  //       nickname: '닉네임',
+  //       rounge: '',
+  //       createdAt: serverTimestamp(),
+  //       images: [],
+  //       urlKey: 'topic',
+  //     });
+  //     const wroteDocRef = doc(db, 'posts', newId);
+  //     await updateDoc(wroteDocRef, { postId: newId });
+  //   }
+  // }
 
-  const generateTenTopicPosts = () => {
-    const dummyTopicPosts = [];
-    for (let i = 0; i < 10; i++) {
-      if (i % 2 === 0) {
-        const newTopicPost: TopicPost = {
-          ...dummyTopicPost,
-          postId: dummyTopicPost.postId + Math.floor(Math.random() * 1000000),
-          createdAt: (
-            parseInt(dummyTopicPost.createdAt) -
-            Math.floor(Math.random() * 30000) * 1000
-          ).toString(),
-        };
-        dummyTopicPosts.push(newTopicPost);
-      } else {
-        const newTopicPost: TopicPost = {
-          ...dummyTopicPost,
-          images: ['https://i.ibb.co/VJXmhFt/asdasd.jpg'],
-          postId: dummyTopicPost.postId + Math.floor(Math.random() * 1000000),
-          createdAt: (
-            parseInt(dummyTopicPost.createdAt) -
-            Math.floor(Math.random() * 30000) * 1000
-          ).toString(),
-        };
-        dummyTopicPosts.push(newTopicPost);
-      }
-    }
-    return dummyTopicPosts;
-  };
-  const generateTenRoungePosts = () => {
-    const dummyRoungePosts = [];
-    for (let i = 0; i < 10; i++) {
-      if (i % 2 === 0) {
-        const newRoungePost: RoungePost = {
-          ...dummyRoungePost,
-          images: [
-            'https://i.ibb.co/VJXmhFt/asdasd.jpg',
-            'https://i.ibb.co/VJXmhFt/asdasd.jpg',
-          ],
-          postId: dummyRoungePost.postId + Math.floor(Math.random() * 1000000),
-          createdAt: (
-            parseInt(dummyRoungePost.createdAt) -
-            Math.floor(Math.random() * 30000) * 1000
-          ).toString(),
-        };
-        dummyRoungePosts.push(newRoungePost);
-      } else {
-        const newRoungePost: RoungePost = {
-          ...dummyRoungePost,
-          postId: dummyRoungePost.postId + Math.floor(Math.random() * 1000000),
-          createdAt: (
-            parseInt(dummyRoungePost.createdAt) -
-            Math.floor(Math.random() * 30000) * 1000
-          ).toString(),
-        };
-        dummyRoungePosts.push(newRoungePost);
-      }
-    }
-    return dummyRoungePosts;
-  };
-  const dummyTopicPosts = generateTenTopicPosts();
-  const dummyRoungePosts = generateTenRoungePosts();
-  const dummyPosts: Array<TopicPost | RoungePost> = []; // 배열복사
-  switch (list) {
-    case 'timeline':
-      dummyPosts.push(...generateTenTopicPosts());
-      for (let i = 0; i < 10; i++) {
-        dummyPosts.splice(
-          Math.floor(Math.random() * 10),
-          0,
-          dummyRoungePosts[i],
-        );
-      }
-      break;
-    case 'topic':
-      dummyPosts.push(...generateTenTopicPosts());
-      const newDummyTopicPosts = generateTenTopicPosts();
-      for (let i = 0; i < 10; i++) {
-        dummyPosts.splice(
-          Math.floor(Math.random() * 10),
-          0,
-          newDummyTopicPosts[i],
-        );
-      }
-      break;
-    default:
-      dummyPosts.push(...generateTenRoungePosts());
-      const newDummyRoungePosts = generateTenRoungePosts();
-      for (let i = 0; i < 10; i++) {
-        dummyPosts.splice(
-          Math.floor(Math.random() * 10),
-          0,
-          newDummyRoungePosts[i],
-        );
-      }
-      break;
+  // 로그인 된 사용자가 topic에 접근 => topic만 반환
+  // 비로그인 or 비인증 사용자 => topic만 반환
+  if (
+    !validRounges ||
+    (validRounges &&
+      validRounges.length === 1 &&
+      validRounges[0] === 'topic') ||
+    list === 'topic'
+  ) {
+    const postsRef = collection(db, 'posts');
+    const returnArr: Array<TopicPost> = [];
+    let q_topic;
+    if (pageParam > 0) {
+      const q_topicCurrent = query(
+        postsRef,
+        where('postType', '==', 'topic'),
+        orderBy('createdAt', 'desc'),
+        limit(pageParam * 20),
+      );
+      const currentSnapShot = await getDocs(q_topicCurrent);
+      const lastVisible = currentSnapShot.docs[currentSnapShot.docs.length - 1];
+      q_topic = query(
+        postsRef,
+        where('postType', '==', 'topic'),
+        orderBy('createdAt', 'desc'),
+        startAfter(lastVisible),
+        limit(20),
+      );
+    } else
+      q_topic = query(
+        postsRef,
+        where('postType', '==', 'topic'),
+        orderBy('createdAt', 'desc'),
+        limit(20),
+      );
+    const snap = await getDocs(q_topic);
+    snap.forEach((doc) => {
+      const docData = doc.data();
+      const returnData: TopicPost = {
+        author: { nickname: docData.nickname, jobSector: docData.job },
+        content: docData.content,
+        commentsCount: docData.commentsCount || 0,
+        createdAt: docData.createdAt.seconds
+          .toString()
+          .padEnd(13, 0)
+          .toString(),
+        images: docData.images,
+        likeCount: docData.pressPerson.length,
+        postId: docData.postId,
+        postType: docData.postType,
+        title: docData.title,
+        topic: docData.topic,
+      };
+      returnArr.push(returnData);
+    });
+    if (returnArr.length === 0) return { result: returnArr, nextPage: -1 };
+    return { result: returnArr, nextPage: pageParam + 1 };
   }
 
-  // console.log(lastIndex);
-  return { result: dummyPosts, nextPage: pageParam + 1 };
+  // 로그인 된 사용자가 timeline에 접근
+  if (list === 'timeline') {
+    const myValidRounges = validRounges ? [...validRounges] : [];
+    const myInvalidRounges = DefaultListsAndTopics.rounges.filter((rounge) => {
+      for (const myRoungeUrl of myValidRounges)
+        if (rounge.url === myRoungeUrl) return false; // url은 unique하므로 비교값으로 사용
+      return true;
+    });
+    const myInvalidRoungesUrls = myInvalidRounges.map((v) => v.url);
+    myInvalidRoungesUrls.pop(); // not-in 은 10개의 엘리먼트까지만 지원
+    const postsRef = collection(db, 'posts');
+    const returnArr: Array<TopicPost | RoungePost> = [];
+    //
+    //
+    // console.log(myInvalidRoungesUrls);
+    // const { docs: docs_ } = await getDocs(
+    //   query(postsRef, where('urlKey', 'not-in', myValidRounges)),
+    // );
+    // docs_.forEach((v) => {
+    //   const {
+    //     postType,
+    //     rounge: { url },
+    //   } = v.data();
+    //   console.log(postType, ':', url);
+    // });
+    //
+    //
+
+    let q_rounge;
+    if (pageParam > 0) {
+      const q_roungeCurrent = query(
+        postsRef,
+        where('urlKey', 'not-in', myInvalidRoungesUrls),
+        orderBy('urlKey'),
+        orderBy('createdAt', 'desc'),
+        limit(pageParam * 20),
+      );
+      const currentSnapShot = await getDocs(q_roungeCurrent);
+      const lastVisible = currentSnapShot.docs[currentSnapShot.docs.length - 1];
+      q_rounge = query(
+        postsRef,
+        where('urlKey', 'not-in', myInvalidRoungesUrls),
+        orderBy('urlKey'),
+        orderBy('createdAt', 'desc'),
+        startAfter(lastVisible),
+        limit(20),
+      );
+    } else
+      q_rounge = query(
+        postsRef,
+        where('urlKey', 'not-in', myInvalidRoungesUrls),
+        orderBy('urlKey'),
+        orderBy('createdAt', 'desc'),
+        limit(20),
+      );
+    const snap = await getDocs(q_rounge);
+    snap.forEach((doc) => {
+      const docData = doc.data();
+      if (docData.postType === 'topic') {
+        const returnData: TopicPost = {
+          author: { nickname: docData.nickname, jobSector: docData.job },
+          content: docData.content,
+          commentsCount: docData.commentsCount || 0,
+          createdAt: docData.createdAt.seconds
+            .toString()
+            .padEnd(13, 0)
+            .toString(),
+          images: docData.images,
+          likeCount: docData.pressPerson.length,
+          postId: docData.postId,
+          postType: docData.postType,
+          title: docData.title,
+          topic: docData.topic,
+        };
+        returnArr.push(returnData);
+      } else if (docData.postType === 'rounge') {
+        const returnData: RoungePost = {
+          author: { nickname: docData.nickname, jobSector: docData.job },
+          content: docData.content,
+          commentsCount: docData.commentsCount || 0,
+          createdAt: docData.createdAt.seconds
+            .toString()
+            .padEnd(13, 0)
+            .toString(),
+          images: docData.images,
+          likeCount: docData.pressPerson.length,
+          postId: docData.postId,
+          postType: docData.postType,
+          title: docData.title,
+          rounge: docData.rounge,
+        };
+        returnArr.push(returnData);
+      }
+    });
+    if (returnArr.length === 0) return { result: returnArr, nextPage: -1 };
+    return { result: returnArr, nextPage: pageParam + 1 };
+
+    // return;
+  }
+
+  // 이외의 경우는 rounge페이지에 접근
+  // 허용되지 않은 라운지에 접근
+  if (validRounges?.indexOf(list) === -1) {
+    // return;
+  }
+  // 허용된 라운지에 접근중일 경우
+  const postsRef = collection(db, 'posts');
+  const returnArr: Array<TopicPost | RoungePost> = [];
+  let q_rounge;
+  if (pageParam > 0) {
+    const q_roungeCurrent = query(
+      postsRef,
+      where('rounge.url', '==', list),
+      orderBy('createdAt', 'desc'),
+      limit(pageParam * 20),
+    );
+    const currentSnapShot = await getDocs(q_roungeCurrent);
+    const lastVisible = currentSnapShot.docs[currentSnapShot.docs.length - 1];
+    q_rounge = query(
+      postsRef,
+      where('rounge.url', '==', list),
+      orderBy('createdAt', 'desc'),
+      startAfter(lastVisible),
+      limit(20),
+    );
+  } else
+    q_rounge = query(
+      postsRef,
+      where('rounge.url', '==', list),
+      orderBy('createdAt', 'desc'),
+      limit(20),
+    );
+  const snap = await getDocs(q_rounge);
+  snap.forEach((doc) => {
+    const docData = doc.data();
+    if (docData.postType === 'topic') {
+      const returnData: TopicPost = {
+        author: { nickname: docData.nickname, jobSector: docData.job },
+        content: docData.content,
+        commentsCount: docData.commentsCount || 0,
+        createdAt: docData.createdAt.seconds
+          .toString()
+          .padEnd(13, 0)
+          .toString(),
+        images: docData.images,
+        likeCount: docData.pressPerson.length,
+        postId: docData.postId,
+        postType: docData.postType,
+        title: docData.title,
+        topic: docData.topic,
+      };
+      returnArr.push(returnData);
+    } else if (docData.postType === 'rounge') {
+      const returnData: RoungePost = {
+        author: { nickname: docData.nickname, jobSector: docData.job },
+        content: docData.content,
+        commentsCount: docData.commentsCount || 0,
+        createdAt: docData.createdAt.seconds
+          .toString()
+          .padEnd(13, 0)
+          .toString(),
+        images: docData.images,
+        likeCount: docData.pressPerson.length,
+        postId: docData.postId,
+        postType: docData.postType,
+        title: docData.title,
+        rounge: docData.rounge,
+      };
+      returnArr.push(returnData);
+    }
+  });
+  if (returnArr.length === 0) return { result: returnArr, nextPage: -1 };
+  return { result: returnArr, nextPage: pageParam + 1 };
 };
 
 export const searchInfiniteFunction = async (

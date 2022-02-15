@@ -15,6 +15,9 @@ import { setNewUserInfo } from '@store/reducer';
 import nookies from 'nookies';
 import { firebaseAdmin } from '@firebase/firebaseAdmin';
 import { InferGetServerSidePropsType, GetServerSidePropsContext } from 'next';
+import GroupAddIcon from '@mui/icons-material/GroupAdd';
+import GoogleIcon from '@mui/icons-material/Google';
+import LoginIcon from '@mui/icons-material/Login';
 export default function Login() {
   const router = useRouter();
   const provider = new GoogleAuthProvider();
@@ -97,13 +100,18 @@ export default function Login() {
             </WrapInput>
             <WrapButton>
               <Button>
+                <GroupAddIcon style={{ marginRight: '10px' }} />
                 <Link href="/user/signup">회원가입</Link>
               </Button>
               <Button type="button" onClick={loginWithGoogle}>
+                <GoogleIcon style={{ marginRight: '10px' }} />
                 Google
               </Button>
             </WrapButton>
-            <SubmitButton type="submit">로그인</SubmitButton>
+            <SubmitButton type="submit">
+              <LoginIcon style={{ marginRight: '10px' }} />
+              로그인
+            </SubmitButton>
           </WrapContents>
         </form>
       </Main>
@@ -135,8 +143,8 @@ const Button = styled.button`
   border-radius: 5px;
   border: none;
   color: white;
-  width: 80px;
-  height: 24px;
+  width: 100px;
+  height: 35px;
   font-size: 12px;
   cursor: pointer;
   :hover {
@@ -147,7 +155,7 @@ const Button = styled.button`
 const WrapButton = styled.div`
   display: flex;
   justify-content: space-between;
-  margin: 20px;
+  margin-bottom: 30px;
   width: 313px;
 `;
 
