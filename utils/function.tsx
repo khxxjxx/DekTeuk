@@ -125,13 +125,13 @@ export const getHomePostsInfiniteFunction = async (
   validRounges?: Array<HomeListUrlString>,
 ) => {
   //
-  // 아라 주석은 전체 posts 갯수 출력과 랜덤 데이터 생성을 코드임
+  // 아래 주석은 전체 post 갯수 출력과 랜덤 데이터 생성을 코드임
   //
-  // const collectionRef = collection(db, 'posts');
-  // console.log((await getDocs(collectionRef)).docs.length);
-  // for (let i = 0; i < 30; i++) {
+  const collectionRef = collection(db, 'post');
+  console.log((await getDocs(collectionRef)).docs.length);
+  // for (let i = 0; i < 10; i++) {
   //   for (const rounge of DefaultListsAndTopics.rounges) {
-  //     const collectionRef = collection(db, 'posts');
+  //     const collectionRef = collection(db, 'post');
   //     console.log(rounge);
   //     const { id: newId } = await addDoc(collectionRef, {
   //       title: faker.lorem.sentence(),
@@ -141,7 +141,7 @@ export const getHomePostsInfiniteFunction = async (
   //       postType: 'rounge',
   //       topic: '',
   //       updatedAt: serverTimestamp(),
-  //       userId: 'jf4RswnBDeQAV3DPtzcHlDJbxTL92',
+  //       userId: 'rBbTwMFvMdZULOcNqYyDleySd5n2',
   //       job: rounge.title,
   //       nickname: '닉네임2222222222',
   //       rounge,
@@ -149,13 +149,13 @@ export const getHomePostsInfiniteFunction = async (
   //       images: [],
   //       urlKey: rounge.url,
   //     });
-  //     const wroteDocRef = doc(db, 'posts', newId);
+  //     const wroteDocRef = doc(db, 'post', newId);
   //     await updateDoc(wroteDocRef, { postId: newId });
   //   }
   // }
-  // for (let i = 0; i < 30; i++) {
+  // for (let i = 0; i < 10; i++) {
   //   for (const topic of DefaultListsAndTopics.topics) {
-  //     const collectionRef = collection(db, 'posts');
+  //     const collectionRef = collection(db, 'post');
   //     console.log(topic);
   //     const { id: newId } = await addDoc(collectionRef, {
   //       title: faker.lorem.sentence(),
@@ -165,7 +165,7 @@ export const getHomePostsInfiniteFunction = async (
   //       postType: 'topic',
   //       topic,
   //       updatedAt: serverTimestamp(),
-  //       userId: 'jf22GhSujbZtWDPtzcHlDJbxTL92',
+  //       userId: 'rBbTwMFvMdZULOcNqYyDleySd5n2',
   //       job: '서비스',
   //       nickname: '닉네임',
   //       rounge: '',
@@ -173,7 +173,7 @@ export const getHomePostsInfiniteFunction = async (
   //       images: [],
   //       urlKey: 'topic',
   //     });
-  //     const wroteDocRef = doc(db, 'posts', newId);
+  //     const wroteDocRef = doc(db, 'post', newId);
   //     await updateDoc(wroteDocRef, { postId: newId });
   //   }
   // }
@@ -187,29 +187,29 @@ export const getHomePostsInfiniteFunction = async (
       validRounges[0] === 'topic') ||
     list === 'topic'
   ) {
-    const postsRef = collection(db, 'posts');
+    const postRef = collection(db, 'post');
     const returnArr: Array<TopicPost> = [];
     let q_topic;
     if (pageParam > 0) {
       const q_topicCurrent = query(
-        postsRef,
-        where('postType', '==', 'topic'),
+        postRef,
+        where('urlKey', '==', 'topic'),
         orderBy('createdAt', 'desc'),
         limit(pageParam * 20),
       );
       const currentSnapShot = await getDocs(q_topicCurrent);
       const lastVisible = currentSnapShot.docs[currentSnapShot.docs.length - 1];
       q_topic = query(
-        postsRef,
-        where('postType', '==', 'topic'),
+        postRef,
+        where('urlKey', '==', 'topic'),
         orderBy('createdAt', 'desc'),
         startAfter(lastVisible),
         limit(20),
       );
     } else
       q_topic = query(
-        postsRef,
-        where('postType', '==', 'topic'),
+        postRef,
+        where('urlKey', '==', 'topic'),
         orderBy('createdAt', 'desc'),
         limit(20),
       );
@@ -247,13 +247,13 @@ export const getHomePostsInfiniteFunction = async (
     });
     const myInvalidRoungesUrls = myInvalidRounges.map((v) => v.url);
     myInvalidRoungesUrls.pop(); // not-in 은 10개의 엘리먼트까지만 지원
-    const postsRef = collection(db, 'posts');
+    const postRef = collection(db, 'post');
     const returnArr: Array<TopicPost | RoungePost> = [];
     //
     //
     // console.log(myInvalidRoungesUrls);
     // const { docs: docs_ } = await getDocs(
-    //   query(postsRef, where('urlKey', 'not-in', myValidRounges)),
+    //   query(postRef, where('urlKey', 'not-in', myValidRounges)),
     // );
     // docs_.forEach((v) => {
     //   const {
@@ -264,31 +264,28 @@ export const getHomePostsInfiniteFunction = async (
     // });
     //
     //
-
+    console.log(myValidRounges);
     let q_rounge;
     if (pageParam > 0) {
       const q_roungeCurrent = query(
-        postsRef,
-        where('urlKey', 'not-in', myInvalidRoungesUrls),
-        orderBy('urlKey'),
+        postRef,
+        where('urlKey', 'in', myValidRounges),
         orderBy('createdAt', 'desc'),
         limit(pageParam * 20),
       );
       const currentSnapShot = await getDocs(q_roungeCurrent);
       const lastVisible = currentSnapShot.docs[currentSnapShot.docs.length - 1];
       q_rounge = query(
-        postsRef,
-        where('urlKey', 'not-in', myInvalidRoungesUrls),
-        orderBy('urlKey'),
+        postRef,
+        where('urlKey', 'in', myValidRounges),
         orderBy('createdAt', 'desc'),
         startAfter(lastVisible),
         limit(20),
       );
     } else
       q_rounge = query(
-        postsRef,
-        where('urlKey', 'not-in', myInvalidRoungesUrls),
-        orderBy('urlKey'),
+        postRef,
+        where('urlKey', 'in', myValidRounges),
         orderBy('createdAt', 'desc'),
         limit(20),
       );
@@ -343,29 +340,29 @@ export const getHomePostsInfiniteFunction = async (
     // return;
   }
   // 허용된 라운지에 접근중일 경우
-  const postsRef = collection(db, 'posts');
+  const postRef = collection(db, 'post');
   const returnArr: Array<TopicPost | RoungePost> = [];
   let q_rounge;
   if (pageParam > 0) {
     const q_roungeCurrent = query(
-      postsRef,
-      where('rounge.url', '==', list),
+      postRef,
+      where('urlKey', '==', list),
       orderBy('createdAt', 'desc'),
       limit(pageParam * 20),
     );
     const currentSnapShot = await getDocs(q_roungeCurrent);
     const lastVisible = currentSnapShot.docs[currentSnapShot.docs.length - 1];
     q_rounge = query(
-      postsRef,
-      where('rounge.url', '==', list),
+      postRef,
+      where('urlKey', '==', list),
       orderBy('createdAt', 'desc'),
       startAfter(lastVisible),
       limit(20),
     );
   } else
     q_rounge = query(
-      postsRef,
-      where('rounge.url', '==', list),
+      postRef,
+      where('urlKey', '==', list),
       orderBy('createdAt', 'desc'),
       limit(20),
     );
