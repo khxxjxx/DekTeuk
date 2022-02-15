@@ -60,6 +60,12 @@ const Test: NextPage = () => {
   //     `/chat/${chatRoom.id}`,
   //   );
   // };
+  const postData = {
+    title: '포스트 타이틀',
+    id: '123',
+    type: 'comment',
+    ownerId: 'hPJXTVu1T3dMsXObcQPhsei7r7y1',
+  };
   return (
     <>
       {/* <input
@@ -90,7 +96,7 @@ const Test: NextPage = () => {
       >
         더미{' '}
       </button> */}
-      <Comment id="asdasdasd" />
+      <Comment postData={postData} />
     </>
   );
 };
