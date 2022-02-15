@@ -13,6 +13,7 @@ export interface TopicObj {
 }
 
 export interface RoungePost {
+  pressPerson: string[];
   postId: string;
   postType: 'rounge';
   rounge: RoungeObj;
@@ -25,6 +26,7 @@ export interface RoungePost {
   images: string[];
 }
 export interface TopicPost {
+  pressPerson: string[];
   postId: string;
   postType: 'topic';
   topic: TopicObj;

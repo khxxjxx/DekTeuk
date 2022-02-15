@@ -2,11 +2,12 @@ import { HYDRATE } from 'next-redux-wrapper';
 import { AnyAction, combineReducers } from '@reduxjs/toolkit';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { getMyInfo } from '@utils/function';
-import { UserState, ViewPosts } from '@interface/StoreInterface';
+import { SearchResult, UserState, ViewPosts } from '@interface/StoreInterface';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '@firebase/firebase';
 import { createStore } from 'redux';
 import { useSelector, useDispatch } from 'react-redux';
+import { RoungePost, TopicPost } from '@interface/CardInterface';
 const initialUserState: UserState = {
   user: {
     nickname: '',
@@ -65,13 +66,46 @@ const view = createSlice({
       state.view = [action.payload];
     },
     setViewPosts(state, action) {
-      state.view = [...state.view, action.payload];
+      state.view.push(action.payload);
     },
     resetViewPosts(state) {
       state.view = [];
     },
     setSearchValue(state, action) {
       state.searchValue = action.payload;
+    },
+    addViewPost(state, action) {
+      state.view.unshift(action.payload);
+    },
+    likeViewPost(
+      state,
+      action: { payload: { postId: string; userId: string } },
+    ) {
+      outer: for (let i = 0; i < state.view.length; i++) {
+        for (let j = 0; j < state.view[i].result.length; j++) {
+          if (state.view[i].result[j].postId === action.payload.postId) {
+            state.view[i].result[j].pressPerson.push(action.payload.userId);
+            state.view[i].result[j].likeCount++;
+            break outer;
+          }
+        }
+      }
+    },
+    unLikeViewPost(
+      state,
+      action: { payload: { postId: string; userId: string } },
+    ) {
+      outer: for (let i = 0; i < state.view.length; i++) {
+        for (let j = 0; j < state.view[i].result.length; j++) {
+          if (state.view[i].result[j].postId === action.payload.postId) {
+            state.view[i].result[j].pressPerson = state.view[i].result[
+              j
+            ].pressPerson.filter((id: string) => id !== action.payload.userId);
+            state.view[i].result[j].likeCount--;
+            break outer;
+          }
+        }
+      }
     },
   },
 });
@@ -106,6 +140,8 @@ export const initialViewAction = view.actions.initialViewPosts;
 export const setSearchValueAction = view.actions.setSearchValue;
 export const setScrollAction = scroll.actions.setScroll;
 export const setMyInfoAction = userSlice.actions.setMyInfo;
+export const likeViewPostAction = view.actions.likeViewPost;
+export const unLikeViewPostAction = view.actions.unLikeViewPost;
 const rootReducer = (
   state: {
     user: UserState;

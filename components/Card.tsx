@@ -5,9 +5,15 @@ import Link from 'next/link';
 import { ForwardedRef, forwardRef } from 'react';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ModeCommentIcon from '@mui/icons-material/ModeComment';
+import ThumbUpOutlinedIcon from '@mui/icons-material/ThumbUpOutlined';
 import { useInView } from 'react-intersection-observer';
 
 import ImgComponent from './items/ImgComponent';
+import { useDispatch } from 'react-redux';
+import { likeViewPostAction, unLikeViewPostAction } from '@store/reducer';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '@firebase/firebase';
+import { getAuth } from 'firebase/auth';
 
 const Wrapper = styled.div`
   width: 100%;
@@ -144,7 +150,11 @@ const CardStatWrapper = styled.div`
 const ThumbUpIconStyled = styled(ThumbUpIcon)`
   font-size: 1rem;
   margin-right: 0.5rem;
-  // color: rgb(144, 202, 249);
+  color: rgb(66, 103, 178);
+`;
+const ThumbUpOutlinedIconStyled = styled(ThumbUpOutlinedIcon)`
+  font-size: 1rem;
+  margin-right: 0.5rem;
   color: rgb(66, 103, 178);
 `;
 const ModeCommentIconStyled = styled(ModeCommentIcon)`
@@ -235,11 +245,17 @@ const DateDiffStyledSkeleton = styled.div`
 const CardWrapperSkeleton = styled(CardWrapper)`
   height: auto;
 `;
+const CardStatWrapperLike = styled(CardStatWrapper)`
+  z-index: 1;
+`;
+
 export const RoungeCard = forwardRef(function RoungeCardWithRef(
   {
     roungeCardData,
+    isLiked = false,
   }: {
     roungeCardData: RoungePost;
+    isLiked: boolean;
   },
   ref?: ForwardedRef<any>,
 ) {
@@ -282,7 +298,11 @@ export const RoungeCard = forwardRef(function RoungeCardWithRef(
               <CardDividerStyled />
               <CardBottomWrapperStyled>
                 <CardStatWrapper>
-                  <ThumbUpIconStyled />
+                  {isLiked ? (
+                    <ThumbUpIconStyled />
+                  ) : (
+                    <ThumbUpOutlinedIconStyled />
+                  )}
                   {roungeCardData.likeCount === 0
                     ? '좋아요'
                     : roungeCardData.likeCount}
@@ -347,13 +367,17 @@ const CardSkeleton = () => {
 export const TopicCard = forwardRef(function TopicCardWithRef(
   {
     topicCardData,
+    isLiked = false,
   }: {
     topicCardData: TopicPost;
+    isLiked: boolean;
   },
   ref?: any,
 ) {
+  const dispatch = useDispatch();
   const { ref: cardRef, inView } = useInView();
-
+  // @ts-ignore
+  // console.log(topicCardData.pressPerson);
   // console.log(Object.keys(topicCardData));
   return (
     <Wrapper ref={cardRef}>
@@ -404,12 +428,57 @@ export const TopicCard = forwardRef(function TopicCardWithRef(
               </TopicCardMainStyled>
               <CardDividerStyled />
               <CardBottomWrapperStyled>
-                <CardStatWrapper>
-                  <ThumbUpIconStyled />
+                <CardStatWrapperLike
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    const currentUser = getAuth().currentUser;
+                    if (currentUser) {
+                      if (isLiked) {
+                        const docRef = doc(db, 'post', topicCardData.postId);
+                        const { uid } = currentUser;
+                        const updatePressPerson =
+                          topicCardData.pressPerson.filter(
+                            (person) => person !== uid,
+                          );
+                        await updateDoc(docRef, {
+                          pressPerson: updatePressPerson,
+                        });
+                        dispatch(
+                          unLikeViewPostAction({
+                            postId: topicCardData.postId,
+                            userId: uid,
+                          }),
+                        );
+                      } else {
+                        const docRef = doc(db, 'post', topicCardData.postId);
+                        const { uid } = currentUser;
+                        const updatePressPerson = [
+                          ...topicCardData.pressPerson,
+                          uid,
+                        ];
+                        await updateDoc(docRef, {
+                          pressPerson: updatePressPerson,
+                        });
+                        dispatch(
+                          likeViewPostAction({
+                            postId: topicCardData.postId,
+                            userId: uid,
+                          }),
+                        );
+                      }
+                    }
+                  }}
+                >
+                  {isLiked ? (
+                    <ThumbUpIconStyled />
+                  ) : (
+                    <ThumbUpOutlinedIconStyled />
+                  )}
+
                   {topicCardData.likeCount === 0
                     ? '좋아요'
                     : topicCardData.likeCount}
-                </CardStatWrapper>
+                </CardStatWrapperLike>
                 <CardStatWrapper>
                   <ModeCommentIconStyled />
                   {topicCardData.commentsCount === 0
@@ -427,75 +496,6 @@ export const TopicCard = forwardRef(function TopicCardWithRef(
               <CardSkeleton />
             </>
           )}
-        </CardWrapper>
-      </Link>
-    </Wrapper>
-  );
-});
-
-export const TestTopicCard = forwardRef(function TopicCardWithRef(
-  {
-    topicCardData,
-  }: {
-    topicCardData: TopicPost;
-  },
-  ref?: any,
-) {
-  // const { ref: cardRef, inView } = useInView();
-  // console.log(Object.keys(topicCardData));
-  return (
-    // <Wrapper ref={cardRef}>
-    <Wrapper>
-      <Link
-        href={`/list/topic/${topicCardData.topic.url}/${topicCardData.postId}`}
-        passHref
-      >
-        <CardWrapper>
-          {/* {inView && ( */}
-          {
-            <>
-              <div ref={ref} />
-              <TopicCardMainStyled>
-                <TopicCardContentWrapper>
-                  <CardTitleStyled>{topicCardData.title}</CardTitleStyled>
-                  <br />
-
-                  <CardContentStyled>{topicCardData.content}</CardContentStyled>
-                  <br />
-                  <CardAuthorJobSectorWrapperStyled>
-                    <CardAuthorJobSectorStyled>
-                      {topicCardData.author.jobSector}
-                    </CardAuthorJobSectorStyled>
-                    <CardMiddleDotStyled>·</CardMiddleDotStyled>
-                    <CardAuthorNickname>
-                      {topicCardData.author.nickname}
-                    </CardAuthorNickname>
-                  </CardAuthorJobSectorWrapperStyled>
-                </TopicCardContentWrapper>
-                {topicCardData.images.length !== 0 && (
-                  <ImgComponent urls={topicCardData.images} />
-                )}
-              </TopicCardMainStyled>
-              <CardDividerStyled />
-              <CardBottomWrapperStyled>
-                <CardStatWrapper>
-                  <ThumbUpIconStyled />
-                  {topicCardData.likeCount === 0
-                    ? '좋아요'
-                    : topicCardData.likeCount}
-                </CardStatWrapper>
-                <CardStatWrapper>
-                  <ModeCommentIconStyled />
-                  {topicCardData.commentsCount === 0
-                    ? '댓글'
-                    : topicCardData.commentsCount}
-                </CardStatWrapper>
-                <div style={{ marginLeft: 'auto' }}>
-                  {getDateTime(topicCardData.createdAt)}
-                </div>
-              </CardBottomWrapperStyled>
-            </>
-          }
         </CardWrapper>
       </Link>
     </Wrapper>

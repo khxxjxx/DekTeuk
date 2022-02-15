@@ -48,7 +48,7 @@ import EditPostForm from '@components/write/EditPostForm';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import Layout from '@layouts/Layout';
 const style = {
   position: 'absolute' as 'absolute',
@@ -71,7 +71,7 @@ export const getServerSideProps: GetServerSideProps = async (
   } else id = null;
   const docRef = doc(db, 'post', id as string);
   const docSnap = await getDoc(docRef);
-  if (context.req.headers.referer && context.req.url)
+  if (context.req.headers.referer && context.req.url) {
     return {
       props: {
         referer: context.req.headers.referer
@@ -82,6 +82,7 @@ export const getServerSideProps: GetServerSideProps = async (
         postId: id,
       },
     };
+  }
   return {
     props: { postProps: JSON.stringify(docSnap.data()), postId: id },
   };
@@ -96,6 +97,7 @@ export default function RoungePost({
   postProps: string;
   postId: string;
 }) {
+  const router = useRouter();
   const { user } = useSelector((state: RootReducer) => state.user);
   // const [user, setUser] = useState<any>({});
   const [post, setPost] = useState(JSON.parse(postProps));
@@ -172,7 +174,8 @@ export default function RoungePost({
           referer.split('/')[0] === 'list'
         ) // [0]가 list인지 확인
       ) &&
-      referer !== 'search'
+      referer !== 'search' &&
+      referer !== 'write'
     ) {
       dispatch(setScrollAction(0));
     }
@@ -251,7 +254,7 @@ export default function RoungePost({
             <Modal
               open={notRoungemodalOpen}
               onClose={() => {
-                Router.push('/');
+                router.push('/');
               }}
               aria-labelledby="modal-modal-title"
               aria-describedby="modal-modal-description"
@@ -357,8 +360,8 @@ export default function RoungePost({
                     alignItems: 'center',
                   }}
                 >
-                  {post.image.length !== 0 &&
-                    post.image.map((v: any, i: number) => {
+                  {post.images.length !== 0 &&
+                    post.images.map((v: any, i: number) => {
                       return (
                         <Box
                           key={v.url}

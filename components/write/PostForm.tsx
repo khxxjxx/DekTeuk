@@ -44,8 +44,8 @@ import { green } from '@mui/material/colors';
 import Fab from '@mui/material/Fab';
 import CheckIcon from '@mui/icons-material/Check';
 import SaveIcon from '@mui/icons-material/Save';
-import type { RootReducer } from 'store/reducer';
-import { useSelector } from 'react-redux';
+import { resetViewAction } from '@store/reducer';
+import { useDispatch, useSelector } from 'react-redux';
 import { withRouter } from 'next/router';
 import { StoreState, UserState } from '@interface/StoreInterface';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
@@ -67,13 +67,19 @@ interface postSubTheme {
   title: string;
   url: string;
 }
-const PostForm = () => {
+const PostForm = ({ from }: { from: string }) => {
+  //
+  const dispatch = useDispatch();
+  //
   //이미지 업로드 부분
   const [modalOpen, setModalOpen] = useState(false);
   const [postImage, setPostImage] = useState<any>(null);
   const [url, setUrl] = useState('');
   const [progress, setProgress] = useState(0);
   const [imgList, setImgList] = useState<any>([]);
+  //
+  const [postedUrl, setPostedUrl] = useState<string>('');
+  //
   //텍스트 처리
   const { user }: UserState = useSelector((state: StoreState) => state.user);
 
@@ -96,7 +102,7 @@ const PostForm = () => {
     updatedAt: '',
     job: '',
     nickname: '',
-    image: [],
+    images: [],
     commentsCount: 0,
   });
   const [postTopic, setPostTopic] = useState<any>({
@@ -119,7 +125,7 @@ const PostForm = () => {
   // Create the file metadata
   /** @type {any} */
   const metadata = {
-    contentType: 'image/jpeg',
+    contentType: 'images/jpeg',
   };
 
   //rounge,topic 바뀔때마다 세부주제value값 menu에 반영
@@ -178,14 +184,14 @@ const PostForm = () => {
 
   const onSubmit = async () => {
     //사진 정보 저장
-    let image: Array<Object> = [];
+    let images: Array<Object> = [];
     //[이미지 다운로드 url, firebase에 저장한 이미지 이름, 이미지 설명]
     if (imgList.length >= 1) {
-      image = imgList.map((v: Array<Object>) => {
+      images = imgList.map((v: Array<Object>) => {
         return { url: v[0], imgName: v[1], imgDetail: v[2] };
       });
     } else {
-      image = [];
+      images = [];
     }
 
     if (post.postType === '' || post.title === '' || post.content === '') {
@@ -214,14 +220,16 @@ const PostForm = () => {
         job: user.jobSector,
         nickname: user.nickname,
         createdAt: serverTimestamp(),
-        image: image,
+        images,
         commentsCount: 0,
         urlKey: 'topic',
       };
 
       const { id: newId } = await addDoc(collectionRef, putObj);
       //새로 생성된 post id를 user 정보에 추가
-
+      //
+      setPostedUrl(`/list/topic/${postTopic.url}/${newId}`);
+      //
       const docRef = doc(db, 'user', uid);
       const userPostUpdate = {
         ...user,
@@ -238,6 +246,10 @@ const PostForm = () => {
       //유저에 게시물 id 추가
       setModalOpen(true);
       //나중에 topic 페이지로 이동하도록 변경하기
+      if (from === 'topic' || from === 'timeline' || !from) {
+        // [rounge] 페이지가 아닌 페이지에서 write로 접근 후 topic 글 작성
+        dispatch(resetViewAction()); // 서버상태와 동기화를 위해 초기화
+      }
     } else {
       const collectionRef = collection(db, 'post');
       const putObj = {
@@ -252,7 +264,7 @@ const PostForm = () => {
         job: user.jobSector,
         nickname: user.nickname,
         createdAt: serverTimestamp(),
-        image: image,
+        images,
         commentsCount: 0,
         urlKey: postRounge.url,
       };
@@ -276,8 +288,13 @@ const PostForm = () => {
       //유저에 게시물 id 추가
       setModalOpen(true);
       //나중에 topic 페이지로 이동하도록 변경하기
+      setPostedUrl(`/list/rounge/${postRounge.url}/${newId}`);
     }
     //원하는 타겟으로 나중에 변경하기
+    if (from === 'timeline' || from === postRounge) {
+      // 이전 [rounge] 페이지에서 현재 [rounge] 페이지 글 작성 또는 이전 페이지가 timeline
+      dispatch(resetViewAction()); // 서버상태와 동기화를 위해 초기화
+    }
   };
 
   //이미지 업로드
@@ -592,7 +609,7 @@ const PostForm = () => {
         <Modal
           open={modalOpen}
           onClose={() => {
-            Router.push('/');
+            Router.replace(postedUrl);
           }}
           aria-labelledby="modal-modal-title"
           aria-describedby="modal-modal-description"

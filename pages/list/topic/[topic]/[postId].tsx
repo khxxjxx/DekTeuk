@@ -55,6 +55,7 @@ export const getServerSideProps: GetServerSideProps = async (
   if (context.params?.postId) {
     id = context.params.postId;
   } else id = null;
+  // console.log((await getDoc(doc(db, 'post', id as String))).data());
   const docRef = doc(db, 'post', id as string);
   const docSnap = await getDoc(docRef);
   if (context.req.headers.referer && context.req.url)
@@ -239,8 +240,8 @@ export default function TopicPost({
                 alignItems: 'center',
               }}
             >
-              {post.image.length !== 0 &&
-                post.image.map((v: any, i: number) => {
+              {post.images.length !== 0 &&
+                post.images.map((v: any, i: number) => {
                   return (
                     <Box
                       key={v.url}
