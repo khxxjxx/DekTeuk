@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import Layout from '@layouts/Layout';
 import { getTopics } from '@utils/function';
 import { TestTopicCard } from '@components/Card';
@@ -15,7 +15,6 @@ export default function TopicPage() {
   const topicType = router.query.topic as string;
 
   const { ref, inView } = useInView();
-  const [firstFetch, setFirstFetch] = useState<boolean>(true);
 
   const [stopFetch, setStopFetch] = useState<boolean>(false); // 파이어베이스 연동시 사용
 
@@ -23,35 +22,45 @@ export default function TopicPage() {
 
   const dispatch = useDispatch();
 
-  const { posts } = useSelector((state: RootReducer) => state.posts);
+  const { data, key } = useSelector(
+    (state: RootReducer) => state.tempData.tempData,
+  );
 
   useEffect(() => {
-    if (posts.length === 0 && firstFetch) {
+    if (data.length === 0 || key != router.asPath.split('/')[3]) {
       console.log('첫 번째 디스패치');
-      dispatch(setDataAction(getTopics(topicType, 'test')));
-      setFirstFetch(false);
+      dispatch(
+        setDataAction({
+          data: getTopics(topicType, 'test'),
+          key: router.asPath.split('/')[3],
+        }),
+      );
     }
   }, []);
 
   useEffect(() => {
-    if (inView === true && firstFetch === false && stopFetch === false) {
+    if (inView === true && stopFetch === false) {
       const newtPosts = getTopics(topicType, 'test');
-      dispatch(setDataAction([...posts, ...newtPosts]));
+      dispatch(
+        setDataAction({
+          data: [...data, ...newtPosts],
+          key: router.asPath.split('/')[3],
+        }),
+      );
     }
   }, [inView]);
 
   return (
     <Layout>
-      {posts.length &&
-        posts.map((post: any, idx: any) => (
-          <>
-            {idx == posts.length - 2 ? (
-              <TestTopicCard topicCardData={post} key={post.postId} ref={ref} />
-            ) : (
-              <TestTopicCard topicCardData={post} key={post.postId} />
-            )}
-          </>
-        ))}
+      {data.length &&
+        data.map((post: any, idx: number) => {
+          return idx == data.length - 2 ? (
+            <TestTopicCard topicCardData={post} key={idx} />
+          ) : (
+            <TestTopicCard topicCardData={post} key={idx} />
+          );
+        })}
+      <div ref={ref}></div>
     </Layout>
   );
 }

@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import styled from '@emotion/styled';
 import NotificationInfo from './NotificationInfo';
 import NotificationContent from './NotificationContent';
@@ -10,6 +11,7 @@ type NotificationCardProps = {
   originContent: string;
   content: string;
   postType: string;
+  postUrl: string;
 };
 
 const NotificationCardWrapper = styled.div`
@@ -31,19 +33,22 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
   originContent,
   content,
   postType,
+  postUrl,
 }) => {
   return (
-    <NotificationCardWrapper>
-      <NotificationMainContent>
-        <NotificationInfo type={type} />
-        <NotificationContent content={content} />
-        <NotificationOriginContent
-          originContent={originContent}
-          postType={postType}
-        />
-      </NotificationMainContent>
-      <NotificationTime time={time} />
-    </NotificationCardWrapper>
+    <Link href={postUrl} passHref>
+      <NotificationCardWrapper>
+        <NotificationMainContent>
+          <NotificationInfo type={type} />
+          <NotificationContent content={content} />
+          <NotificationOriginContent
+            originContent={originContent}
+            postType={postType}
+          />
+        </NotificationMainContent>
+        <NotificationTime time={time} />
+      </NotificationCardWrapper>
+    </Link>
   );
 };
 

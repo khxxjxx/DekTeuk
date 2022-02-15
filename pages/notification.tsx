@@ -70,6 +70,7 @@ const Notification: NextPage = ({
               originContent={'이것이 넷플릭스 오리지널?'}
               content={'디즈니플러스 진짜 개노잼'}
               postType={'토픽'}
+              postUrl={'/test'}
             />
             {notifications.length != 0 &&
               notifications.map((v: any, i) => (
@@ -80,6 +81,7 @@ const Notification: NextPage = ({
                   originContent={v.orginContent}
                   content={v.content}
                   postType={v.postType}
+                  postUrl={v.postUrl}
                 />
               ))}
           </div>

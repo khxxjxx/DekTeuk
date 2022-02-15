@@ -90,18 +90,18 @@ const scroll = createSlice({
 });
 
 // 임시
-const topicPost = createSlice({
-  name: 'posts',
-  initialState: { posts: <any>[] },
+const tempData = createSlice({
+  name: 'tempData',
+  initialState: { tempData: { data: <any>[], key: '' } },
   reducers: {
     setData(state, action) {
-      console.log('setData 실행');
-      state.posts = action.payload;
+      console.log('setData 실행', state.tempData, action.payload);
+      state.tempData = action.payload;
     },
   },
 });
 
-export const setDataAction = topicPost.actions.setData; // 임시
+export const setDataAction = tempData.actions.setData; // 임시
 
 export const setViewAction = view.actions.setViewPosts;
 export const resetViewAction = view.actions.resetViewPosts;
@@ -114,7 +114,7 @@ const rootReducer = (
     user: UserState;
     view: ViewPosts;
     scroll: { scrollY: number };
-    posts: any;
+    tempData: any;
   },
   action: AnyAction,
 ) => {
@@ -147,7 +147,7 @@ const rootReducer = (
                 ? { view: [], searchValue: '' }
                 : state.view,
             user: userState,
-            posts: state.posts,
+            tempData: state.tempData,
           };
         } else
           return {
@@ -157,14 +157,14 @@ const rootReducer = (
                 ? { view: [], searchValue: '' }
                 : state.view,
             scroll: { scrollY: state.scroll.scrollY },
-            posts: state.posts,
+            tempData: state.tempData,
           };
       default:
         const combineReducer = combineReducers({
           user: userSlice.reducer,
           view: view.reducer,
           scroll: scroll.reducer,
-          posts: topicPost.reducer,
+          tempData: tempData.reducer,
         });
         return combineReducer(state, action);
     }
