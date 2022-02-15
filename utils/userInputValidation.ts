@@ -32,8 +32,17 @@ export const userInputValidation = (name: string, value: string) => {
 export const inputErrorCheck = (state: UserInputData) => {
   const { email, password, checkPassword, nickname, jobSector } = state;
 
-  if (password !== checkPassword) {
-    alert('비밀번호가 다릅니다!');
+  if (email.error) {
+    alert('이메일이 잘못 입력되었습니다!');
+    return false;
+  } else if (password.error || checkPassword.error) {
+    alert('비밀번호가 잘못 입력되었습니다!');
+    return false;
+  } else if (nickname.error) {
+    alert('닉네임이 잘못 입력되었습니다!');
+    return false;
+  } else if (jobSector.error) {
+    alert('직종을 선택하지 않았습니다!');
     return false;
   }
 

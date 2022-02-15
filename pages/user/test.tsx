@@ -5,6 +5,8 @@ import { InferGetServerSidePropsType } from 'next';
 import axios from 'axios';
 import { getDateTime } from '@utils/function';
 import type { NextApiRequest, NextApiResponse } from 'next';
+
+// 됨 - asdf.jpg
 const txtData = [
   {
     valueType: 'ALL',
@@ -383,6 +385,7 @@ const txtData = [
   },
 ];
 
+// 됨 - business_license.jpg
 const txtData1 = [
   {
     valueType: 'ALL',
@@ -781,11 +784,1045 @@ const txtData1 = [
   },
 ];
 
+// 안됨 - 문자들이 분리되서 식별
+const txtData2 = [
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '국세청',
+    inferConfidence: 0.9998,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '사업자등록증',
+    inferConfidence: 0.9998,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: 'us.oa.kr',
+    inferConfidence: 0.6777,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '(',
+    inferConfidence: 0.9999,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '법인사업자',
+    inferConfidence: 0.9996,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: ')',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '등록번호 :',
+    inferConfidence: 0.9195,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '104-86-53569',
+    inferConfidence: 0.9999,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '법인명(단체명)',
+    inferConfidence: 0.9513,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: ':',
+    inferConfidence: 0.9992,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '(주)',
+    inferConfidence: 0.9998,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '리그라운드',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '대',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '표',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '자',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: ':',
+    inferConfidence: 0.9971,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '서성덕,',
+    inferConfidence: 0.9805,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '임윤희',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '(각자대표)',
+    inferConfidence: 0.9996,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '개',
+    inferConfidence: 0.9999,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '업연월일',
+    inferConfidence: 0.9954,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: ':',
+    inferConfidence: 0.9984,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '2014',
+    inferConfidence: 0.9999,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '년',
+    inferConfidence: 0.9999,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '02',
+    inferConfidence: 0.9999,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '월',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '20',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '일',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '법인등록번호',
+    inferConfidence: 0.9999,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: ':',
+    inferConfidence: 0.9996,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '110111-5337765',
+    inferConfidence: 0.9998,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '사업장',
+    inferConfidence: 0.9998,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '소재지',
+    inferConfidence: 0.9999,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: ':',
+    inferConfidence: 0.9991,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '서울특별시',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '중구',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '동호로',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '387-2,',
+    inferConfidence: 0.9997,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '1,3,5층(방산동)',
+    inferConfidence: 0.9995,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '본점소재지',
+    inferConfidence: 0.9783,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: ':',
+    inferConfidence: 0.9989,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '서울특별시',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '중구',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '동호로',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '387-2,',
+    inferConfidence: 0.9994,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '1,3,5층(방산동)',
+    inferConfidence: 0.9995,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '사업의',
+    inferConfidence: 0.9997,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '종 류',
+    inferConfidence: 0.8598,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: ':',
+    inferConfidence: 0.9996,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '업태',
+    inferConfidence: 0.9978,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '제조업',
+    inferConfidence: 0.9995,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '종목',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '생분해성',
+    inferConfidence: 0.9997,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '제품',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '포장자재',
+    inferConfidence: 0.9996,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '도소매',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '일회용품,',
+    inferConfidence: 0.9978,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '포장자재',
+    inferConfidence: 0.9994,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '발',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '급',
+    inferConfidence: 0.9997,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '사',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '유',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: ':',
+    inferConfidence: 0.9998,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '정정',
+    inferConfidence: 0.9999,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '국',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '세 청',
+    inferConfidence: 0.9825,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '사업자',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '단위',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '과세',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '적용사업자',
+    inferConfidence: 0.9997,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '여부',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: ':',
+    inferConfidence: 0.9983,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '여(',
+    inferConfidence: 0.9857,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: ')',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '부(V)',
+    inferConfidence: 0.99,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '전자세금계산서',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '전용',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '전자우편주소',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: ':',
+    inferConfidence: 0.9986,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '2019',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '년',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '06',
+    inferConfidence: 0.9999,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '월',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '26',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '일',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '중부세무서장',
+    inferConfidence: 0.9997,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '국세청',
+    inferConfidence: 0.9997,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: 'National TaxService',
+    inferConfidence: 0.9936,
+  },
+];
+
+// 됨 - ocr1.jpg
+const txtData3 = [
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '국세청',
+    inferConfidence: 0.9996,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '사업자등록증',
+    inferConfidence: 0.9998,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: 'ntoolk',
+    inferConfidence: 0.5316,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '(',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '법인사업자',
+    inferConfidence: 0.9999,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: ')',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '등록번호:',
+    inferConfidence: 0.9035,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '214-87-39314',
+    inferConfidence: 0.9999,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '법인명(단체명)',
+    inferConfidence: 0.9621,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: ':',
+    inferConfidence: 0.9999,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '드림에이피에스',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '주식회사',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '대',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '표',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '자',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: ':',
+    inferConfidence: 0.9998,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '김현권',
+    inferConfidence: 0.9999,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '개업연월일:',
+    inferConfidence: 0.9648,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '2003',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '년',
+    inferConfidence: 0.9999,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '08',
+    inferConfidence: 0.9999,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '월',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '05 일',
+    inferConfidence: 0.9904,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '법인등록번호:',
+    inferConfidence: 0.9509,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '110111-2835209',
+    inferConfidence: 0.9965,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '사업장',
+    inferConfidence: 0.9993,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '소재지',
+    inferConfidence: 0.9999,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: ':',
+    inferConfidence: 0.9999,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '서울특별시',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '마포구',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '월드컵로',
+    inferConfidence: 0.9999,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '96,',
+    inferConfidence: 0.9481,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '4층(서교동,',
+    inferConfidence: 0.9988,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '영훈빌딩)',
+    inferConfidence: 0.9995,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '본점소재지',
+    inferConfidence: 0.9132,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: ':',
+    inferConfidence: 0.9999,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '서울특별시',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '마포구',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '월드컵로',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '96.',
+    inferConfidence: 0.9738,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '4층(서교동,',
+    inferConfidence: 0.9991,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '영훈빌딩)',
+    inferConfidence: 0.9995,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '사업의',
+    inferConfidence: 0.9994,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '종류:',
+    inferConfidence: 0.8368,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '업태',
+    inferConfidence: 0.9877,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '건설',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '종목',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '철물공사',
+    inferConfidence: 0.9994,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '건설',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '기계설비공사',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '서비스',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '기타도급',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: 'TEL',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: ':',
+    inferConfidence: 0.9997,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '02-323-3261',
+    inferConfidence: 0.9994,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '발',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '급',
+    inferConfidence: 0.9995,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '사',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '유 :',
+    inferConfidence: 0.8629,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: 'FAX',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: ':',
+    inferConfidence: 0.9997,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '02-323-3610',
+    inferConfidence: 0.9997,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '국',
+    inferConfidence: 0.9998,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: 'MAIL:',
+    inferConfidence: 0.9794,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: 'draps@draps.co.kr',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '사업자',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '단위',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '과세',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '적용사업자',
+    inferConfidence: 0.9996,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '여부',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: ':',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '여(',
+    inferConfidence: 0.9994,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: ')부(V)',
+    inferConfidence: 0.9456,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '전자세금계산서',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '전용',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '전자우편주소',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: ':',
+    inferConfidence: 0.9994,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '2020',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '년',
+    inferConfidence: 1,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '06월',
+    inferConfidence: 0.843,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '16 일',
+    inferConfidence: 0.9719,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '마포세무서장',
+    inferConfidence: 0.9995,
+  },
+  {
+    valueType: 'ALL',
+    boundingPoly: { vertices: [Array] },
+    inferText: '국세청',
+    inferConfidence: 0.9997,
+  },
+];
+
 export default function Test() {
   const timestamp = new Date().getTime();
   const [imageUrl, setImageUrl] = useState<string>('');
   const [imageExt, setImageExt] = useState<string>('');
-  let sumText = '';
+
   const data = {
     images: [
       {
@@ -825,26 +1862,69 @@ export default function Test() {
       console.log(res.data.message);
     });
   };
-  const resultTxt = (data: any) => {
+  // const resultTxt = (data: any) => {
+  //   const filteredText: any = [];
+  //   data.forEach((el: any, idx: number) => {
+  //     if (el.inferText === '등록번호 :') {
+  //       console.log(data[idx + 1].inferText);
+  //     } else if (el.inferText === '개업연월일:') {
+  //       console.log(data[idx - 1].inferText);
+  //       console.log(data[idx + 1].inferText);
+  //       console.log(data[idx + 2].inferText);
+  //       console.log(data[idx + 3].inferText);
+  //     }
+  //   });
+
+  //   console.log(filteredText);
+  // };
+
+  // 등록번호 idx+1 = 사업자 등록번호
+  // 개업연월일 idx-1 = 이름
+  // 개업연월일 idx ~ 법인등록번호 idx = 날짜
+  // 법인등록번호 || 법인등록번호
+  const resultTxt = (txtData: any) => {
     const filteredText: any = [];
-    data.forEach((el: any, idx: number) => {
-      if (el.inferText === '등록번호 :') {
-        console.log(data[idx + 1].inferText);
-      } else if (el.inferText === '개업연월일:') {
-        console.log(data[idx - 1].inferText);
-        console.log(data[idx + 1].inferText);
-        console.log(data[idx + 2].inferText);
-        console.log(data[idx + 3].inferText);
+    const regex = /[^0-9]/g;
+    let startDateIndex: number = 0;
+    let endDateIndex: number = 0;
+    let date = '';
+
+    txtData.forEach((el: any, idx: number) => {
+      if (el.inferText === '등록번호 :' || el.inferText === '등록번호:') {
+        console.log('등록번호', txtData[idx + 1].inferText);
+        filteredText.push(txtData[idx + 1].inferText.replaceAll('-', ''));
+      } else if (
+        el.inferText === '개업년월일:' ||
+        el.inferText === '개업연월일:'
+      ) {
+        console.log('name', txtData[idx - 1].inferText);
+        console.log('startDateIdx', idx);
+
+        filteredText.push(txtData[idx - 1].inferText);
+        startDateIndex = idx + 1;
+      } else if (
+        el.inferText === '법인등록번호:' ||
+        el.inferText === '법인등록번호'
+      ) {
+        console.log('endDateIdx', idx);
+        endDateIndex = idx;
       }
     });
-
+    for (let i = startDateIndex; i < endDateIndex; i++) {
+      date += txtData[i].inferText;
+    }
+    console.log('date', date);
+    const regexedDate = date.replace(regex, '');
+    console.log('regexedDate', regexedDate);
+    filteredText.push(regexedDate);
     console.log(filteredText);
+    //console.log(txtData);
   };
   return (
     <>
       <input type="file" accept="image/*" onChange={onImageChange} />
       <button onClick={onOcr}>Ocr</button>
-      <button onClick={resultTxt}>result</button>
+      <button onClick={() => resultTxt(txtData)}>result</button>
     </>
   );
 }

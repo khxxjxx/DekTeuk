@@ -19,7 +19,10 @@ import { useRouter } from 'next/router';
 import MenuItem from '@mui/material/MenuItem';
 import { UserInputData, userInputInitialState, jobSectors } from './constants';
 import { getAuth } from 'firebase/auth';
-import { userInputValidation } from '@utils/userInputValidation';
+import {
+  userInputValidation,
+  inputErrorCheck,
+} from '@utils/userInputValidation';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
@@ -37,17 +40,19 @@ export default function Google() {
     reducer,
     userInputInitialState,
   );
-  const [email, setEmail] = useState<string>('');
   const [imageUrl, setImageUrl] = useState<string>('');
   const [imageExt, setImageExt] = useState<string>('');
-
+  const [nicknameBtnChecked, setNicknameBtnChecked] = useState<boolean>(false);
   const storage = getStorage();
-  const { nickname, jobSector } = inputState;
+  const { email, nickname, jobSector } = inputState;
   useEffect(() => {
     const auth = getAuth();
     const curUser = auth.currentUser;
     console.log('google account');
-    setEmail(curUser?.email!);
+    inputDispatch({
+      type: 'email',
+      payload: { value: curUser?.email, error: '' },
+    });
     console.log(inputState);
   }, []);
 
@@ -62,35 +67,38 @@ export default function Google() {
       alert('증명서 파일을 찾을 수 없습니다!');
       return;
     }
-    const userData = {
-      nickname: nickname.value,
-      jobSector: jobSector.value,
-      validRounges: [
-        {
-          title: '타임라인',
-          url: 'timeline',
-        },
-        {
-          title: '토픽',
-          url: 'topic',
-        },
-        {
-          title: jobSector.value,
-          url: jobSectors.find((v) => v.title === jobSector.value)
-            ?.url as string,
-        },
-      ],
-      id: uid,
-      hasNewNotification: true,
-      posts: [],
-      email: email,
-    };
-    uploadImg(uid!);
-    console.log('success');
-    const docSnap = await setDoc(doc(db, 'user', uid!), userData);
-    console.log(docSnap);
-    await signOut(auth);
-    router.push('/user/login');
+    const success = inputErrorCheck(inputState);
+    if (success) {
+      const userData = {
+        nickname: nickname.value,
+        jobSector: jobSector.value,
+        validRounges: [
+          {
+            title: '타임라인',
+            url: 'timeline',
+          },
+          {
+            title: '토픽',
+            url: 'topic',
+          },
+          {
+            title: jobSector.value,
+            url: jobSectors.find((v) => v.title === jobSector.value)
+              ?.url as string,
+          },
+        ],
+        id: uid,
+        hasNewNotification: false,
+        posts: [],
+        email: email.value,
+      };
+      uploadImg(uid!);
+      console.log('success');
+      const docSnap = await setDoc(doc(db, 'user', uid!), userData);
+      console.log(docSnap);
+      await signOut(auth);
+      router.push('/user/login');
+    }
   };
 
   const uploadImg = async (uid: string) => {
@@ -112,9 +120,17 @@ export default function Google() {
     let nicknameHelperText;
     if (nicknameCheckSnap.docs.length !== 0 || nickname.value.length < 3) {
       nicknameHelperText = '사용 불가능한 닉네임 입니다!';
+      alert(nicknameHelperText);
     } else {
-      nicknameHelperText = '사용 가능한 닉네임 입니다!';
+      nicknameHelperText = '';
+      alert('사용 가능한 닉네임 입니다!');
+      setNicknameBtnChecked(true);
     }
+
+    inputDispatch({
+      type: 'nickname',
+      payload: { value: nickname.value, error: nicknameHelperText },
+    });
   };
 
   const onImageChange = (e: any) => {
@@ -134,6 +150,9 @@ export default function Google() {
 
   const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    if (name === 'nickname' && nicknameBtnChecked) {
+      setNicknameBtnChecked(false);
+    }
     const error = userInputValidation(name, value);
     inputDispatch({ type: name, payload: { value, error } });
   };
@@ -146,7 +165,7 @@ export default function Google() {
           <WrapContents>
             <WrapInput>
               <Label>Email</Label>
-              <TextFields required disabled name="email" value={email} />
+              <TextFields required disabled name="email" value={email.value} />
             </WrapInput>
             <WrapInput>
               <Label>닉네임</Label>
@@ -156,7 +175,11 @@ export default function Google() {
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
-                      <CheckButton type="button" onClick={checkNickname}>
+                      <CheckButton
+                        type="button"
+                        onClick={checkNickname}
+                        disabled={nicknameBtnChecked}
+                      >
                         중복확인
                       </CheckButton>
                     </InputAdornment>
@@ -224,7 +247,7 @@ export default function Google() {
                 ))}
               </TextFields>
             </WrapInput>
-            <SubmitButton type="submit">
+            <SubmitButton type="submit" disabled={!nicknameBtnChecked}>
               <GroupAddIcon style={{ marginRight: '10px' }} />
               회원가입
             </SubmitButton>
@@ -287,6 +310,9 @@ const CheckButton = styled.button`
   :hover {
     opacity: 0.8;
   }
+  :disabled {
+    background: gray;
+  }
 `;
 
 const SubmitButton = styled.button`
@@ -300,6 +326,9 @@ const SubmitButton = styled.button`
   cursor: pointer;
   :hover {
     opacity: 0.8;
+  }
+  :disabled {
+    background: gray;
   }
 `;
 

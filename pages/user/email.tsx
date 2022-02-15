@@ -7,7 +7,6 @@ import Button from '@mui/material/Button';
 import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
-  GoogleAuthProvider,
   signOut,
 } from 'firebase/auth';
 import { db, auth } from '@firebase/firebase';
@@ -55,9 +54,10 @@ export default function Signup() {
 
   const [imageUrl, setImageUrl] = useState<string>('');
   const [imageExt, setImageExt] = useState<string>('');
-
+  const [nicknameBtnChecked, setNicknameBtnChecked] = useState<boolean>(false);
+  const [emailBtnChecked, setEmailBtnChecked] = useState<boolean>(false);
   const { email, password, checkPassword, nickname, jobSector } = inputState;
-
+  console.log(inputState);
   const createUserWithEmail = async () => {
     try {
       const { user: result } = await createUserWithEmailAndPassword(
@@ -74,12 +74,9 @@ export default function Signup() {
 
   const SignUpSubmitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(checkPassword.value === password.value);
-    console.log(inputState);
-    //inputErrorCheck(inputState);
     if (checkPassword.value !== password.value) {
       alert('비밀번호가 다릅니다!');
-      dispatch({
+      inputDispatch({
         type: 'checkPassword',
         payload: { value: checkPassword.value, error: '비밀번호가 다릅니다!' },
       });
@@ -89,38 +86,41 @@ export default function Signup() {
       alert('증명서 파일을 찾을 수 없습니다!');
       return;
     }
+    const success = inputErrorCheck(inputState);
 
-    const uid = (await createUserWithEmail()) as string;
-    const userData = {
-      nickname: nickname.value,
-      jobSector: jobSector.value,
-      validRounges: [
-        {
-          title: '타임라인',
-          url: 'timeline',
-        },
-        {
-          title: '토픽',
-          url: 'topic',
-        },
-        {
-          title: jobSector.value,
-          url: jobSectors.find((v) => v.title === jobSector.value)
-            ?.url as string,
-          // type error 잡아야 함
-        },
-      ],
-      id: uid,
-      hasNewNotification: true,
-      posts: [],
-      email: email.value,
-    };
+    if (success) {
+      const uid = (await createUserWithEmail()) as string;
+      const userData = {
+        nickname: nickname.value,
+        jobSector: jobSector.value,
+        validRounges: [
+          {
+            title: '타임라인',
+            url: 'timeline',
+          },
+          {
+            title: '토픽',
+            url: 'topic',
+          },
+          {
+            title: jobSector.value,
+            url: jobSectors.find((v) => v.title === jobSector.value)
+              ?.url as string,
+            // type error 잡아야 함
+          },
+        ],
+        id: uid,
+        hasNewNotification: false,
+        posts: [],
+        email: email.value,
+      };
 
-    uploadImg(uid);
-    console.log('success');
-    await setDoc(doc(db, 'user', uid), userData);
-    await signOut(auth);
-    router.push('/user/login');
+      uploadImg(uid);
+      console.log('success');
+      await setDoc(doc(db, 'user', uid), userData);
+      await signOut(auth);
+      router.push('/user/login');
+    }
   };
 
   const uploadImg = async (uid: string) => {
@@ -133,6 +133,32 @@ export default function Signup() {
     }
   };
 
+  const checkEmail = async () => {
+    const emailCheckQuery = query(
+      collection(db, 'user'),
+      where('email', '==', email.value),
+    );
+    let emailHelperText;
+    const emailCheckSnap = await getDocs(emailCheckQuery);
+    if (emailCheckSnap.docs.length !== 0 || email.value.length < 3) {
+      emailHelperText = '사용 불가능한 이메일 입니다!';
+      alert(emailHelperText);
+    } else {
+      if (email.error) {
+        alert(email.error);
+        return;
+      }
+      emailHelperText = '';
+      alert('사용 가능한 이메일 입니다!');
+      setEmailBtnChecked(true);
+    }
+
+    inputDispatch({
+      type: 'email',
+      payload: { value: email.value, error: emailHelperText },
+    });
+  };
+
   const checkNickname = async () => {
     const nicknameCheckQuery = query(
       collection(db, 'user'),
@@ -142,12 +168,15 @@ export default function Signup() {
     const nicknameCheckSnap = await getDocs(nicknameCheckQuery);
     if (nicknameCheckSnap.docs.length !== 0 || nickname.value.length < 3) {
       nicknameHelperText = '사용 불가능한 닉네임 입니다!';
+      alert(nicknameHelperText);
     } else {
-      nicknameHelperText = '사용 가능한 닉네임 입니다!';
+      nicknameHelperText = '';
+      alert('사용 가능한 닉네임 입니다!');
+      setNicknameBtnChecked(true);
     }
 
     inputDispatch({
-      type: nickname,
+      type: 'nickname',
       payload: { value: nickname.value, error: nicknameHelperText },
     });
   };
@@ -167,8 +196,15 @@ export default function Signup() {
     e.target.value = '';
   };
   const onClearImg = () => setImageUrl('');
+
   const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    if (name === 'nickname' && nicknameBtnChecked) {
+      setNicknameBtnChecked(false);
+    }
+    if (name === 'email' && emailBtnChecked) {
+      setEmailBtnChecked(false);
+    }
     const error = userInputValidation(name, value);
     inputDispatch({ type: name, payload: { value, error } });
   };
@@ -183,6 +219,19 @@ export default function Signup() {
               <TextFields
                 required
                 error={email.error ? true : false}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <CheckButton
+                        type="button"
+                        onClick={checkEmail}
+                        disabled={emailBtnChecked}
+                      >
+                        중복확인
+                      </CheckButton>
+                    </InputAdornment>
+                  ),
+                }}
                 placeholder="Email 주소를 입력해 주세요."
                 name="email"
                 value={email.value}
@@ -227,7 +276,11 @@ export default function Signup() {
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
-                      <CheckButton type="button" onClick={checkNickname}>
+                      <CheckButton
+                        type="button"
+                        onClick={checkNickname}
+                        disabled={nicknameBtnChecked}
+                      >
                         중복확인
                       </CheckButton>
                     </InputAdornment>
@@ -297,7 +350,10 @@ export default function Signup() {
               </TextFields>
             </WrapInput>
 
-            <SubmitButton type="submit">
+            <SubmitButton
+              type="submit"
+              disabled={!(nicknameBtnChecked && emailBtnChecked)}
+            >
               <GroupAddIcon style={{ marginRight: '10px' }} />
               회원가입
             </SubmitButton>
@@ -358,6 +414,9 @@ const CheckButton = styled.button`
   :hover {
     opacity: 0.8;
   }
+  :disabled {
+    background: gray;
+  }
 `;
 
 const SubmitButton = styled.button`
@@ -371,6 +430,9 @@ const SubmitButton = styled.button`
   cursor: pointer;
   :hover {
     opacity: 0.8;
+  }
+  :disabled {
+    background: gray;
   }
 `;
 
