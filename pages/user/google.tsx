@@ -20,10 +20,14 @@ import MenuItem from '@mui/material/MenuItem';
 import { UserInfo } from '@interface/StoreInterface';
 import { UserInputData, userInputInitialState, jobSectors } from './constants';
 import { getAuth } from 'firebase/auth';
-const reducer = (state: UserInputData, action: any) => {
-  return { ...state, [action.name]: action.payload };
-};
+import { userInputValidation } from '@utils/userInputValidation';
 
+const reducer = (state: UserInputData, action: any) => {
+  return {
+    ...state,
+    [action.type]: { value: action.payload.value, error: action.payload.error },
+  };
+};
 export default function Google() {
   const router = useRouter();
   const dispatch = useDispatch();
@@ -31,16 +35,11 @@ export default function Google() {
     reducer,
     userInputInitialState,
   );
-  //const [error, setError] = useState<boolean>('');
+  const [error, setError] = useState<boolean>(false);
   const [email, setEmail] = useState<string>('');
   const [imageUrl, setImageUrl] = useState<string>('');
   const [imageExt, setImageExt] = useState<string>('');
-  const [inputHelpers, setInputHelpers] = useState<
-    Omit<UserInputData, 'email' | 'password' | 'checkPassword'>
-  >({
-    nickname: '',
-    jobSector: '직종을 선택 해 주세요',
-  });
+
   const storage = getStorage();
   const { nickname, jobSector } = inputState;
   useEffect(() => {
@@ -63,8 +62,8 @@ export default function Google() {
       return;
     }
     const userInitData: UserInfo = {
-      nickname: nickname,
-      jobSector: jobSector,
+      nickname: nickname.value,
+      jobSector: jobSector.value,
       validRounges: [
         {
           title: '타임라인',
@@ -75,8 +74,9 @@ export default function Google() {
           url: 'topic',
         },
         {
-          title: jobSector,
-          url: jobSectors.find((v) => v.title === jobSector)?.url as string,
+          title: jobSector.value,
+          url: jobSectors.find((v) => v.title === jobSector.value)
+            ?.url as string,
         },
       ],
       id: uid,
@@ -105,22 +105,17 @@ export default function Google() {
   const checkNickname = async () => {
     const nicknameCheckQuery = query(
       collection(db, 'user'),
-      where('nickname', '==', nickname),
+      where('nickname', '==', nickname.value),
     );
     const nicknameCheckSnap = await getDocs(nicknameCheckQuery);
     let nicknameHelperText;
-    if (nicknameCheckSnap.docs.length !== 0 || nickname.length < 3) {
+    if (nicknameCheckSnap.docs.length !== 0 || nickname.value.length < 3) {
       nicknameHelperText = '사용 불가능한 닉네임 입니다!';
+      setError(true);
     } else {
       nicknameHelperText = '사용 가능한 닉네임 입니다!';
+      setError(false);
     }
-
-    const newInputHelper = {
-      ...inputHelpers,
-      nickname: nicknameHelperText,
-    };
-
-    setInputHelpers(newInputHelper);
   };
 
   const onImageChange = (e: any) => {
@@ -140,7 +135,8 @@ export default function Google() {
 
   const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    inputDispatch({ type: name, payload: value });
+    const error = userInputValidation(name, value);
+    inputDispatch({ type: name, payload: { value, error } });
   };
 
   return (
@@ -157,6 +153,7 @@ export default function Google() {
               <Label>닉네임</Label>
               <TextFields
                 required
+                error={nickname.error ? true : false}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
@@ -170,9 +167,9 @@ export default function Google() {
                 margin="dense"
                 name="nickname"
                 placeholder="닉네임을 입력해 주세요."
-                value={nickname}
+                value={nickname.value}
                 onChange={onInputChange}
-                helperText={inputHelpers.nickname}
+                helperText={nickname.error}
               />
             </WrapInput>
             <WrapImageUpload>
@@ -211,12 +208,13 @@ export default function Google() {
               <Label>직종</Label>
               <TextFields
                 select
+                error={jobSector.error ? true : false}
                 variant="outlined"
                 margin="dense"
                 name="jobSector"
-                value={jobSector}
+                value={jobSector.value}
                 onChange={onInputChange}
-                helperText={inputHelpers.jobSector}
+                helperText={jobSector.error}
               >
                 {jobSectors.map((value, idx) => (
                   <MenuItem key={idx} value={value.title}>

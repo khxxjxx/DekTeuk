@@ -1,9 +1,9 @@
 export type UserInputData = {
-  email: string;
-  password: string;
-  checkPassword: string;
-  nickname: string;
-  jobSector: string;
+  email: { value: string; error: string };
+  password: { value: string; error: string };
+  checkPassword: { value: string; error: string };
+  nickname: { value: string; error: string };
+  jobSector: { value: string; error: string };
 };
 
 export type InputHelperText = {
@@ -15,11 +15,11 @@ export type InputHelperText = {
 };
 
 export const userInputInitialState: UserInputData = {
-  email: '',
-  password: '',
-  checkPassword: '',
-  nickname: '',
-  jobSector: '',
+  email: { value: '', error: '' },
+  password: { value: '', error: '' },
+  checkPassword: { value: '', error: '' },
+  nickname: { value: '', error: '' },
+  jobSector: { value: '', error: '직종을 선택해 주세요' },
 };
 
 export const jobSectors = [

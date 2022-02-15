@@ -35,9 +35,16 @@ import {
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import {
+  userInputValidation,
+  inputErrorCheck,
+} from '@utils/userInputValidation';
 
 const reducer = (state: UserInputData, action: any) => {
-  return { ...state, [action.type]: action.payload };
+  return {
+    ...state,
+    [action.type]: { value: action.payload.value, error: action.payload.error },
+  };
 };
 
 export default function Signup() {
@@ -49,7 +56,6 @@ export default function Signup() {
     userInputInitialState,
   );
   const provider = new GoogleAuthProvider();
-  const [isGoogle, setIsGoogle] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
   const [imageUrl, setImageUrl] = useState<string>('');
   const [imageExt, setImageExt] = useState<string>('');
@@ -67,8 +73,8 @@ export default function Signup() {
     try {
       const { user: result } = await createUserWithEmailAndPassword(
         auth,
-        email,
-        password,
+        email.value,
+        password.value,
       );
       sendEmailVerification(result);
       return result.uid;
@@ -79,10 +85,15 @@ export default function Signup() {
 
   const SignUpSubmitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const uid = (await createUserWithEmail()) as string;
-
-    if (checkPassword !== password) {
+    console.log(checkPassword.value === password.value);
+    console.log(inputState);
+    //inputErrorCheck(inputState);
+    if (checkPassword.value !== password.value) {
       alert('비밀번호가 다릅니다!');
+      dispatch({
+        type: 'checkPassword',
+        payload: { value: checkPassword.value, error: '비밀번호가 다릅니다!' },
+      });
       return;
     }
     if (!imageUrl) {
@@ -90,9 +101,10 @@ export default function Signup() {
       return;
     }
 
+    const uid = (await createUserWithEmail()) as string;
     const userData: UserInfo = {
-      nickname: nickname,
-      jobSector: jobSector,
+      nickname: nickname.value,
+      jobSector: jobSector.value,
       validRounges: [
         {
           title: '타임라인',
@@ -103,15 +115,16 @@ export default function Signup() {
           url: 'topic',
         },
         {
-          title: jobSector,
-          url: jobSectors.find((v) => v.title === jobSector)?.url as string,
+          title: jobSector.value,
+          url: jobSectors.find((v) => v.title === jobSector.value)
+            ?.url as string,
           // type error 잡아야 함
         },
       ],
       id: uid,
       hasNewNotification: true,
       posts: [],
-      email: email,
+      email: email.value,
     };
 
     uploadImg(uid);
@@ -134,21 +147,20 @@ export default function Signup() {
   const checkNickname = async () => {
     const nicknameCheckQuery = query(
       collection(db, 'user'),
-      where('nickname', '==', nickname),
+      where('nickname', '==', nickname.value),
     );
     let nicknameHelperText;
     const nicknameCheckSnap = await getDocs(nicknameCheckQuery);
-    if (nicknameCheckSnap.docs.length !== 0 || nickname.length < 3) {
+    if (nicknameCheckSnap.docs.length !== 0 || nickname.value.length < 3) {
       nicknameHelperText = '사용 불가능한 닉네임 입니다!';
     } else {
       nicknameHelperText = '사용 가능한 닉네임 입니다!';
     }
-    const newInputHelper = {
-      ...inputHelpers,
-      nickname: nicknameHelperText,
-    };
 
-    setInputHelpers(newInputHelper);
+    inputDispatch({
+      type: nickname,
+      payload: { value: nickname.value, error: nicknameHelperText },
+    });
   };
 
   const onImageChange = (e: any) => {
@@ -168,7 +180,8 @@ export default function Signup() {
   const onClearImg = () => setImageUrl('');
   const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    inputDispatch({ type: name, payload: value });
+    const error = userInputValidation(name, value);
+    inputDispatch({ type: name, payload: { value, error } });
   };
   return (
     <>
@@ -180,11 +193,12 @@ export default function Signup() {
               <Label>Email</Label>
               <TextFields
                 required
+                error={email.error ? true : false}
                 placeholder="Email 주소를 입력해 주세요."
                 name="email"
-                value={email}
+                value={email.value}
                 onChange={onInputChange}
-                helperText={inputHelpers.email}
+                helperText={email.error}
               />
             </WrapInput>
             <WrapInput>
@@ -192,24 +206,27 @@ export default function Signup() {
               <TextFields
                 required
                 type="password"
+                error={password.error ? true : false}
                 placeholder="비밀번호는 6자리 이상 입력해주세요."
                 variant="outlined"
                 margin="dense"
                 name="password"
-                value={password}
+                value={password.value}
                 onChange={onInputChange}
-                helperText={inputHelpers.password}
+                helperText={password.error}
               />
+              <Label>비밀번호 확인</Label>
               <TextFields
                 required
                 type="password"
+                error={checkPassword.error ? true : false}
                 placeholder="비밀번호를 한 번더 입력해 주세요."
                 variant="outlined"
                 margin="dense"
                 name="checkPassword"
-                value={checkPassword}
+                value={checkPassword.value}
                 onChange={onInputChange}
-                helperText={inputHelpers.checkPassword}
+                helperText={checkPassword.error}
               />
             </WrapInput>
 
@@ -217,6 +234,7 @@ export default function Signup() {
               <Label>닉네임</Label>
               <TextFields
                 required
+                error={nickname.error ? true : false}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
@@ -230,9 +248,9 @@ export default function Signup() {
                 margin="dense"
                 name="nickname"
                 placeholder="닉네임을 입력해 주세요."
-                value={nickname}
+                value={nickname.value}
                 onChange={onInputChange}
-                helperText={inputHelpers.nickname}
+                helperText={nickname.error}
               />
             </WrapInput>
             <WrapImageUpload>
@@ -274,12 +292,13 @@ export default function Signup() {
               <Label>직종</Label>
               <TextFields
                 select
+                error={jobSector.error ? true : false}
                 variant="outlined"
                 margin="dense"
                 name="jobSector"
-                value={jobSector}
+                value={jobSector.value}
                 onChange={onInputChange}
-                helperText={inputHelpers.jobSector}
+                helperText={jobSector.error}
               >
                 {jobSectors.map((value, idx) => (
                   <MenuItem key={idx} value={value.title}>
