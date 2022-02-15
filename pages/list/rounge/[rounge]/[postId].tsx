@@ -1,4 +1,8 @@
-import { setScrollAction } from '@store/reducer';
+import {
+  likeViewPostAction,
+  setScrollAction,
+  unLikeViewPostAction,
+} from '@store/reducer';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import { useDispatch } from 'react-redux';
 import {
@@ -50,6 +54,7 @@ import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import Router, { useRouter } from 'next/router';
 import Layout from '@layouts/Layout';
+import { StoreState, UserState } from '@interface/StoreInterface';
 const style = {
   position: 'absolute' as 'absolute',
   top: '50%',
@@ -110,6 +115,34 @@ export default function RoungePost({
   const [editOpen, setEditOpen] = useState(false);
   const [accessPost, setAccessPost] = useState('');
   const dispatch = useDispatch();
+
+  // 파이어스토어 업데이트, 클라이언트 상태 업데이트
+  const { user: myInfo }: UserState = useSelector(
+    (state: StoreState) => state.user,
+  );
+  const [isLiked, setIsLiked] = useState(
+    post.pressPerson.indexOf(myInfo.id) !== -1,
+  );
+  const onLike = async () => {
+    const postDocRef = doc(db, 'post', post.postId);
+    const { pressPerson } = post;
+    const newPressPerson = Array.from(new Set([...pressPerson, uid]));
+    await updateDoc(postDocRef, { pressPerson: newPressPerson });
+    dispatch(likeViewPostAction({ postId: post.postId, userId: uid }));
+    setPostLikeCount(newPressPerson.length);
+    setIsLiked(true);
+  };
+  const onUnLike = async () => {
+    const postDocRef = doc(db, 'post', post.postId);
+    const { pressPerson } = post;
+    const newPressPerson = pressPerson.filter((id: string) => id !== uid);
+    await updateDoc(postDocRef, { pressPerson: newPressPerson });
+    dispatch(unLikeViewPostAction({ postId: post.postId, userId: uid }));
+    setPostLikeCount(newPressPerson.length);
+    setIsLiked(false);
+  };
+  //
+
   // useEffect(() => {
   // const getUser = async () => {
   //   if (uid !== '') {
@@ -309,14 +342,23 @@ export default function RoungePost({
                     flexWrap: 'wrap',
                   }}
                 >
-                  {userLike ? (
+                  {/* {userLike ? ( */}
+                  {isLiked ? (
                     <FavoriteIcon
-                      onClick={(e) => changeLike(postId, e)}
+                      // onClick={(e) => changeLike(postId, e)}
+                      onClick={async () => {
+                        await onUnLike();
+                      }}
+                      style={{ cursor: 'pointer' }}
                       sx={{ mr: 1 }}
                     />
                   ) : (
                     <FavoriteBorderIcon
-                      onClick={(e) => changeLike(postId, e)}
+                      // onClick={(e) => changeLike(postId, e)}
+                      onClick={async () => {
+                        await onLike();
+                      }}
+                      style={{ cursor: 'pointer' }}
                       sx={{ mr: 1 }}
                     />
                   )}

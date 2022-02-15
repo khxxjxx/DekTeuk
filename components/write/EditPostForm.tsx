@@ -43,8 +43,8 @@ import { green } from '@mui/material/colors';
 import Fab from '@mui/material/Fab';
 import CheckIcon from '@mui/icons-material/Check';
 import SaveIcon from '@mui/icons-material/Save';
-import type { RootReducer } from 'store/reducer';
-import { useSelector } from 'react-redux';
+import { RootReducer, updateOnePostAction } from 'store/reducer';
+import { useDispatch, useSelector } from 'react-redux';
 import { withRouter } from 'next/router';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -54,6 +54,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Modal from '@mui/material/Modal';
 import { StoreState, UserState } from '@interface/StoreInterface';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { RoungePost, TopicPost } from '@interface/CardInterface';
 
 const style = {
   position: 'absolute' as 'absolute',
@@ -67,6 +68,7 @@ const style = {
   p: 4,
 };
 const PostForm = (props: any) => {
+  const dispatch = useDispatch();
   const postInfo = props.postInfo;
   const [diaOpen, setDiaOpen] = useState(false);
   // 이미지 업로드 부분
@@ -74,7 +76,7 @@ const PostForm = (props: any) => {
   const [url, setUrl] = useState('');
   const [progress, setProgress] = useState(0);
   const [imgList, setImgList] = useState<any>(
-    postInfo.image.map((v: any) => {
+    postInfo.images.map((v: any) => {
       return [v.url, v.imgName, v.imgDetail];
     }),
   );
@@ -102,7 +104,7 @@ const PostForm = (props: any) => {
     updatedAt: postInfo.updatedAt,
     job: postInfo.job,
     nickname: postInfo.nickname,
-    image: postInfo.image,
+    images: postInfo.images,
     commentsCount: postInfo.commentsCount,
   });
   //rougne,topic info 확인
@@ -156,14 +158,14 @@ const PostForm = (props: any) => {
   };
 
   const onSubmit = async () => {
-    let image: Array<Object> = [];
+    let images: Array<Object> = [];
     //[이미지 다운로드 url, firebase에 저장한 이미지 이름, 이미지 설명]
     if (imgList.length >= 1) {
-      image = imgList.map((v: Array<Object>) => {
+      images = imgList.map((v: Array<Object>) => {
         return { url: v[0], imgName: v[1], imgDetail: v[2] };
       });
     } else {
-      image = [];
+      images = [];
     }
     if (post.title === '' || post.content === '') {
       showAlert('error', `필수항목을 작성해 주세요`);
@@ -174,23 +176,34 @@ const PostForm = (props: any) => {
         const postUpdated = {
           ...post,
           updatedAt: serverTimestamp(),
-          image: image,
+          images: images,
           topic: postInfo.topic,
         };
         updateDoc(docRef, postUpdated);
         setPost(postUpdated);
         setDiaOpen(true);
+        dispatch(
+          updateOnePostAction({
+            postId: props.thisPostId,
+            // @ts-ignore
+            postData: post,
+          }),
+        );
       }
       if (postInfo.rounge) {
         const postUpdated = {
           ...post,
           updatedAt: serverTimestamp(),
-          image: image,
+          images: images,
           rounge: postInfo.rounge,
         };
         updateDoc(docRef, postUpdated);
         setPost(postUpdated);
         setDiaOpen(true);
+        dispatch(
+          // @ts-ignore
+          updateOnePostAction({ postId: props.thisPostId, postData: post }),
+        );
       }
 
       //나중에 topic 페이지로 이동하도록 변경하기

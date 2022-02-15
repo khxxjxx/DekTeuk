@@ -97,12 +97,30 @@ const view = createSlice({
       action: { payload: { postId: string; userId: string } },
     ) {
       outer: for (let i = 0; i < state.view.length; i++) {
+        // 이중반복분 탈출을 위한 플래그
         for (let j = 0; j < state.view[i].result.length; j++) {
           if (state.view[i].result[j].postId === action.payload.postId) {
             state.view[i].result[j].pressPerson = state.view[i].result[
               j
             ].pressPerson.filter((id: string) => id !== action.payload.userId);
             state.view[i].result[j].likeCount--;
+            break outer;
+          }
+        }
+      }
+    },
+    updateOnePost(
+      state,
+      action: { payload: { postId: string; postData: TopicPost | RoungePost } },
+    ) {
+      outer: for (let i = 0; i < state.view.length; i++) {
+        // 이중반복분 탈출을 위한 플래그
+        for (let j = 0; j < state.view[i].result.length; j++) {
+          if (state.view[i].result[j].postId === action.payload.postId) {
+            state.view[i].result[j] = {
+              ...state.view[i].result[j],
+              ...action.payload.postData,
+            };
             break outer;
           }
         }
@@ -143,6 +161,7 @@ export const setScrollAction = scroll.actions.setScroll;
 export const setMyInfoAction = userSlice.actions.setMyInfo;
 export const likeViewPostAction = view.actions.likeViewPost;
 export const unLikeViewPostAction = view.actions.unLikeViewPost;
+export const updateOnePostAction = view.actions.updateOnePost;
 const rootReducer = (
   state: {
     user: UserState;

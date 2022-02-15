@@ -259,6 +259,8 @@ export const RoungeCard = forwardRef(function RoungeCardWithRef(
   },
   ref?: ForwardedRef<any>,
 ) {
+  const dispatch = useDispatch();
+
   const { ref: cardRef, inView } = useInView();
   return (
     <Wrapper ref={cardRef}>
@@ -297,16 +299,57 @@ export const RoungeCard = forwardRef(function RoungeCardWithRef(
 
               <CardDividerStyled />
               <CardBottomWrapperStyled>
-                <CardStatWrapper>
+                <CardStatWrapperLike
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    const currentUser = getAuth().currentUser;
+                    if (currentUser) {
+                      if (isLiked) {
+                        const docRef = doc(db, 'post', roungeCardData.postId);
+                        const { uid } = currentUser;
+                        const updatePressPerson =
+                          roungeCardData.pressPerson.filter(
+                            (person) => person !== uid,
+                          );
+                        await updateDoc(docRef, {
+                          pressPerson: updatePressPerson,
+                        });
+                        dispatch(
+                          unLikeViewPostAction({
+                            postId: roungeCardData.postId,
+                            userId: uid,
+                          }),
+                        );
+                      } else {
+                        const docRef = doc(db, 'post', roungeCardData.postId);
+                        const { uid } = currentUser;
+                        const updatePressPerson = [
+                          ...roungeCardData.pressPerson,
+                          uid,
+                        ];
+                        await updateDoc(docRef, {
+                          pressPerson: updatePressPerson,
+                        });
+                        dispatch(
+                          likeViewPostAction({
+                            postId: roungeCardData.postId,
+                            userId: uid,
+                          }),
+                        );
+                      }
+                    }
+                  }}
+                >
                   {isLiked ? (
                     <ThumbUpIconStyled />
                   ) : (
                     <ThumbUpOutlinedIconStyled />
                   )}
+
                   {roungeCardData.likeCount === 0
                     ? '좋아요'
                     : roungeCardData.likeCount}
-                </CardStatWrapper>
+                </CardStatWrapperLike>
                 <CardStatWrapper>
                   <ModeCommentIconStyled />
                   {roungeCardData.commentsCount === 0

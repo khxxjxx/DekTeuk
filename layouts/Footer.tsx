@@ -142,7 +142,9 @@ const Footer = () => {
         <NotificationsNoneOutlinedIconStyled fontSize="medium" />
       </DivStyled>
       <DivStyled>
-        <MoreHorizOutlinedIconStyled fontSize="medium" />
+        <Link href="/mypage" passHref>
+          <MoreHorizOutlinedIconStyled fontSize="medium" />
+        </Link>
       </DivStyled>
       <DivStyled>
         <Link href="/write" passHref>
