@@ -199,12 +199,6 @@ export const sendMessage = async (
   }
 };
 
-// export const uploadImg = (id: string, file: Blob | ArrayBuffer) => {
-//   uploadBytes(ref(storage, `chat/${id}`), file).then(() => {
-//     console.log('Uploaded a IMG!');
-//   });
-// };
-
 export const downloadImg = (key: string) => {
   getDownloadURL(ref(storage, `chat/${key}`)).then((url) => {
     const xhr = new XMLHttpRequest();
