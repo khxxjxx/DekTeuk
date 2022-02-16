@@ -190,7 +190,7 @@ export default function TopicPost({
 
   return (
     <Layout>
-      <Container maxWidth="sm">
+      <Container sx={{ maxWidth: '680px' }}>
         {editOpen ? (
           <EditPostForm
             setEditOpen={setEditOpen}
@@ -314,14 +314,20 @@ export default function TopicPost({
           </Box>
         )}
       </Container>
-      <Comment
-        postData={{
-          id: post.postId,
-          ownerId: post.userId,
-          type: post.postType,
-          title: post.title,
-        }}
-      />
+      {editOpen ? (
+        ''
+      ) : (
+        <Container sx={{ maxWidth: '680px' }}>
+          <Comment
+            postData={{
+              id: post.postId,
+              ownerId: post.userId,
+              type: post.postType,
+              title: post.title,
+            }}
+          />
+        </Container>
+      )}
     </Layout>
   );
 }

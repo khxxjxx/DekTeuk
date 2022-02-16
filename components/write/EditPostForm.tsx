@@ -182,6 +182,7 @@ const PostForm = (props: any) => {
         updateDoc(docRef, postUpdated);
         setPost(postUpdated);
         props.setUpdateTime(Date.now());
+
         setDiaOpen(true);
         dispatch(
           updateOnePostAction({
@@ -200,6 +201,7 @@ const PostForm = (props: any) => {
         };
         updateDoc(docRef, postUpdated);
         setPost(postUpdated);
+        props.setUpdateTime(Date.now());
         setDiaOpen(true);
         dispatch(
           // @ts-ignore
@@ -239,7 +241,6 @@ const PostForm = (props: any) => {
       },
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-          console.log('File available at', downloadURL);
           setUrl(url);
           //[이미지 다운로드 url, firebase에 저장한 이미지 이름, 이미지 설명]
           setImgList([...imgList, [downloadURL, postImage.name, '']]);

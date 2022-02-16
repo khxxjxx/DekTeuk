@@ -189,6 +189,7 @@ export default function RoungePost({
       //console.log를 모달창으로 바꿀것
     }
   });
+  console.log(updateTime);
   const MomentDateChange = () => {
     const nowTime = Date.now(),
       startTime =
@@ -229,7 +230,7 @@ export default function RoungePost({
 
   return (
     <Layout>
-      <Container maxWidth="sm">
+      <Container sx={{ maxWidth: '680px' }}>
         {accessPost === '' ? (
           <Box sx={{ mt: 6 }}>
             <Stack spacing={2}>
@@ -291,7 +292,7 @@ export default function RoungePost({
             <Modal
               open={notRoungemodalOpen}
               onClose={() => {
-                router.push('/');
+                router.back();
               }}
               aria-labelledby="modal-modal-title"
               aria-describedby="modal-modal-description"
@@ -318,10 +319,11 @@ export default function RoungePost({
               setPost={setPost}
               thisPostId={postId}
               postInfo={post}
+              setUpdateTime={setUpdateTime}
             />
           ) : (
             accessPost === 'accessAvailable' && (
-              <Box sx={{ minWidth: 120, mt: 6 }}>
+              <Box sx={{ mt: 6 }}>
                 <CustomSeparator menu={post} />
                 <Typography
                   variant="h5"
@@ -346,10 +348,8 @@ export default function RoungePost({
                     flexWrap: 'wrap',
                   }}
                 >
-                  {/* {userLike ? ( */}
                   {isLiked ? (
                     <FavoriteIcon
-                      // onClick={(e) => changeLike(postId, e)}
                       onClick={async () => {
                         await onUnLike();
                       }}
@@ -358,7 +358,6 @@ export default function RoungePost({
                     />
                   ) : (
                     <FavoriteBorderIcon
-                      // onClick={(e) => changeLike(postId, e)}
                       onClick={async () => {
                         await onLike();
                       }}
@@ -437,6 +436,20 @@ export default function RoungePost({
             )
           ))}
       </Container>
+      {editOpen ? (
+        ''
+      ) : (
+        <Container sx={{ maxWidth: '680px' }}>
+          <Comment
+            postData={{
+              id: post.postId,
+              ownerId: post.userId,
+              type: post.postType,
+              title: post.title,
+            }}
+          />
+        </Container>
+      )}
     </Layout>
   );
 }
