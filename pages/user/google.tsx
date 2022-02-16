@@ -17,6 +17,8 @@ import {
 import { getStorage, ref, uploadString } from 'firebase/storage';
 import { useRouter } from 'next/router';
 import MenuItem from '@mui/material/MenuItem';
+import { UserInfo, Rounge } from '@interface/StoreInterface';
+import { HomeListUrlString } from '@interface/GetPostsInterface';
 import { UserInputData, userInputInitialState, jobSectors } from './constants';
 import { getAuth } from 'firebase/auth';
 import {
@@ -69,7 +71,7 @@ export default function Google() {
     }
     const success = inputErrorCheck(inputState);
     if (success) {
-      const userData = {
+      const userData: UserInfo = {
         nickname: nickname.value,
         jobSector: jobSector.value,
         validRounges: [
@@ -84,8 +86,8 @@ export default function Google() {
           {
             title: jobSector.value,
             url: jobSectors.find((v) => v.title === jobSector.value)
-              ?.url as string,
-          },
+              ?.url as HomeListUrlString,
+          } as Rounge,
         ],
         id: uid,
         hasNewNotification: false,

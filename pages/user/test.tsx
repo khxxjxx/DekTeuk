@@ -33,11 +33,21 @@ const txtDataToJoin5 =
 // ocr7.png - 잘됨
 // ocr8.jpg - 잘됨
 
+type OcrData = {
+  b_no: string;
+  start_dt: string;
+  p_nm: string;
+};
+
 export default function Test() {
   const timestamp = new Date().getTime();
   const [imageUrl, setImageUrl] = useState<string>('');
   const [imageExt, setImageExt] = useState<string>('');
-
+  const [ocrData, setOcrData] = useState<OcrData>({
+    b_no: '',
+    start_dt: '',
+    p_nm: '',
+  });
   const data = {
     images: [
       {
@@ -69,32 +79,55 @@ export default function Test() {
   };
   const onOcr = () => {
     axios.post('http://localhost:3000/api/ocr', data).then((res) => {
-      // res.data.images[0].fields.forEach((elem: any) => {
-      //   console.log('===', elem.inferText);
-      //   sumText += '' + elem.inferText;
-      // });
       resultTxt(res.data.message);
       console.log(res.data.message);
     });
   };
-  const resultTxt = (data: any) => {
-    // const filteredText: any = [];
-    // data.forEach((el: any, idx: number) => {
-    //   filteredText.push(el.inferText);
-    // });
+
+  const validateData = async () => {
+    const validateData1 = {
+      businesses: [ocrData],
+    };
+    // // req data format
+    // const validateData = {
+    //   businesses: [
+    //     {
+    //       b_no: '8290700318',
+    //       start_dt: '20160401',
+    //       p_nm: '백봉',
+    //     },
+    //   ],
+    // };
+    console.log('============');
+    console.log(validateData);
+    console.log('============');
+    console.log(validateData1);
+    try {
+      const data = await axios.post(
+        'http://localhost:3000/api/validateOcrData',
+        validateData,
+      );
+      console.log(data);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const getTextData = (data: any) => {
     const res = data;
-    // const res = filteredText.join().replaceAll(',', '').replaceAll(' ', '');
-    // console.log(res);
+    console.log(res);
     // 개업연월일 가져옴
     console.log(res.indexOf('개업연월일:'));
     const newRes = res.substr(res.indexOf('개업연월일:'));
     const regex = /[^0-9]/g;
     const regDate = /([0-9]{4})년([0-1][0-9])월([0-3][0-9])일/;
+    const start_dt = newRes.match(regDate)[0].replace(regex, '');
     console.log(newRes.match(regDate)[0].replace(regex, ''));
     console.log(newRes.match(regDate));
     // 사업자 등록번호 가져옴
     const regNum = /([0-9]{3})-([0-9]{2})-([0-9]{5})/;
     console.log(res.match(regNum)[0].replaceAll('-', ''));
+    const b_no = res.match(regNum)[0].replaceAll('-', '');
 
     //이름 가져옴
     // console.log(res.indexOf('대표자:'));
@@ -103,13 +136,59 @@ export default function Test() {
     const idx = res.indexOf('성명:');
     // 59
     console.log(res.substr(idx + 3, 3));
+
+    const p_nm = res.substr(idx + 3, 3);
+    setOcrData({
+      b_no,
+      start_dt,
+      p_nm,
+    });
+  };
+
+  const resultTxt = (data: any) => {
+    //const res = data;
+    const filteredText: any = [];
+    data.forEach((el: any, idx: number) => {
+      filteredText.push(el.inferText);
+    });
+
+    const res = filteredText.join().replaceAll(',', '').replaceAll(' ', '');
+    console.log(res);
+    // 개업연월일 가져옴
+    console.log(res.indexOf('개업연월일:'));
+    const newRes = res.substr(res.indexOf('개업연월일:'));
+    const regex = /[^0-9]/g;
+    const regDate = /([0-9]{4})년([0-1][0-9])월([0-3][0-9])일/;
+    const start_dt = newRes.match(regDate)[0].replace(regex, '');
+    console.log(newRes.match(regDate)[0].replace(regex, ''));
+    console.log(newRes.match(regDate));
+    // 사업자 등록번호 가져옴
+    const regNum = /([0-9]{3})-([0-9]{2})-([0-9]{5})/;
+    console.log(res.match(regNum)[0].replaceAll('-', ''));
+    const b_no = res.match(regNum)[0].replaceAll('-', '');
+
+    //이름 가져옴
+    // console.log(res.indexOf('대표자:'));
+    // const idx = res.indexOf('대표자:');
+    console.log(res.indexOf('성명:'));
+    const idx = res.indexOf('성명:');
+    // 59
+    console.log(res.substr(idx + 3, 3));
+
+    const p_nm = res.substr(idx + 3, 3);
+    setOcrData({
+      b_no,
+      start_dt,
+      p_nm,
+    });
   };
 
   return (
     <>
       <input type="file" accept="image/*" onChange={onImageChange} />
       <button onClick={onOcr}>Ocr</button>
-      <button onClick={() => resultTxt(txtDataToJoin4)}>result</button>
+      <button onClick={() => getTextData(txtDataToJoin4)}>getTextData</button>
+      <button onClick={validateData}>result</button>
     </>
   );
 }

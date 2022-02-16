@@ -21,12 +21,9 @@ import {
 import { getStorage, ref, uploadString } from 'firebase/storage';
 import { useRouter } from 'next/router';
 import MenuItem from '@mui/material/MenuItem';
-import {
-  userInputInitialState,
-  jobSectors,
-  UserInputData,
-  InputHelperText,
-} from './constants';
+import { UserInfo, Rounge } from '@interface/StoreInterface';
+import { HomeListUrlString } from '@interface/GetPostsInterface';
+import { userInputInitialState, jobSectors, UserInputData } from './constants';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
@@ -90,7 +87,7 @@ export default function Signup() {
 
     if (success) {
       const uid = (await createUserWithEmail()) as string;
-      const userData = {
+      const userData: UserInfo = {
         nickname: nickname.value,
         jobSector: jobSector.value,
         validRounges: [
@@ -105,9 +102,8 @@ export default function Signup() {
           {
             title: jobSector.value,
             url: jobSectors.find((v) => v.title === jobSector.value)
-              ?.url as string,
-            // type error 잡아야 함
-          },
+              ?.url as HomeListUrlString,
+          } as Rounge,
         ],
         id: uid,
         hasNewNotification: false,
