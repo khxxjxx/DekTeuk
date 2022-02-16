@@ -31,7 +31,7 @@ export default function useNotification() {
       collection(db, 'notification'),
       where('userId', '==', `${user.id}`),
       orderBy('createdAt', 'desc'),
-      limit(3),
+      limit(10),
     );
     const snapshots = await getDocs(q);
     const myNotis: any = [];
@@ -48,7 +48,7 @@ export default function useNotification() {
       myNotis.push(myNotiData);
     });
 
-    if (myNotis.length < 3) setStopFetch(true);
+    if (myNotis.length < 10) setStopFetch(true);
 
     setEnd(snapshots.docs[snapshots.docs.length - 1]);
 
@@ -79,7 +79,7 @@ export default function useNotification() {
       notiRef,
       where('userId', '==', `${user.id}`),
       orderBy('createdAt', 'desc'),
-      limit(3),
+      limit(10),
       startAfter(lastSnap),
     );
     const snapshots = await getDocs(q);
@@ -97,7 +97,7 @@ export default function useNotification() {
       myNotis.push(myNotiData);
     });
 
-    if (myNotis.length < 3) {
+    if (myNotis.length < 10) {
       setStopFetch(true);
     }
     setEnd(snapshots.docs[snapshots.docs.length - 1]);

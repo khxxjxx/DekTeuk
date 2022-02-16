@@ -31,7 +31,7 @@ export default function useGetMyPost() {
       collection(db, 'post'),
       where('userId', '==', `${user.id}`),
       orderBy('createdAt', 'desc'),
-      limit(3),
+      limit(20),
     );
     const snapshots = await getDocs(q);
     const myPosts: any = [];
@@ -48,7 +48,7 @@ export default function useGetMyPost() {
       myPosts.push(myPostData);
     });
 
-    if (myPosts.length < 3) setStopFetch(true);
+    if (myPosts.length < 20) setStopFetch(true);
 
     setEnd(snapshots.docs[snapshots.docs.length - 1]);
 
@@ -79,7 +79,7 @@ export default function useGetMyPost() {
       postRef,
       where('userId', '==', `${user.id}`),
       orderBy('createdAt', 'desc'),
-      limit(3),
+      limit(20),
       startAfter(lastSnap),
     );
     const snapshots = await getDocs(q);
@@ -97,7 +97,7 @@ export default function useGetMyPost() {
       myPosts.push(myPostData);
     });
 
-    if (myPosts.length < 3) {
+    if (myPosts.length < 20) {
       setStopFetch(true);
     }
     setEnd(snapshots.docs[snapshots.docs.length - 1]);
