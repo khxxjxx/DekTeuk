@@ -14,6 +14,7 @@ import { SearchResult } from '@interface/StoreInterface';
 import { RoungeCard, TopicCard } from '@components/Card';
 import NotFoundPage from '@pages/404';
 import { setViewAction } from '@store/reducer';
+import { HomeListUrlString } from '@interface/GetPostsInterface';
 const RoungePage = () => {
   const router = useRouter();
   const [results, setResults] = useState<Array<SearchResult>>([]);
@@ -52,7 +53,7 @@ const RoungePage = () => {
       (async () => {
         setIsLoading(true);
         const result = await getHomePostsInfiniteFunction(
-          router.asPath.split('/')[2],
+          router.asPath.split('/')[2] as HomeListUrlString,
           0,
         );
         setIsLoading(false);
@@ -64,7 +65,7 @@ const RoungePage = () => {
     if (inView) {
       (async () => {
         const nextResult = await getHomePostsInfiniteFunction(
-          router.asPath.split('/')[2],
+          router.asPath.split('/')[2] as HomeListUrlString,
           results[results.length - 1].nextPage,
         );
         setResults([...results, nextResult]);

@@ -27,6 +27,10 @@ import {
 import wrapper from '@store/configureStore';
 
 import useDebounce from '@hooks/useDebounce';
+import {
+  DefaultListsAndTopics,
+  HomeListUrlString,
+} from '@interface/GetPostsInterface';
 
 const ListPage = () => {
   const router = useRouter();
@@ -43,7 +47,6 @@ const ListPage = () => {
   const { scrollY }: { scrollY: number } = useSelector(
     (state: StoreState) => state.scroll,
   );
-  // console.log(myInfo);
   const paddingFunction = useDebounce({
     cb: () => window.scrollY !== 0 && dispatch(setScrollAction(window.scrollY)),
     ms: 100,
@@ -78,35 +81,31 @@ const ListPage = () => {
 
     setAsPath(router.asPath);
   }, [router.asPath]);
-  // useEffect(() => {
-  //   if (!myInfo) dispatch(getUser());
-  // }, [myInfo, dispatch]);
-  useEffect(() => {
-    if (
-      myInfo?.validRounges.findIndex(
-        (v: ValidRounge) => `/list/${v.url}` === router.asPath,
-      ) === -1
-    ) {
-      return;
-    }
-  }, [router, myInfo]);
+
   useEffect(() => {
     if (view.length === 0)
       (async () => {
         dispatch(
           setViewAction(
-            await getHomePostsInfiniteFunction(router.asPath.split('/')[2], 0),
+            await getHomePostsInfiniteFunction(
+              router.asPath.split('/')[2] as HomeListUrlString,
+              0,
+              myInfo.validRounges.map((v) => v.url),
+            ),
           ),
         );
       })();
   }, [view]);
   useEffect(() => {
-    if (inView) {
+    if (inView && view[view.length - 1].nextPage !== -1) {
+      // if (inView) {
       (async () => {
+        console.log('inView');
         setIsLoading(true);
         const nextResults = await getHomePostsInfiniteFunction(
-          router.asPath.split('/')[2],
+          router.asPath.split('/')[2] as HomeListUrlString,
           view[view.length - 1].nextPage,
+          myInfo.validRounges.map((v) => v.url),
         );
         dispatch(setViewAction(nextResults));
         setIsLoading(false);
@@ -115,6 +114,14 @@ const ListPage = () => {
   }, [inView]);
 
   const renderData = view.flatMap((value: any) => value.result) ?? [];
+  if (
+    myInfo?.validRounges.findIndex(
+      (v: ValidRounge) => `/list/${v.url}` === router.asPath,
+    ) === -1
+  ) {
+    return <NotFoundPage />;
+  }
+
   if (isLoading && view.length === 0) {
     return (
       <Layout>
@@ -122,37 +129,56 @@ const ListPage = () => {
       </Layout>
     );
   }
-  // if (
-  //   myInfo?.validRounges.findIndex(
-  //     (v: ValidRounge) => `/list/${v.url}` === router.asPath,
-  //   ) === -1
-  // ) {
-  //   return <NotFoundPage />;
-  // }
+  if (
+    myInfo?.validRounges.findIndex(
+      (v: ValidRounge) => `/list/${v.url}` === router.asPath,
+    ) === -1
+  ) {
+    return <NotFoundPage />;
+  }
   return (
     <>
       <Layout>
         <TimelinePageWrapperDiv>
           <TimelineResultsWrapperDiv>
             {(renderData as Array<TopicPost | RoungePost>)?.map((post, i) => {
+              let isLiked = false;
+              if (myInfo?.id) {
+                // @ts-ignore
+                if (post.pressPerson.indexOf(myInfo.id) !== -1) isLiked = true;
+              }
               if (
-                i >=
-                (renderData as Array<TopicPost | RoungePost>).length - 10
+                i ===
+                (renderData as Array<TopicPost | RoungePost>).length - 20
               ) {
                 return post.postType === 'topic' ? (
-                  <TopicCard topicCardData={post} key={post.postId} ref={ref} />
+                  <TopicCard
+                    topicCardData={post}
+                    key={post.postId}
+                    ref={ref}
+                    isLiked={isLiked}
+                  />
                 ) : (
                   <RoungeCard
                     roungeCardData={post}
                     key={post.postId}
                     ref={ref}
+                    isLiked={isLiked}
                   />
                 );
               }
               return post.postType === 'topic' ? (
-                <TopicCard topicCardData={post} key={post.postId} />
+                <TopicCard
+                  topicCardData={post}
+                  key={post.postId}
+                  isLiked={isLiked}
+                />
               ) : (
-                <RoungeCard roungeCardData={post} key={post.postId} />
+                <RoungeCard
+                  roungeCardData={post}
+                  key={post.postId}
+                  isLiked={isLiked}
+                />
               );
             })}
           </TimelineResultsWrapperDiv>
@@ -165,28 +191,7 @@ const ListPage = () => {
 export const getServerSideProps = wrapper.getServerSideProps(
   (store) =>
     async (props): Promise<any> => {
-      const { list } = props.params as { list: string };
       store.dispatch(setSearchValueAction(''));
-      switch (list) {
-        case 'timeline': // topic, rounge 데이터 다 갖고와서 view에 dispatch
-          store.dispatch(
-            initialViewAction(
-              await getHomePostsInfiniteFunction('timeline', 0),
-            ),
-          );
-          console.log(list === 'timeline');
-          break;
-        case 'topic': // topic 데이터 다 갖고와서 view에 dispatch
-          store.dispatch(
-            initialViewAction(await getHomePostsInfiniteFunction('topic', 0)),
-          );
-          break;
-        default:
-          store.dispatch(
-            initialViewAction(await getHomePostsInfiniteFunction(list, 0)),
-          );
-          break;
-      }
     },
 );
 

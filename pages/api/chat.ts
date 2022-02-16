@@ -166,6 +166,7 @@ export const sendMessage = async (
   value: string,
   msgType: string,
   user: string,
+  otherId: queryType,
   file?: Blob | ArrayBuffer,
   id?: queryType,
 ) => {
@@ -193,13 +194,19 @@ export const sendMessage = async (
   }
 
   if (msgType === 'img' && file) {
-    uploadImg(message.id, file);
+    uploadBytes(ref(storage, `chat/${message.id}`), file).then(() => {
+      console.log('Uploaded a IMG!');
+    });
+  }
+
+  if (otherId) {
+    updateNotification(otherId as string, true);
   }
 };
 
-export const uploadImg = (id: string, file: Blob | ArrayBuffer) => {
-  uploadBytes(ref(storage, `chat/${id}`), file).then(() => {
-    console.log('Uploaded a IMG!');
+export const updateNotification = async (userId: string, value: boolean) => {
+  await updateDoc(doc(db, 'user', userId), {
+    hasNewChatNotification: value,
   });
 };
 

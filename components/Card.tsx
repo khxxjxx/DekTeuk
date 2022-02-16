@@ -5,9 +5,15 @@ import Link from 'next/link';
 import { ForwardedRef, forwardRef } from 'react';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ModeCommentIcon from '@mui/icons-material/ModeComment';
+import ThumbUpOutlinedIcon from '@mui/icons-material/ThumbUpOutlined';
 import { useInView } from 'react-intersection-observer';
 
 import ImgComponent from './items/ImgComponent';
+import { useDispatch } from 'react-redux';
+import { likeViewPostAction, unLikeViewPostAction } from '@store/reducer';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '@firebase/firebase';
+import { getAuth } from 'firebase/auth';
 
 const Wrapper = styled.div`
   width: 100%;
@@ -16,8 +22,7 @@ const Wrapper = styled.div`
 `;
 const CardWrapper = styled.div`
   width: 100%;
-  background-color: ${({ theme }: any) =>
-    theme.customTheme.defaultMode.cardWrapperBackgroundColor};
+  background-color: white;
   height: 200px;
   border-radius: 10px;
   margin: 17px 8px 0 8px;
@@ -29,8 +34,7 @@ const CardWrapper = styled.div`
   align-items: center;
   max-width: 680px;
   @media (prefers-color-scheme: dark) {
-    background-color: ${({ theme }: any) =>
-      theme.customTheme.darkMode.cardWrapperBackgroundColor};
+    background-color: ${({ theme }: any) => theme.mainColorBlack};
   }
 `;
 const OneDepthNestedLink = styled(Link)`
@@ -43,19 +47,15 @@ const TopicWrapperDivStyled = styled.div`
     font-size: 8px;
     font-weight: 500;
     margin-bottom: 4px;
-    background-color: ${({ theme }: any) =>
-      theme.customTheme.defaultMode.topicWrapperBackgroundColor};
+    background-color: ${({ theme }: any) => theme.mainColorViolet};
     border-radius: 20px;
     padding: 4px 12px 4px 12px;
-    color: ${({ theme }: any) =>
-      theme.customTheme.defaultMode.topicWrapperTextColor};
+    color: black;
   }
   @media (prefers-color-scheme: dark) {
     & div {
-      background-color: ${({ theme }: any) =>
-        theme.customTheme.darkMode.topicWrapperBackgroundColor};
-      color: ${({ theme }: any) =>
-        theme.customTheme.darkMode.topicWrapperTextColor};
+      background-color: ${({ theme }: any) => theme.blackGray};
+      color: ${({ theme }: any) => theme.lightGray};
       // color: red;
     }
   }
@@ -144,7 +144,11 @@ const CardStatWrapper = styled.div`
 const ThumbUpIconStyled = styled(ThumbUpIcon)`
   font-size: 1rem;
   margin-right: 0.5rem;
-  // color: rgb(144, 202, 249);
+  color: rgb(66, 103, 178);
+`;
+const ThumbUpOutlinedIconStyled = styled(ThumbUpOutlinedIcon)`
+  font-size: 1rem;
+  margin-right: 0.5rem;
   color: rgb(66, 103, 178);
 `;
 const ModeCommentIconStyled = styled(ModeCommentIcon)`
@@ -235,14 +239,22 @@ const DateDiffStyledSkeleton = styled.div`
 const CardWrapperSkeleton = styled(CardWrapper)`
   height: auto;
 `;
+const CardStatWrapperLike = styled(CardStatWrapper)`
+  z-index: 1;
+`;
+
 export const RoungeCard = forwardRef(function RoungeCardWithRef(
   {
     roungeCardData,
+    isLiked = false,
   }: {
     roungeCardData: RoungePost;
+    isLiked: boolean;
   },
   ref?: ForwardedRef<any>,
 ) {
+  const dispatch = useDispatch();
+
   const { ref: cardRef, inView } = useInView();
   return (
     <Wrapper ref={cardRef}>
@@ -281,12 +293,57 @@ export const RoungeCard = forwardRef(function RoungeCardWithRef(
 
               <CardDividerStyled />
               <CardBottomWrapperStyled>
-                <CardStatWrapper>
-                  <ThumbUpIconStyled />
+                <CardStatWrapperLike
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    const currentUser = getAuth().currentUser;
+                    if (currentUser) {
+                      if (isLiked) {
+                        const docRef = doc(db, 'post', roungeCardData.postId);
+                        const { uid } = currentUser;
+                        const updatePressPerson =
+                          roungeCardData.pressPerson.filter(
+                            (person) => person !== uid,
+                          );
+                        await updateDoc(docRef, {
+                          pressPerson: updatePressPerson,
+                        });
+                        dispatch(
+                          unLikeViewPostAction({
+                            postId: roungeCardData.postId,
+                            userId: uid,
+                          }),
+                        );
+                      } else {
+                        const docRef = doc(db, 'post', roungeCardData.postId);
+                        const { uid } = currentUser;
+                        const updatePressPerson = [
+                          ...roungeCardData.pressPerson,
+                          uid,
+                        ];
+                        await updateDoc(docRef, {
+                          pressPerson: updatePressPerson,
+                        });
+                        dispatch(
+                          likeViewPostAction({
+                            postId: roungeCardData.postId,
+                            userId: uid,
+                          }),
+                        );
+                      }
+                    }
+                  }}
+                >
+                  {isLiked ? (
+                    <ThumbUpIconStyled />
+                  ) : (
+                    <ThumbUpOutlinedIconStyled />
+                  )}
+
                   {roungeCardData.likeCount === 0
                     ? '좋아요'
                     : roungeCardData.likeCount}
-                </CardStatWrapper>
+                </CardStatWrapperLike>
                 <CardStatWrapper>
                   <ModeCommentIconStyled />
                   {roungeCardData.commentsCount === 0
@@ -347,13 +404,17 @@ const CardSkeleton = () => {
 export const TopicCard = forwardRef(function TopicCardWithRef(
   {
     topicCardData,
+    isLiked = false,
   }: {
     topicCardData: TopicPost;
+    isLiked: boolean;
   },
   ref?: any,
 ) {
+  const dispatch = useDispatch();
   const { ref: cardRef, inView } = useInView();
-
+  // @ts-ignore
+  // console.log(topicCardData.pressPerson);
   // console.log(Object.keys(topicCardData));
   return (
     <Wrapper ref={cardRef}>
@@ -404,12 +465,57 @@ export const TopicCard = forwardRef(function TopicCardWithRef(
               </TopicCardMainStyled>
               <CardDividerStyled />
               <CardBottomWrapperStyled>
-                <CardStatWrapper>
-                  <ThumbUpIconStyled />
+                <CardStatWrapperLike
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    const currentUser = getAuth().currentUser;
+                    if (currentUser) {
+                      if (isLiked) {
+                        const docRef = doc(db, 'post', topicCardData.postId);
+                        const { uid } = currentUser;
+                        const updatePressPerson =
+                          topicCardData.pressPerson.filter(
+                            (person) => person !== uid,
+                          );
+                        await updateDoc(docRef, {
+                          pressPerson: updatePressPerson,
+                        });
+                        dispatch(
+                          unLikeViewPostAction({
+                            postId: topicCardData.postId,
+                            userId: uid,
+                          }),
+                        );
+                      } else {
+                        const docRef = doc(db, 'post', topicCardData.postId);
+                        const { uid } = currentUser;
+                        const updatePressPerson = [
+                          ...topicCardData.pressPerson,
+                          uid,
+                        ];
+                        await updateDoc(docRef, {
+                          pressPerson: updatePressPerson,
+                        });
+                        dispatch(
+                          likeViewPostAction({
+                            postId: topicCardData.postId,
+                            userId: uid,
+                          }),
+                        );
+                      }
+                    }
+                  }}
+                >
+                  {isLiked ? (
+                    <ThumbUpIconStyled />
+                  ) : (
+                    <ThumbUpOutlinedIconStyled />
+                  )}
+
                   {topicCardData.likeCount === 0
                     ? '좋아요'
                     : topicCardData.likeCount}
-                </CardStatWrapper>
+                </CardStatWrapperLike>
                 <CardStatWrapper>
                   <ModeCommentIconStyled />
                   {topicCardData.commentsCount === 0

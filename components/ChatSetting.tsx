@@ -42,22 +42,26 @@ const Background = styled.div`
   position: fixed;
   z-index: 999;
   background: #000000bf;
+  display: flex;
+  justify-content: center;
 `;
 
 const ModalWrapper = styled.div`
   animation: ${slideUp} 0.5s ease-out forwards;
+  width: clamp(0px, 80%, 600px);
   height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
   color: black;
+  position: fixed;
+  bottom: 0;
 
   & > div {
     width: clamp(0px, 80%, 600px);
     border-radius: 20px;
-    background-color: ${({ theme }: any) =>
-      theme.customTheme.defaultMode.chatFromBackgroundColor};
+    background-color: ${({ theme }: any) => theme.whiteGray};
     margin-bottom: 20px;
     cursor: pointer;
   }
@@ -65,8 +69,7 @@ const ModalWrapper = styled.div`
   @media (prefers-color-scheme: dark) {
     color: white;
     & > div {
-      background-color: ${({ theme }: any) =>
-        theme.customTheme.darkMode.chatFromBackgroundColor};
+      background-color: ${({ theme }: any) => theme.blackGray};
     }
   }
 `;
