@@ -14,7 +14,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@firebase/firebase';
 
-export default function useGetMyPost() {
+export default function useNotification() {
   const router = useRouter();
   const [end, setEnd] = useState<any>(0);
   const [stopFetch, setStopFetch] = useState<boolean>(false);
@@ -26,46 +26,46 @@ export default function useGetMyPost() {
 
   const { user } = useSelector((state: RootReducer) => state.user);
 
-  const getPosts = async () => {
+  const getNotifications = async () => {
     const q = await query(
-      collection(db, 'post'),
+      collection(db, 'notification'),
       where('userId', '==', `${user.id}`),
       orderBy('createdAt', 'desc'),
-      limit(20),
+      limit(10),
     );
     const snapshots = await getDocs(q);
-    const myPosts: any = [];
+    const myNotis: any = [];
     snapshots.forEach((snapshot) => {
       const returnData = snapshot.data();
-      const myPostData = {
-        title: returnData.title,
-        postId: returnData.postId,
+      const myNotiData = {
+        alertType: returnData.alertType,
+        originContent: returnData.originContent,
         content: returnData.content,
+        createdAt: returnData.createdAt,
         postType: returnData.postType,
-        url:
-          returnData.postType == 'topic' ? returnData.topic : returnData.rounge,
+        postUrl: returnData.postUrl,
       };
-      myPosts.push(myPostData);
+      myNotis.push(myNotiData);
     });
 
-    if (myPosts.length < 20) setStopFetch(true);
+    if (myNotis.length < 10) setStopFetch(true);
 
     setEnd(snapshots.docs[snapshots.docs.length - 1]);
 
     dispatch(
       setDataAction({
-        data: myPosts,
-        key: 'mypost',
+        data: myNotis,
+        key: 'notification',
       }),
     );
   };
 
-  const getMorePosts = async (lastNum: number) => {
-    const postRef = collection(db, 'post');
+  const getMoreNotifications = async (lastNum: number) => {
+    const notiRef = collection(db, 'notification');
     let lastSnap;
     if (end === 0) {
       const after = query(
-        postRef,
+        notiRef,
         where('userId', '==', `${user.id}`),
         orderBy('createdAt', 'desc'),
         limit(lastNum),
@@ -76,42 +76,42 @@ export default function useGetMyPost() {
       lastSnap = end;
     }
     const q = query(
-      postRef,
+      notiRef,
       where('userId', '==', `${user.id}`),
       orderBy('createdAt', 'desc'),
-      limit(20),
+      limit(10),
       startAfter(lastSnap),
     );
     const snapshots = await getDocs(q);
-    const myPosts: any = [];
+    const myNotis: any = [];
     snapshots.forEach((snapshot) => {
       const returnData = snapshot.data();
-      const myPostData = {
-        title: returnData.title,
-        postId: returnData.postId,
+      const myNotiData = {
+        alertType: returnData.alertType,
+        originContent: returnData.originContent,
         content: returnData.content,
+        createdAt: returnData.createdAt,
         postType: returnData.postType,
-        url:
-          returnData.postType == 'topic' ? returnData.topic : returnData.rounge,
+        postUrl: returnData.postUrl,
       };
-      myPosts.push(myPostData);
+      myNotis.push(myNotiData);
     });
 
-    if (myPosts.length < 20) {
+    if (myNotis.length < 10) {
       setStopFetch(true);
     }
     setEnd(snapshots.docs[snapshots.docs.length - 1]);
     dispatch(
       setDataAction({
-        data: [...data, ...myPosts],
-        key: `mypost`,
+        data: [...data, ...myNotis],
+        key: `notification`,
       }),
     );
   };
 
   useEffect(() => {
-    if (data.length === 0 || 'mypost' !== key) {
-      getPosts();
+    if (data.length === 0 || 'notification' !== key) {
+      getNotifications();
     }
   }, []);
 
@@ -119,5 +119,5 @@ export default function useGetMyPost() {
     if (!user.id) router.push('/user/login');
   }, []);
 
-  return { data, key, stopFetch, getMorePosts };
+  return { data, key, stopFetch, getMoreNotifications };
 }

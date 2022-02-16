@@ -43,7 +43,7 @@ export default function TopicPage() {
       collection(db, 'post'),
       where('topic.url', '==', `${router.asPath.split('/')[3]}`),
       orderBy('createdAt', 'desc'),
-      limit(2),
+      limit(20),
     );
     const snapshots = await getDocs(q);
     const topics: Array<TopicPost> = [];
@@ -74,7 +74,7 @@ export default function TopicPage() {
         key: router.asPath.split('/')[3],
       }),
     );
-    if (topics.length < 2) {
+    if (topics.length < 20) {
       setStopFetch(true);
     }
   };
@@ -98,7 +98,7 @@ export default function TopicPage() {
       postRef,
       where('topic.url', '==', `${router.asPath.split('/')[3]}`),
       orderBy('createdAt', 'desc'),
-      limit(2),
+      limit(20),
       startAfter(lastSnap),
     );
     const snapshots = await getDocs(q);
@@ -124,7 +124,7 @@ export default function TopicPage() {
       topics.push(returnData);
     });
 
-    if (topics.length < 2) {
+    if (topics.length < 20) {
       setStopFetch(true);
     }
     setEnd(snapshots.docs[snapshots.docs.length - 1]);
@@ -145,7 +145,7 @@ export default function TopicPage() {
     if (
       inView === true &&
       stopFetch === false &&
-      data.length >= 2 &&
+      data.length >= 20 &&
       key == router.asPath.split('/')[3]
     ) {
       getMoreNotification(data.length);
@@ -163,13 +163,9 @@ export default function TopicPage() {
   return (
     <Layout>
       {data.length !== 0 &&
-        data.map((post: any, idx: number) => {
-          return idx == data.length - 2 ? (
-            <TestTopicCard topicCardData={post} key={idx} />
-          ) : (
-            <TestTopicCard topicCardData={post} key={idx} />
-          );
-        })}
+        data.map((post: any, idx: number) => (
+          <TestTopicCard topicCardData={post} key={idx} />
+        ))}
       <div ref={ref} style={{ height: '50px' }}></div>
     </Layout>
   );
