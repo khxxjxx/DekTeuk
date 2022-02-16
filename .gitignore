@@ -40,3 +40,5 @@ yarn-error.log*
 
 # testfile
 /pages/user/test.tsx
+sa.json
+seed.sh
