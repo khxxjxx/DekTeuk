@@ -111,6 +111,7 @@ export default function Signup() {
         ],
         id: uid,
         hasNewNotification: false,
+        hasNewChatNotification: false,
         posts: [],
         email: email.value,
       };
