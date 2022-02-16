@@ -18,8 +18,8 @@ import {
   query,
   where,
   getDocs,
-  orderBy,
   limit,
+  orderBy,
   startAfter,
 } from 'firebase/firestore';
 import { db } from '@firebase/firebase';
@@ -37,7 +37,7 @@ const Notification: NextPage = ({
 
   const [stopFetch, setStopFetch] = useState<boolean>(false); // 파이어베이스 연동시 사용
   const [end, setEnd] = useState<any>(0);
-  const [test, setTest] = useState(false);
+  const [display, setDisplay] = useState(false);
 
   const { ref, inView } = useInView();
 
@@ -68,7 +68,7 @@ const Notification: NextPage = ({
 
   useEffect(() => {
     if (data[0]?.postUrl) {
-      setTest(true);
+      setDisplay(true);
     }
   }, [data]);
 
@@ -85,7 +85,7 @@ const Notification: NextPage = ({
     snapshots.forEach((snapshot) => {
       dataArr.push(snapshot.data());
     });
-    console.log('버튼클릭 클라이언트');
+
     if (dataArr.length < 10) setStopFetch(true);
 
     dispatch(
@@ -98,10 +98,8 @@ const Notification: NextPage = ({
 
   useEffect(() => {
     if (data.length === 0 || 'notification' !== key) {
-      console.log('ssss');
       getNotification();
     }
-    // setTest(true);
   }, []);
 
   useEffect(() => {
@@ -130,14 +128,14 @@ const Notification: NextPage = ({
       <Layout>
         <Container>
           <div style={{ marginTop: '30px' }}>
-            {test &&
+            {display &&
               data.length != 0 &&
               data.map((v: any, i: number) => (
                 <NotificationCard
                   key={i}
                   type={v.alertType}
                   time={getDateTime(v.createdAt)}
-                  originContent={v.orginContent}
+                  originContent={v.originContent}
                   content={v.content}
                   postType={v.postType}
                   postUrl={v.postUrl}

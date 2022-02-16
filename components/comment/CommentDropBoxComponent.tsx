@@ -50,7 +50,6 @@ const CommentDropBox: React.FC<CommentDropBoxProps> = ({
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const userLoginInfo = useSelector((state: RootReducer) => state.user.user.id);
-
   const deleteComment = async () => {
     const commentref = doc(db, 'comment', commentId);
     await updateDoc(commentref, {
@@ -72,16 +71,17 @@ const CommentDropBox: React.FC<CommentDropBoxProps> = ({
 
   return (
     <CommentDropBoxDiv ref={menuRef}>
-      {setNestedReply && (
+      {
         <CommentDropBoxOption
           onClick={() => {
-            setNestedReply(true);
+            if (setNestedReply) setNestedReply(true);
+
             setMenu(false);
           }}
         >
           대댓글 달기
         </CommentDropBoxOption>
-      )}
+      }
 
       {userId == userLoginInfo && (
         <>

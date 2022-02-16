@@ -15,13 +15,24 @@ import type {
   InferGetServerSidePropsType,
 } from 'next';
 
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  limit,
+  orderBy,
+  startAfter,
+} from 'firebase/firestore';
+import { db } from '@firebase/firebase';
+
 export default function TopicPage() {
   const router = useRouter();
 
   const topicType = router.query.topic as string;
 
   const { ref, inView } = useInView();
-  const [test, setTest] = useState(false);
+  const [display, setDisplay] = useState(false);
 
   const [stopFetch, setStopFetch] = useState<boolean>(false); // 파이어베이스 연동시 사용
 
@@ -32,34 +43,125 @@ export default function TopicPage() {
   const { data, key } = useSelector(
     (state: RootReducer) => state.tempData.tempData,
   );
-  useLayoutEffect(() => {
+
+  const getTopicPost = async () => {
+    const q = query(
+      collection(db, 'post'),
+      where('topic.url', '==', `${router.asPath.split('/')[3]}`),
+      orderBy('createdAt', 'desc'),
+      limit(10),
+    );
+    const snapshots = await getDocs(q);
+    const topics: Array<TopicPost> = [];
+    snapshots.forEach((doc) => {
+      const topicData = doc.data();
+      const returnData: TopicPost = {
+        author: { nickname: topicData.nickname, jobSector: topicData.job },
+        content: topicData.content,
+        commentsCount: topicData.commentsCount || 0,
+        createdAt: topicData.createdAt.seconds
+          .toString()
+          .padEnd(13, 0)
+          .toString(),
+        images: topicData.images,
+        likeCount: topicData.pressPerson.length,
+        postId: topicData.postId,
+        postType: topicData.postType,
+        title: topicData.title,
+        topic: topicData.topic,
+        pressPerson: topicData.pressPerson,
+      };
+      topics.push(returnData);
+    });
+    if (topics.length < 10) setStopFetch(true);
+    setEnd(snapshots.docs[snapshots.docs.length - 1]);
+    dispatch(
+      setDataAction({
+        data: topics,
+        key: router.asPath.split('/')[3],
+      }),
+    );
+  };
+
+  const getMoreNotification = async () => {
+    const q = query(
+      collection(db, 'post'),
+      where('topic.url', '==', `${router.asPath.split('/')[3]}`),
+      orderBy('createdAt', 'desc'),
+      limit(10),
+      startAfter(end),
+    );
+    const snapshots = await getDocs(q);
+    const topics: Array<TopicPost> = [];
+    snapshots.forEach((doc) => {
+      const topicData = doc.data();
+      const returnData: TopicPost = {
+        author: { nickname: topicData.nickname, jobSector: topicData.job },
+        content: topicData.content,
+        commentsCount: topicData.commentsCount || 0,
+        createdAt: topicData.createdAt.seconds
+          .toString()
+          .padEnd(13, 0)
+          .toString(),
+        images: topicData.images,
+        likeCount: topicData.pressPerson.length,
+        postId: topicData.postId,
+        postType: topicData.postType,
+        title: topicData.title,
+        topic: topicData.topic,
+        pressPerson: topicData.pressPerson,
+      };
+      topics.push(returnData);
+    });
+
+    if (topics.length < 10) setStopFetch(true);
+    setEnd(snapshots.docs[snapshots.docs.length - 1]);
+    dispatch(
+      setDataAction({
+        data: [...data, ...topics],
+        key: `${router.asPath.split('/')[3]}`,
+      }),
+    );
+  };
+  useEffect(() => {
     if (data.length === 0 || router.asPath.split('/')[3] !== key) {
-      console.log('첫 번째 디스패치', '이거 언제 실행됨?');
-      dispatch(
-        setDataAction({
-          data: getTopics(topicType, 'test'),
-          key: router.asPath.split('/')[3],
-        }),
-      );
+      getTopicPost();
+
+      // dispatch(
+      //   setDataAction({
+      //     data: getTopics(topicType, 'test'),
+      //     key: router.asPath.split('/')[3],
+      //   }),
+      // );
     }
-    setTest(true);
   }, []);
 
   useEffect(() => {
-    if (inView === true && stopFetch === false && data.length >= 10) {
-      const newtPosts = getTopics(topicType, 'test');
-      dispatch(
-        setDataAction({
-          data: [...data, ...newtPosts],
-          key: router.asPath.split('/')[3],
-        }),
-      );
+    if (data[0]?.title) {
+      setDisplay(true);
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if (
+      inView === true &&
+      stopFetch === false &&
+      data.length >= 10 &&
+      key == router.asPath.split('/')[3]
+    ) {
+      // const newtPosts = getTopics(topicType, 'test');
+      getMoreNotification();
+      // dispatch(
+      //   setDataAction({
+      //     data: [...data, ...newtPosts],
+      //     key: router.asPath.split('/')[3],
+      //   }),
+      // );
     }
   }, [inView]);
-  console.log('@@@', data, '@@@@');
   return (
     <Layout>
-      {test &&
+      {display &&
         data.length !== 0 &&
         data.map((post: any, idx: number) => {
           return idx == data.length - 2 ? (
@@ -73,22 +175,22 @@ export default function TopicPage() {
   );
 }
 
-export const getServerSideProps: GetServerSideProps =
-  wrapper.getServerSideProps((store) => async (ctx) => {
-    const type = ctx.query.topic;
-    const data = store.getState();
-    console.log('@@@@@@@@@@', data.tempData, 'asdasd');
+// export const getServerSideProps: GetServerSideProps =
+//   wrapper.getServerSideProps((store) => async (ctx) => {
+//     const type = ctx.query.topic;
+//     const data = store.getState();
+//     console.log('@@@@@@@@@@', data.tempData, 'asdasd');
 
-    // if (data.tempData.key !== type) {
-    //   store.dispatch(
-    //     setDataAction({
-    //       data: [],
-    //       key: type,
-    //     }),
-    //   );
-    // }
+//     // if (data.tempData.key !== type) {
+//     //   store.dispatch(
+//     //     setDataAction({
+//     //       data: [],
+//     //       key: type,
+//     //     }),
+//     //   );
+//     // }
 
-    return {
-      props: {},
-    };
-  });
+//     return {
+//       props: {},
+//     };
+//   });
