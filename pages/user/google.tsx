@@ -89,6 +89,7 @@ export default function Google() {
         ],
         id: uid,
         hasNewNotification: false,
+        hasNewChatNotification: false,
         posts: [],
         email: email.value,
       };

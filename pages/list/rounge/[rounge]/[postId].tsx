@@ -1,4 +1,8 @@
-import { setScrollAction } from '@store/reducer';
+import {
+  likeViewPostAction,
+  setScrollAction,
+  unLikeViewPostAction,
+} from '@store/reducer';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import { useDispatch } from 'react-redux';
 import {
@@ -48,8 +52,9 @@ import EditPostForm from '@components/write/EditPostForm';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import Layout from '@layouts/Layout';
+import { StoreState, UserState } from '@interface/StoreInterface';
 const style = {
   position: 'absolute' as 'absolute',
   top: '50%',
@@ -71,7 +76,7 @@ export const getServerSideProps: GetServerSideProps = async (
   } else id = null;
   const docRef = doc(db, 'post', id as string);
   const docSnap = await getDoc(docRef);
-  if (context.req.headers.referer && context.req.url)
+  if (context.req.headers.referer && context.req.url) {
     return {
       props: {
         referer: context.req.headers.referer
@@ -82,6 +87,7 @@ export const getServerSideProps: GetServerSideProps = async (
         postId: id,
       },
     };
+  }
   return {
     props: { postProps: JSON.stringify(docSnap.data()), postId: id },
   };
@@ -96,6 +102,7 @@ export default function RoungePost({
   postProps: string;
   postId: string;
 }) {
+  const router = useRouter();
   const { user } = useSelector((state: RootReducer) => state.user);
   // const [user, setUser] = useState<any>({});
   const [post, setPost] = useState(JSON.parse(postProps));
@@ -108,6 +115,34 @@ export default function RoungePost({
   const [editOpen, setEditOpen] = useState(false);
   const [accessPost, setAccessPost] = useState('');
   const dispatch = useDispatch();
+
+  // 파이어스토어 업데이트, 클라이언트 상태 업데이트
+  const { user: myInfo }: UserState = useSelector(
+    (state: StoreState) => state.user,
+  );
+  const [isLiked, setIsLiked] = useState(
+    post.pressPerson.indexOf(myInfo.id) !== -1,
+  );
+  const onLike = async () => {
+    const postDocRef = doc(db, 'post', post.postId);
+    const { pressPerson } = post;
+    const newPressPerson = Array.from(new Set([...pressPerson, uid]));
+    await updateDoc(postDocRef, { pressPerson: newPressPerson });
+    dispatch(likeViewPostAction({ postId: post.postId, userId: uid }));
+    setPostLikeCount(newPressPerson.length);
+    setIsLiked(true);
+  };
+  const onUnLike = async () => {
+    const postDocRef = doc(db, 'post', post.postId);
+    const { pressPerson } = post;
+    const newPressPerson = pressPerson.filter((id: string) => id !== uid);
+    await updateDoc(postDocRef, { pressPerson: newPressPerson });
+    dispatch(unLikeViewPostAction({ postId: post.postId, userId: uid }));
+    setPostLikeCount(newPressPerson.length);
+    setIsLiked(false);
+  };
+  //
+
   // useEffect(() => {
   // const getUser = async () => {
   //   if (uid !== '') {
@@ -172,7 +207,8 @@ export default function RoungePost({
           referer.split('/')[0] === 'list'
         ) // [0]가 list인지 확인
       ) &&
-      referer !== 'search'
+      referer !== 'search' &&
+      referer !== 'write'
     ) {
       dispatch(setScrollAction(0));
     }
@@ -251,7 +287,7 @@ export default function RoungePost({
             <Modal
               open={notRoungemodalOpen}
               onClose={() => {
-                Router.push('/');
+                router.push('/');
               }}
               aria-labelledby="modal-modal-title"
               aria-describedby="modal-modal-description"
@@ -306,14 +342,23 @@ export default function RoungePost({
                     flexWrap: 'wrap',
                   }}
                 >
-                  {userLike ? (
+                  {/* {userLike ? ( */}
+                  {isLiked ? (
                     <FavoriteIcon
-                      onClick={(e) => changeLike(postId, e)}
+                      // onClick={(e) => changeLike(postId, e)}
+                      onClick={async () => {
+                        await onUnLike();
+                      }}
+                      style={{ cursor: 'pointer' }}
                       sx={{ mr: 1 }}
                     />
                   ) : (
                     <FavoriteBorderIcon
-                      onClick={(e) => changeLike(postId, e)}
+                      // onClick={(e) => changeLike(postId, e)}
+                      onClick={async () => {
+                        await onLike();
+                      }}
+                      style={{ cursor: 'pointer' }}
                       sx={{ mr: 1 }}
                     />
                   )}
@@ -357,8 +402,8 @@ export default function RoungePost({
                     alignItems: 'center',
                   }}
                 >
-                  {post.image.length !== 0 &&
-                    post.image.map((v: any, i: number) => {
+                  {post.images.length !== 0 &&
+                    post.images.map((v: any, i: number) => {
                       return (
                         <Box
                           key={v.url}

@@ -2,11 +2,12 @@ import { HYDRATE } from 'next-redux-wrapper';
 import { AnyAction, combineReducers } from '@reduxjs/toolkit';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { getMyInfo } from '@utils/function';
-import { UserState, ViewPosts } from '@interface/StoreInterface';
+import { SearchResult, UserState, ViewPosts } from '@interface/StoreInterface';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '@firebase/firebase';
 import { createStore } from 'redux';
 import { useSelector, useDispatch } from 'react-redux';
+import { RoungePost, TopicPost } from '@interface/CardInterface';
 const initialUserState: UserState = {
   user: {
     nickname: '',
@@ -14,6 +15,7 @@ const initialUserState: UserState = {
     validRounges: [{ title: '토픽', url: 'topic' }],
     id: '',
     hasNewNotification: false,
+    hasNewChatNotification: false,
     posts: [],
     email: '',
   },
@@ -65,13 +67,64 @@ const view = createSlice({
       state.view = [action.payload];
     },
     setViewPosts(state, action) {
-      state.view = [...state.view, action.payload];
+      state.view.push(action.payload);
     },
     resetViewPosts(state) {
       state.view = [];
     },
     setSearchValue(state, action) {
       state.searchValue = action.payload;
+    },
+    addViewPost(state, action) {
+      state.view.unshift(action.payload);
+    },
+    likeViewPost(
+      state,
+      action: { payload: { postId: string; userId: string } },
+    ) {
+      outer: for (let i = 0; i < state.view.length; i++) {
+        for (let j = 0; j < state.view[i].result.length; j++) {
+          if (state.view[i].result[j].postId === action.payload.postId) {
+            state.view[i].result[j].pressPerson.push(action.payload.userId);
+            state.view[i].result[j].likeCount++;
+            break outer;
+          }
+        }
+      }
+    },
+    unLikeViewPost(
+      state,
+      action: { payload: { postId: string; userId: string } },
+    ) {
+      outer: for (let i = 0; i < state.view.length; i++) {
+        // 이중반복분 탈출을 위한 플래그
+        for (let j = 0; j < state.view[i].result.length; j++) {
+          if (state.view[i].result[j].postId === action.payload.postId) {
+            state.view[i].result[j].pressPerson = state.view[i].result[
+              j
+            ].pressPerson.filter((id: string) => id !== action.payload.userId);
+            state.view[i].result[j].likeCount--;
+            break outer;
+          }
+        }
+      }
+    },
+    updateOnePost(
+      state,
+      action: { payload: { postId: string; postData: TopicPost | RoungePost } },
+    ) {
+      outer: for (let i = 0; i < state.view.length; i++) {
+        // 이중반복분 탈출을 위한 플래그
+        for (let j = 0; j < state.view[i].result.length; j++) {
+          if (state.view[i].result[j].postId === action.payload.postId) {
+            state.view[i].result[j] = {
+              ...state.view[i].result[j],
+              ...action.payload.postData,
+            };
+            break outer;
+          }
+        }
+      }
     },
   },
 });
@@ -106,6 +159,9 @@ export const initialViewAction = view.actions.initialViewPosts;
 export const setSearchValueAction = view.actions.setSearchValue;
 export const setScrollAction = scroll.actions.setScroll;
 export const setMyInfoAction = userSlice.actions.setMyInfo;
+export const likeViewPostAction = view.actions.likeViewPost;
+export const unLikeViewPostAction = view.actions.unLikeViewPost;
+export const updateOnePostAction = view.actions.updateOnePost;
 const rootReducer = (
   state: {
     user: UserState;
@@ -127,6 +183,7 @@ const rootReducer = (
             validRounges: [],
             id: '',
             hasNewNotification: false,
+            hasNewChatNotification: false,
             posts: [],
             email: '',
           },

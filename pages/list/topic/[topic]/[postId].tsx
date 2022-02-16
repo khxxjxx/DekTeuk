@@ -1,4 +1,8 @@
-import { setScrollAction } from '@store/reducer';
+import {
+  likeViewPostAction,
+  setScrollAction,
+  unLikeViewPostAction,
+} from '@store/reducer';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import { useDispatch } from 'react-redux';
 import {
@@ -46,6 +50,7 @@ import DeleteLink from '@components/post/DeleteLink';
 import EditPostForm from '@components/write/EditPostForm';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import Layout from '@layouts/Layout';
+import { StoreState, UserState } from '@interface/StoreInterface';
 
 export const getServerSideProps: GetServerSideProps = async (
   // context: GetServerSidePropsContext,
@@ -55,6 +60,7 @@ export const getServerSideProps: GetServerSideProps = async (
   if (context.params?.postId) {
     id = context.params.postId;
   } else id = null;
+  // console.log((await getDoc(doc(db, 'post', id as String))).data());
   const docRef = doc(db, 'post', id as string);
   const docSnap = await getDoc(docRef);
   if (context.req.headers.referer && context.req.url)
@@ -92,6 +98,34 @@ export default function TopicPost({
   const [editOpen, setEditOpen] = useState(false);
 
   const dispatch = useDispatch();
+
+  // 파이어스토어 업데이트, 클라이언트 상태 업데이트
+  const { user: myInfo }: UserState = useSelector(
+    (state: StoreState) => state.user,
+  );
+  const [isLiked, setIsLiked] = useState(
+    post.pressPerson.indexOf(myInfo.id) !== -1,
+  );
+  const onLike = async () => {
+    const postDocRef = doc(db, 'post', post.postId);
+    const { pressPerson } = post;
+    const newPressPerson = Array.from(new Set([...pressPerson, uid]));
+    await updateDoc(postDocRef, { pressPerson: newPressPerson });
+    dispatch(likeViewPostAction({ postId: post.postId, userId: uid }));
+    setPostLikeCount(newPressPerson.length);
+    setIsLiked(true);
+  };
+  const onUnLike = async () => {
+    const postDocRef = doc(db, 'post', post.postId);
+    const { pressPerson } = post;
+    const newPressPerson = pressPerson.filter((id: string) => id !== uid);
+    await updateDoc(postDocRef, { pressPerson: newPressPerson });
+    dispatch(unLikeViewPostAction({ postId: post.postId, userId: uid }));
+    setPostLikeCount(newPressPerson.length);
+    setIsLiked(false);
+  };
+  //
+
   const changeLike = async (id: any, e: any) => {
     //다른 태그에 이벤트가 전달되지 않게 하기 위함
 
@@ -188,17 +222,25 @@ export default function TopicPost({
                 flexWrap: 'wrap',
               }}
             >
-              {userLike ? (
+              {/* {userLike ? ( */}
+              {isLiked ? (
                 <FavoriteIcon
-                  onClick={(e) => changeLike(postId, e)}
+                  onClick={async () => {
+                    await onUnLike();
+                  }}
+                  style={{ cursor: 'pointer' }}
                   sx={{ mr: 1 }}
                 />
               ) : (
                 <FavoriteBorderIcon
-                  onClick={(e) => changeLike(postId, e)}
+                  onClick={async () => {
+                    await onLike();
+                  }}
+                  style={{ cursor: 'pointer' }}
                   sx={{ mr: 1 }}
                 />
               )}
+              {/* {postLikeCount} */}
               {postLikeCount}
               <AccessTimeIcon sx={{ ml: 3, mr: 1 }} />
               <MomentDateChange />
@@ -239,8 +281,8 @@ export default function TopicPost({
                 alignItems: 'center',
               }}
             >
-              {post.image.length !== 0 &&
-                post.image.map((v: any, i: number) => {
+              {post.images.length !== 0 &&
+                post.images.map((v: any, i: number) => {
                   return (
                     <Box
                       key={v.url}

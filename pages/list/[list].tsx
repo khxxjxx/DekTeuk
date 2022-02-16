@@ -47,7 +47,6 @@ const ListPage = () => {
   const { scrollY }: { scrollY: number } = useSelector(
     (state: StoreState) => state.scroll,
   );
-  // console.log(myInfo);
   const paddingFunction = useDebounce({
     cb: () => window.scrollY !== 0 && dispatch(setScrollAction(window.scrollY)),
     ms: 100,
@@ -99,7 +98,9 @@ const ListPage = () => {
   }, [view]);
   useEffect(() => {
     if (inView && view[view.length - 1].nextPage !== -1) {
+      // if (inView) {
       (async () => {
+        console.log('inView');
         setIsLoading(true);
         const nextResults = await getHomePostsInfiniteFunction(
           router.asPath.split('/')[2] as HomeListUrlString,
@@ -128,37 +129,56 @@ const ListPage = () => {
       </Layout>
     );
   }
-  // if (
-  //   myInfo?.validRounges.findIndex(
-  //     (v: ValidRounge) => `/list/${v.url}` === router.asPath,
-  //   ) === -1
-  // ) {
-  //   return <NotFoundPage />;
-  // }
+  if (
+    myInfo?.validRounges.findIndex(
+      (v: ValidRounge) => `/list/${v.url}` === router.asPath,
+    ) === -1
+  ) {
+    return <NotFoundPage />;
+  }
   return (
     <>
       <Layout>
         <TimelinePageWrapperDiv>
           <TimelineResultsWrapperDiv>
             {(renderData as Array<TopicPost | RoungePost>)?.map((post, i) => {
+              let isLiked = false;
+              if (myInfo?.id) {
+                // @ts-ignore
+                if (post.pressPerson.indexOf(myInfo.id) !== -1) isLiked = true;
+              }
               if (
-                i >=
-                (renderData as Array<TopicPost | RoungePost>).length - 10
+                i ===
+                (renderData as Array<TopicPost | RoungePost>).length - 20
               ) {
                 return post.postType === 'topic' ? (
-                  <TopicCard topicCardData={post} key={post.postId} ref={ref} />
+                  <TopicCard
+                    topicCardData={post}
+                    key={post.postId}
+                    ref={ref}
+                    isLiked={isLiked}
+                  />
                 ) : (
                   <RoungeCard
                     roungeCardData={post}
                     key={post.postId}
                     ref={ref}
+                    isLiked={isLiked}
                   />
                 );
               }
               return post.postType === 'topic' ? (
-                <TopicCard topicCardData={post} key={post.postId} />
+                <TopicCard
+                  topicCardData={post}
+                  key={post.postId}
+                  isLiked={isLiked}
+                />
               ) : (
-                <RoungeCard roungeCardData={post} key={post.postId} />
+                <RoungeCard
+                  roungeCardData={post}
+                  key={post.postId}
+                  isLiked={isLiked}
+                />
               );
             })}
           </TimelineResultsWrapperDiv>
@@ -171,43 +191,7 @@ const ListPage = () => {
 export const getServerSideProps = wrapper.getServerSideProps(
   (store) =>
     async (props): Promise<any> => {
-      const { list } = props.params as { list: HomeListUrlString };
       store.dispatch(setSearchValueAction(''));
-      const state: StoreState = store.getState();
-      const {
-        user: {
-          user: { validRounges },
-        },
-      } = state;
-      switch (list) {
-        case 'timeline': // topic, rounge 데이터 다 갖고와서 view에 dispatch
-          store.dispatch(
-            initialViewAction(
-              await getHomePostsInfiniteFunction(
-                list,
-                0,
-                validRounges.map((v) => v.url),
-              ),
-            ),
-          );
-          break;
-        case 'topic': // topic 데이터 다 갖고와서 view에 dispatch
-          store.dispatch(
-            initialViewAction(await getHomePostsInfiniteFunction(list, 0)),
-          );
-          break;
-        default:
-          store.dispatch(
-            initialViewAction(
-              await getHomePostsInfiniteFunction(
-                list,
-                0,
-                validRounges.map((v) => v.url),
-              ),
-            ),
-          );
-          break;
-      }
     },
 );
 

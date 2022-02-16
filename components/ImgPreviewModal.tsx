@@ -45,8 +45,14 @@ const ImgPreviewModal = ({
         >
           {imgData!.src.map((img, idx) => (
             <SwiperSlide key={img as string}>
-              <Image src={img as string} alt="preview-img" />
-              <DeleteImg onClick={() => DeleteImgHandler(idx)}>X</DeleteImg>
+              <Image
+                src={img as string}
+                alt="preview-img"
+                upload={imgData!.type === 'upload'}
+              />
+              {imgData!.type === 'upload' && (
+                <DeleteImg onClick={() => DeleteImgHandler(idx)}>X</DeleteImg>
+              )}
             </SwiperSlide>
           ))}
         </SwiperStyled>
@@ -76,25 +82,26 @@ const Background = styled.div`
   position: fixed;
   z-index: 999;
   background: #000000bf;
+  scroll: hidden;
 `;
 
 const slideDown = keyframes`
-from {
-  opacity: 0;
-  transform: translateY(-80vh);
-}
-to {
-  opacity: 1;
-  transform: translateY(10%);
-}`;
+  from {
+    opacity: 0;
+    transform: translateY(-80vh);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(15%);
+  }
+`;
 
 const Modal = styled.div`
   margin: 0 auto;
   width: clamp(0px, 80%, 680px);
-  height: 80%;
+  height: 75%;
   padding: 30px 15px;
-  background-color: ${({ theme }: any) =>
-    theme.customTheme.defaultMode.chatFromBackgroundColor};
+  background-color: ${({ theme }: any) => theme.whiteGray};
   border-radius: 14px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
   animation: ${slideDown} 0.5s ease-out forwards;
@@ -103,32 +110,31 @@ const Modal = styled.div`
   flex-direction: column;
 
   @media (prefers-color-scheme: dark) {
-    background: ${({ theme }: any) =>
-      theme.customTheme.darkMode.chatFromBackgroundColor};
+    background: ${({ theme }: any) => theme.blackGray};
   }
 `;
 
 const SwiperStyled = styled(Swiper)`
-  width: 240px;
-  height: calc(100% - 80px);
+  width: clamp(0px, 80%, 300px);
+  height: calc(100% - 100px);
 `;
 
-const Image = styled.img`
+const Image = styled.img<{ upload: boolean }>`
   width: 100%;
   height: 100%;
   object-fit: contain;
-  background: #cecece;
+  background: ${(props) => (props.upload ? '#cecece' : 'none')};
   border-radius: 10px;
 
   @media (prefers-color-scheme: dark) {
-    background: #171717;
+    background: ${(props) => (props.upload ? '#171717' : 'none')};
   }
 `;
 
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: space-around;
-  padding-top: 30px;
+  padding-top: 50px;
 
   & button {
     color: black;
@@ -139,8 +145,7 @@ const ButtonWrapper = styled.div`
     height: 50px;
   }
   & button.send {
-    background: ${({ theme }: any) =>
-      theme.customTheme.defaultMode.chatToBackgroundColor};
+    background: ${({ theme }: any) => theme.mainColorPink};
   }
 
   @media (prefers-color-scheme: dark) {
@@ -148,8 +153,7 @@ const ButtonWrapper = styled.div`
       color: white;
     }
     & button.send {
-      background: ${({ theme }: any) =>
-        theme.customTheme.darkMode.chatToBackgroundColor};
+      background: ${({ theme }: any) => theme.mainColorBlue};
     }
   }
 `;

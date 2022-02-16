@@ -22,6 +22,7 @@ import {
   startAfter,
 } from 'firebase/firestore';
 import { faker } from '@faker-js/faker';
+import { getAuth } from 'firebase/auth';
 
 export const getMyInfo = async (result: any) => {
   //await delay(3000);
@@ -35,6 +36,7 @@ export const getMyInfo = async (result: any) => {
     validRounges: result.validRounges,
     // myChattings: result.myChatting,
     hasNewNotification: result.hasNewNotification,
+    hasNewChatNotification: result.hasNewChatNotification,
     id: result.id,
     // nickname: '닉네임입니다',
     // jobSector: '외식·음료',
@@ -86,6 +88,7 @@ export const getTopics = (list: string, pageParam: string) => {
     likeCount: Math.floor(Math.random() * 5),
     createdAt: Date.now().toString(),
     images: [],
+    pressPerson: [],
   };
 
   const generateTenTopicPosts = () => {
@@ -129,7 +132,33 @@ export const getHomePostsInfiniteFunction = async (
   //
   const collectionRef = collection(db, 'post');
   console.log((await getDocs(collectionRef)).docs.length);
-  // for (let i = 0; i < 10; i++) {
+  // const uid = getAuth().currentUser?.uid;
+  // if (uid) {
+  //   const docRef = doc(db, 'user', uid);
+  //   const docdata = (await getDoc(docRef)).data();
+  //   const userUpdated = {
+  //     ...docdata,
+  //     validRounges: [
+  //       { title: '타임라인', url: 'timeline' },
+  //       { title: '토픽', url: 'topic' },
+  //       { title: '매장관리·판매', url: 'store' },
+  //     ],
+  //   };
+  //   await updateDoc(docRef, userUpdated);
+  //   const docdata_ = await getDoc(docRef);
+  //   console.log(docdata_.data());
+  // }
+
+  // if (postInfo.topic) {
+  //   const postUpdated = {
+  //     ...post,
+  //     updatedAt: serverTimestamp(),
+  //     image: image,
+  //     topic: postInfo.topic,
+  //   };
+  //   updateDoc(docRef, postUpdated);
+
+  // for (let i = 0; i < 2; i++) {
   //   for (const rounge of DefaultListsAndTopics.rounges) {
   //     const collectionRef = collection(db, 'post');
   //     console.log(rounge);
@@ -153,7 +182,7 @@ export const getHomePostsInfiniteFunction = async (
   //     await updateDoc(wroteDocRef, { postId: newId });
   //   }
   // }
-  // for (let i = 0; i < 10; i++) {
+  // for (let i = 0; i < 4; i++) {
   //   for (const topic of DefaultListsAndTopics.topics) {
   //     const collectionRef = collection(db, 'post');
   //     console.log(topic);
@@ -195,7 +224,7 @@ export const getHomePostsInfiniteFunction = async (
         postRef,
         where('urlKey', '==', 'topic'),
         orderBy('createdAt', 'desc'),
-        limit(pageParam * 20),
+        limit(pageParam * 40),
       );
       const currentSnapShot = await getDocs(q_topicCurrent);
       const lastVisible = currentSnapShot.docs[currentSnapShot.docs.length - 1];
@@ -204,14 +233,14 @@ export const getHomePostsInfiniteFunction = async (
         where('urlKey', '==', 'topic'),
         orderBy('createdAt', 'desc'),
         startAfter(lastVisible),
-        limit(20),
+        limit(40),
       );
     } else
       q_topic = query(
         postRef,
         where('urlKey', '==', 'topic'),
         orderBy('createdAt', 'desc'),
-        limit(20),
+        limit(40),
       );
     const snap = await getDocs(q_topic);
     snap.forEach((doc) => {
@@ -230,6 +259,8 @@ export const getHomePostsInfiniteFunction = async (
         postType: docData.postType,
         title: docData.title,
         topic: docData.topic,
+        // @ts-ignore
+        pressPerson: docData.pressPerson,
       };
       returnArr.push(returnData);
     });
@@ -240,38 +271,15 @@ export const getHomePostsInfiniteFunction = async (
   // 로그인 된 사용자가 timeline에 접근
   if (list === 'timeline') {
     const myValidRounges = validRounges ? [...validRounges] : [];
-    const myInvalidRounges = DefaultListsAndTopics.rounges.filter((rounge) => {
-      for (const myRoungeUrl of myValidRounges)
-        if (rounge.url === myRoungeUrl) return false; // url은 unique하므로 비교값으로 사용
-      return true;
-    });
-    const myInvalidRoungesUrls = myInvalidRounges.map((v) => v.url);
-    myInvalidRoungesUrls.pop(); // not-in 은 10개의 엘리먼트까지만 지원
     const postRef = collection(db, 'post');
     const returnArr: Array<TopicPost | RoungePost> = [];
-    //
-    //
-    // console.log(myInvalidRoungesUrls);
-    // const { docs: docs_ } = await getDocs(
-    //   query(postRef, where('urlKey', 'not-in', myValidRounges)),
-    // );
-    // docs_.forEach((v) => {
-    //   const {
-    //     postType,
-    //     rounge: { url },
-    //   } = v.data();
-    //   console.log(postType, ':', url);
-    // });
-    //
-    //
-    console.log(myValidRounges);
     let q_rounge;
     if (pageParam > 0) {
       const q_roungeCurrent = query(
         postRef,
         where('urlKey', 'in', myValidRounges),
         orderBy('createdAt', 'desc'),
-        limit(pageParam * 20),
+        limit(pageParam * 40),
       );
       const currentSnapShot = await getDocs(q_roungeCurrent);
       const lastVisible = currentSnapShot.docs[currentSnapShot.docs.length - 1];
@@ -280,14 +288,14 @@ export const getHomePostsInfiniteFunction = async (
         where('urlKey', 'in', myValidRounges),
         orderBy('createdAt', 'desc'),
         startAfter(lastVisible),
-        limit(20),
+        limit(40),
       );
     } else
       q_rounge = query(
         postRef,
         where('urlKey', 'in', myValidRounges),
         orderBy('createdAt', 'desc'),
-        limit(20),
+        limit(40),
       );
     const snap = await getDocs(q_rounge);
     snap.forEach((doc) => {
@@ -307,6 +315,7 @@ export const getHomePostsInfiniteFunction = async (
           postType: docData.postType,
           title: docData.title,
           topic: docData.topic,
+          pressPerson: docData.pressPerson,
         };
         returnArr.push(returnData);
       } else if (docData.postType === 'rounge') {
@@ -324,6 +333,7 @@ export const getHomePostsInfiniteFunction = async (
           postType: docData.postType,
           title: docData.title,
           rounge: docData.rounge,
+          pressPerson: docData.pressPerson,
         };
         returnArr.push(returnData);
       }
@@ -348,7 +358,7 @@ export const getHomePostsInfiniteFunction = async (
       postRef,
       where('urlKey', '==', list),
       orderBy('createdAt', 'desc'),
-      limit(pageParam * 20),
+      limit(pageParam * 40),
     );
     const currentSnapShot = await getDocs(q_roungeCurrent);
     const lastVisible = currentSnapShot.docs[currentSnapShot.docs.length - 1];
@@ -357,14 +367,14 @@ export const getHomePostsInfiniteFunction = async (
       where('urlKey', '==', list),
       orderBy('createdAt', 'desc'),
       startAfter(lastVisible),
-      limit(20),
+      limit(40),
     );
   } else
     q_rounge = query(
       postRef,
       where('urlKey', '==', list),
       orderBy('createdAt', 'desc'),
-      limit(20),
+      limit(40),
     );
   const snap = await getDocs(q_rounge);
   snap.forEach((doc) => {
@@ -384,6 +394,7 @@ export const getHomePostsInfiniteFunction = async (
         postType: docData.postType,
         title: docData.title,
         topic: docData.topic,
+        pressPerson: docData.pressPerson,
       };
       returnArr.push(returnData);
     } else if (docData.postType === 'rounge') {
@@ -401,6 +412,7 @@ export const getHomePostsInfiniteFunction = async (
         postType: docData.postType,
         title: docData.title,
         rounge: docData.rounge,
+        pressPerson: docData.pressPerson,
       };
       returnArr.push(returnData);
     }
@@ -433,6 +445,7 @@ export const searchInfiniteFunction = async (
     likeCount: Math.floor(Math.random() * 5),
     createdAt: Date.now().toString(),
     images: [],
+    pressPerson: [],
   };
   const dummyTopicPost: TopicPost = {
     postId: 'r8qur390wjfioajwfeio394uf90q23urq89pd3oil',
@@ -448,6 +461,7 @@ export const searchInfiniteFunction = async (
     likeCount: Math.floor(Math.random() * 5),
     createdAt: Date.now().toString(),
     images: [],
+    pressPerson: [],
   };
   const dummyTopicPosts = [];
   const dummyRoungePosts = [];
