@@ -105,6 +105,7 @@ export default function RoungePost({
   const router = useRouter();
   const { user } = useSelector((state: RootReducer) => state.user);
   // const [user, setUser] = useState<any>({});
+  const [updateTime, setUpdateTime] = useState(0);
   const [post, setPost] = useState(JSON.parse(postProps));
   const [uid, setUid] = useState<string>('');
   const [modalOpen, setModalOpen] = useState(false);
@@ -193,7 +194,10 @@ export default function RoungePost({
       startTime =
         post.updatedAt === ''
           ? new Date(post.createdAt.seconds * 1000)
+          : updateTime !== 0
+          ? new Date(updateTime)
           : new Date(post.updatedAt.seconds * 1000);
+
     return <Moment fromNow>{startTime}</Moment>;
   };
 

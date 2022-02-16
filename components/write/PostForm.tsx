@@ -202,16 +202,6 @@ const PostForm = ({ from }: { from: string }) => {
     }
   });
 
-  // useEffect(() => {
-  //   const findUserInfo = async () => {
-  //     //id로 user 파악함
-  //     const docRef = doc(db, 'user', user.id);
-  //     const docSnap = await getDoc(docRef);
-  //     setuserInfoList(docSnap.data());
-  //   };
-  //   findUserInfo();
-  // }, []);
-
   const handleClose: any = (event: any, reason: any) => {
     setOpen(!open);
   };

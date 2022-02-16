@@ -181,6 +181,7 @@ const PostForm = (props: any) => {
         };
         updateDoc(docRef, postUpdated);
         setPost(postUpdated);
+        props.setUpdateTime(Date.now());
         setDiaOpen(true);
         dispatch(
           updateOnePostAction({
@@ -220,7 +221,7 @@ const PostForm = (props: any) => {
       handleUpload(e.target.files[0]);
     }
   };
-
+  console.log(user);
   const handleUpload = (postImage: any) => {
     const storageRef = ref(storage, 'images/' + postImage.name);
     const uploadTask = uploadBytesResumable(storageRef, postImage, metadata);
