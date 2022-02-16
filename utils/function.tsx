@@ -24,6 +24,7 @@ import {
 } from 'firebase/firestore';
 import { faker } from '@faker-js/faker';
 import { getAuth } from 'firebase/auth';
+import algoliasearch from 'algoliasearch/lite';
 
 export const getMyInfo = async (result: any) => {
   //await delay(3000);
@@ -131,8 +132,8 @@ export const getHomePostsInfiniteFunction = async (
   //
   // 아래 주석은 전체 post 갯수 출력과 랜덤 데이터 생성을 코드임
   //
-  const collectionRef = collection(db, 'post');
-  console.log((await getDocs(collectionRef)).docs.length);
+  // const collectionRef = collection(db, 'post');
+  // console.log((await getDocs(collectionRef)).docs.length);
   // const uid = getAuth().currentUser?.uid;
   // if (uid) {
   //   const docRef = doc(db, 'user', uid);
@@ -425,75 +426,139 @@ export const getHomePostsInfiniteFunction = async (
 export const searchInfiniteFunction = async (
   searchValue: string,
   pageParam: number,
+  validRounges?: Array<HomeListUrlString>,
 ) => {
-  const value = searchValue;
-  // console.log(searchValue, pageParam);
-  if (!value) {
-    return { result: [], nextPage: 1 };
-  }
-  // await delay(800);
-  const dummyRoungePost: RoungePost = {
-    postId: 'r8q394uf90q23urq89pd3oil',
-    postType: 'rounge',
-    rounge: { title: '외식·음료', url: 'food-service' },
-    title: '라운지 글 제목',
-    content:
-      `전달된 pageParam은 ${pageParam} ` +
-      searchValue +
-      '블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 ',
-    commentsCount: Math.floor(Math.random() * 5),
-    author: { nickname: '닉네임', jobSector: '외식·음료' },
-    likeCount: Math.floor(Math.random() * 5),
-    createdAt: Date.now().toString(),
-    images: [],
-    pressPerson: [],
-  };
-  const dummyTopicPost: TopicPost = {
-    postId: 'r8qur390wjfioajwfeio394uf90q23urq89pd3oil',
-    postType: 'topic',
-    topic: { title: '블라블라', url: 'blabla' },
-    title: '토픽 글 제목',
-    content:
-      `전달된 pageParam은 ${pageParam} ` +
-      searchValue +
-      '블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 ',
-    commentsCount: Math.floor(Math.random() * 5),
-    author: { nickname: '닉네임', jobSector: '외식·음료' },
-    likeCount: Math.floor(Math.random() * 5),
-    createdAt: Date.now().toString(),
-    images: [],
-    pressPerson: [],
-  };
-  const dummyTopicPosts = [];
-  const dummyRoungePosts = [];
+  try {
+    const filterString = validRounges
+      ?.filter((rounge) => rounge !== 'timeline')
+      .map((rounge) => `urlKey:${rounge}`)
+      .join(' OR ')
+      .trim();
+    const returnArr: any[] = [];
+    if (
+      !process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_APP_ID ||
+      !process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY
+    )
+      return { result: [], nextPage: -1 };
+    const searchClient = algoliasearch(
+      process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_APP_ID,
+      process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY,
+    );
+    const index = searchClient.initIndex('post');
+    const { hits } = await index.search(searchValue, {
+      page: pageParam ? pageParam + 1 : 0,
+      hitsPerPage: 40,
+      filters: filterString,
+    });
+    hits.forEach((docData: any) => {
+      if (docData.postType === 'topic') {
+        const returnData: TopicPost = {
+          author: { nickname: docData.nickname, jobSector: docData.job },
+          content: docData.content,
+          commentsCount: docData.commentsCount || 0,
+          createdAt: docData.createdAt.toString(),
+          images: docData.images,
+          likeCount: docData.pressPerson.length,
+          postId: docData.postId,
+          postType: docData.postType,
+          title: docData.title,
+          topic: docData.topic,
+          pressPerson: docData.pressPerson,
+        };
+        returnArr.push(returnData);
+      } else if (docData.postType === 'rounge') {
+        const returnData: RoungePost = {
+          author: { nickname: docData.nickname, jobSector: docData.job },
+          content: docData.content,
+          commentsCount: docData.commentsCount || 0,
+          createdAt: docData.createdAt.toString(),
+          images: docData.images,
+          likeCount: docData.pressPerson.length,
+          postId: docData.postId,
+          postType: docData.postType,
+          title: docData.title,
+          rounge: docData.rounge,
+          pressPerson: docData.pressPerson,
+        };
+        returnArr.push(returnData);
+      }
+    });
+    if (returnArr.length === 0) return { result: returnArr, nextPage: -1 };
+    return { result: returnArr, nextPage: pageParam + 1 };
 
-  for (let i = 0; i < 10; i++) {
-    const newTopicPost: TopicPost = {
-      ...dummyTopicPost,
-      postId: dummyTopicPost.postId + Math.floor(Math.random() * 1000000),
-      createdAt: (
-        parseInt(dummyTopicPost.createdAt) -
-        Math.floor(Math.random() * 30000) * 1000
-      ).toString(),
-    };
-    dummyTopicPosts.push(newTopicPost);
+    // console.log(hits);
+    // return { result: hits, nextPage: pageParam + 1 };
+  } catch (error) {
+    console.error(error);
+  }
+  // prop을 받아 더미데이터로 리턴
+  // const value = searchValue;
+  // if (!value) {
+  //   return { result: [], nextPage: -1 };
+  // }
+  // // await delay(800);
+  // const dummyRoungePost: RoungePost = {
+  //   postId: 'r8q394uf90q23urq89pd3oil',
+  //   postType: 'rounge',
+  //   rounge: { title: '외식·음료', url: 'food-service' },
+  //   title: '라운지 글 제목',
+  //   content:
+  //     `전달된 pageParam은 ${pageParam} ` +
+  //     searchValue +
+  //     '블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 ',
+  //   commentsCount: Math.floor(Math.random() * 5),
+  //   author: { nickname: '닉네임', jobSector: '외식·음료' },
+  //   likeCount: Math.floor(Math.random() * 5),
+  //   createdAt: Date.now().toString(),
+  //   images: [],
+  //   pressPerson: [],
+  // };
+  // const dummyTopicPost: TopicPost = {
+  //   postId: 'r8qur390wjfioajwfeio394uf90q23urq89pd3oil',
+  //   postType: 'topic',
+  //   topic: { title: '블라블라', url: 'blabla' },
+  //   title: '토픽 글 제목',
+  //   content:
+  //     `전달된 pageParam은 ${pageParam} ` +
+  //     searchValue +
+  //     '블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 블라블라 ',
+  //   commentsCount: Math.floor(Math.random() * 5),
+  //   author: { nickname: '닉네임', jobSector: '외식·음료' },
+  //   likeCount: Math.floor(Math.random() * 5),
+  //   createdAt: Date.now().toString(),
+  //   images: [],
+  //   pressPerson: [],
+  // };
+  // const dummyTopicPosts = [];
+  // const dummyRoungePosts = [];
 
-    const newRoungePost: RoungePost = {
-      ...dummyRoungePost,
-      postId: dummyTopicPost.postId + Math.floor(Math.random() * 1000000),
-      createdAt: (
-        parseInt(dummyRoungePost.createdAt) -
-        Math.floor(Math.random() * 30000) * 1000
-      ).toString(),
-    };
-    dummyRoungePosts.push(newRoungePost);
-  }
-  const dummyPosts: Array<TopicPost | RoungePost> = [...dummyTopicPosts];
-  for (let i = 0; i < 10; i++) {
-    dummyPosts.splice(Math.floor(Math.random() * 10), 0, dummyRoungePosts[i]);
-  }
-  // console.log(lastIndex);
-  return { result: dummyPosts, nextPage: pageParam + 1 };
+  // for (let i = 0; i < 20; i++) {
+  //   const newTopicPost: TopicPost = {
+  //     ...dummyTopicPost,
+  //     postId: dummyTopicPost.postId + Math.floor(Math.random() * 1000000),
+  //     createdAt: (
+  //       parseInt(dummyTopicPost.createdAt) -
+  //       Math.floor(Math.random() * 30000) * 1000
+  //     ).toString(),
+  //   };
+  //   dummyTopicPosts.push(newTopicPost);
+
+  //   const newRoungePost: RoungePost = {
+  //     ...dummyRoungePost,
+  //     postId: dummyTopicPost.postId + Math.floor(Math.random() * 1000000),
+  //     createdAt: (
+  //       parseInt(dummyRoungePost.createdAt) -
+  //       Math.floor(Math.random() * 30000) * 1000
+  //     ).toString(),
+  //   };
+  //   dummyRoungePosts.push(newRoungePost);
+  // }
+  // const dummyPosts: Array<TopicPost | RoungePost> = [...dummyTopicPosts];
+  // for (let i = 0; i < 20; i++) {
+  //   dummyPosts.splice(Math.floor(Math.random() * 10), 0, dummyRoungePosts[i]);
+  // }
+  // // console.log(lastIndex);
+  // return { result: dummyPosts, nextPage: pageParam + 1 };
 };
 
 export const getDateTime = (dateNumberString: string): string => {
