@@ -16,7 +16,7 @@ export default async function handler(
   };
   try {
     const data = await axios.post(MY_VALIDATE_API_URL, req.body, headers);
-    console.log(Object.keys(data.data.data[0]));
+
     return res.status(200).json({ message: data.data.data[0].status });
   } catch (e) {
     console.error(e);
