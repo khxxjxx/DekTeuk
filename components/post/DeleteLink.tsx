@@ -14,6 +14,7 @@ import Router from 'next/router';
 import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import { useDispatch } from 'react-redux';
+import { deleteOnePostAction } from '@store/reducer';
 const style = {
   position: 'absolute' as 'absolute',
   top: '50%',
@@ -87,7 +88,7 @@ export default function DeleteLink(props: any) {
         open={modalOpen}
         onClose={() => {
           Router.back();
-          dispatch(resetViewAction());
+          dispatch(deleteOnePostAction({ postId: props.thisPost }));
         }}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
