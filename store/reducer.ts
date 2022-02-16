@@ -27,6 +27,14 @@ const initialUserState: UserState = {
 export const getUser = createAsyncThunk('getUser', async (result: any) => {
   return await result;
 });
+
+export const setTempDataInitializing = createAsyncThunk(
+  'setTempDataInitializing',
+  async (result: any) => {
+    return await result;
+  },
+);
+
 // export const getUser = createAsyncThunk('getUser', async (result: any) => {
 //   return await getMyInfo(result);
 // });
@@ -92,12 +100,16 @@ const scroll = createSlice({
 // 임시
 const tempData = createSlice({
   name: 'tempData',
-  initialState: { tempData: { data: <any>[], key: '' } },
+  initialState: { tempData: { data: <any>[], key: '', status: '' } },
   reducers: {
     setData(state, action) {
-      console.log('setData 실행', state.tempData, action.payload);
       state.tempData = action.payload;
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(setTempDataInitializing.fulfilled, (state, action) => {
+      state.tempData = action.payload;
+    });
   },
 });
 
@@ -121,8 +133,6 @@ const rootReducer = (
   {
     switch (action.type) {
       case HYDRATE:
-        // console.log(state);
-        // return state;
         let userState: UserState = {
           user: {
             nickname: '',
@@ -136,7 +146,8 @@ const rootReducer = (
           status: 'standby',
           error: '',
         };
-
+        console.log(action.payload.tempData, '페이로드');
+        console.log(state.tempData, '스테이트');
         if (action.payload.user.user.nickname) userState = action.payload.user;
         else userState = state.user;
         if (state.view.view.length === 0) {
@@ -147,7 +158,11 @@ const rootReducer = (
                 ? { view: [], searchValue: '' }
                 : state.view,
             user: userState,
-            tempData: state.tempData,
+            tempData:
+              action.payload.tempData.tempData.key != '' &&
+              state.tempData.key == action.payload.tempData.tempData.key
+                ? action.payload.tempData
+                : state.tempData,
           };
         } else
           return {
@@ -157,7 +172,11 @@ const rootReducer = (
                 ? { view: [], searchValue: '' }
                 : state.view,
             scroll: { scrollY: state.scroll.scrollY },
-            tempData: state.tempData,
+            tempData:
+              action.payload.tempData.tempData.key != '' &&
+              state.tempData.key == action.payload.tempData.tempData.key
+                ? action.payload.tempData
+                : state.tempData,
           };
       default:
         const combineReducer = combineReducers({

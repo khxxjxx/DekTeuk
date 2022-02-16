@@ -448,6 +448,7 @@ export const TestTopicCard = forwardRef(function TopicCardWithRef(
     <Wrapper>
       <Link
         href={`/list/topic/${topicCardData.topic.url}/${topicCardData.postId}`}
+        // href={'/test'}
         passHref
       >
         <CardWrapper>
