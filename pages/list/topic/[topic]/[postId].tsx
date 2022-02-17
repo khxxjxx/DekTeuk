@@ -51,32 +51,43 @@ import EditPostForm from '@components/write/EditPostForm';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import Layout from '@layouts/Layout';
 import { StoreState, UserState } from '@interface/StoreInterface';
-
+import AuthorClickMenu from '@components/items/AuthorClickMenu';
+import { ChatDefault, createChatRoom } from '@utils/createChatRoom';
+import { useRouter } from 'next/router';
+import NotFoundPage from '@pages/404';
 export const getServerSideProps: GetServerSideProps = async (
-  // context: GetServerSidePropsContext,
   context: GetServerSidePropsContext,
 ) => {
   let id;
+
   if (context.params?.postId) {
     id = context.params.postId;
   } else id = null;
-  // console.log((await getDoc(doc(db, 'post', id as String))).data());
   const docRef = doc(db, 'post', id as string);
+
   const docSnap = await getDoc(docRef);
-  if (context.req.headers.referer && context.req.url)
+
+  if (JSON.stringify(docSnap.data()) === undefined) {
     return {
-      props: {
-        referer: context.req.headers.referer
-          .split('/')
-          .slice(3, context.req.headers.referer.split('/').length)
-          .join('/'),
-        postProps: JSON.stringify(docSnap.data()),
-        postId: id,
-      },
+      notFound: true,
+      props: {},
     };
-  return {
-    props: { postProps: JSON.stringify(docSnap.data()), postId: id },
-  };
+  } else {
+    if (context.req.headers.referer && context.req.url)
+      return {
+        props: {
+          referer: context.req.headers.referer
+            .split('/')
+            .slice(3, context.req.headers.referer.split('/').length)
+            .join('/'),
+          postProps: JSON.stringify(docSnap.data()),
+          postId: id,
+        },
+      };
+    return {
+      props: { postProps: JSON.stringify(docSnap.data()), postId: id },
+    };
+  }
 };
 
 export default function TopicPost({
@@ -96,7 +107,7 @@ export default function TopicPost({
   const [userLike, setUserLike] = useState(post.pressPerson.includes(uid));
   const [postLikeCount, setPostLikeCount] = useState(post.pressPerson.length);
   const [editOpen, setEditOpen] = useState(false);
-
+  const [toggle, setToggle] = useState(false);
   const dispatch = useDispatch();
 
   // 파이어스토어 업데이트, 클라이언트 상태 업데이트
@@ -148,15 +159,10 @@ export default function TopicPost({
       });
     }
   };
-  //postid,postuserid가 필요
   const auth = getAuth();
   onAuthStateChanged(auth, (user) => {
     if (user) {
-      // User is signed in, see docs for a list of available properties
-      // https://firebase.google.com/docs/reference/js/firebase.User
       setUid(user.uid);
-    } else {
-      console.log('no user');
     }
   });
 
@@ -187,7 +193,27 @@ export default function TopicPost({
       dispatch(setScrollAction(0));
     }
   }, []);
-
+  //채팅방 열기
+  const router = useRouter();
+  const onToggle = () => {
+    setToggle(false);
+  };
+  const openChat = async () => {
+    const myInfo: ChatDefault = {
+      nickname: user.nickname,
+      jobSector: user.jobSector,
+      id: uid,
+    };
+    const counterInfo: ChatDefault = {
+      nickname: post.nickname,
+      jobSector: post.job,
+      id: post.userId,
+    };
+    const id = await createChatRoom(myInfo, counterInfo);
+    router.push(
+      `/chat/${id}?other=${counterInfo.nickname}&id=${counterInfo.id}`,
+    );
+  };
   return (
     <Layout>
       <Container sx={{ maxWidth: '680px' }}>
@@ -215,7 +241,21 @@ export default function TopicPost({
               sx={{ mb: 2 }}
               style={{ wordBreak: 'break-all' }}
             >
-              {post.nickname} ({post.job})
+              {uid !== post.userId ? (
+                <Typography
+                  component="span"
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => {
+                    setToggle(true);
+                  }}
+                >
+                  {post.nickname} ({post.job})
+                </Typography>
+              ) : (
+                <Typography component="span">
+                  {post.nickname} ({post.job})
+                </Typography>
+              )}
             </Typography>
             <Typography
               component="span"
@@ -225,7 +265,6 @@ export default function TopicPost({
                 flexWrap: 'wrap',
               }}
             >
-              {/* {userLike ? ( */}
               {isLiked ? (
                 <FavoriteIcon
                   onClick={async () => {
@@ -243,13 +282,12 @@ export default function TopicPost({
                   sx={{ mr: 1 }}
                 />
               )}
-              {/* {postLikeCount} */}
+
               {postLikeCount}
               <AccessTimeIcon sx={{ ml: 3, mr: 1 }} />
               <MomentDateChange />
               {post.updatedAt === '' ? '' : '(수정됨)'}
-              {/* <DriveFileRenameOutlineIcon sx={{ ml: 3, mr: 1 }} />
-          수정하기 */}
+
               {post.userId === uid ? (
                 <>
                   <UpdateLink
@@ -272,7 +310,6 @@ export default function TopicPost({
               sx={{ mb: 2 }}
               style={{ whiteSpace: 'pre-line', wordBreak: 'break-all' }}
             >
-              {/* <div style={{ whiteSpace: 'pre-line' }}>{post.content}</div> */}
               {post.content}
             </Typography>
             <Box
@@ -328,6 +365,7 @@ export default function TopicPost({
           />
         </Container>
       )}
+      {toggle && <AuthorClickMenu onToggle={onToggle} openChat={openChat} />}
     </Layout>
   );
 }

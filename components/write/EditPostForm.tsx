@@ -111,7 +111,6 @@ const PostForm = (props: any) => {
   const [postTopic, setPostTopic] = useState<any>({});
   const [postRounge, setPostRounge] = useState<any>({});
 
-  //photoupload 확인 아이콘-아직 미구현
   const [loading, setLoading] = React.useState(false);
   const [success, setSuccess] = React.useState(false);
   //모달창
@@ -141,12 +140,7 @@ const PostForm = (props: any) => {
   const auth = getAuth();
   onAuthStateChanged(auth, (user) => {
     if (user) {
-      // User is signed in, see docs for a list of available properties
-      // https://firebase.google.com/docs/reference/js/firebase.User
       setUid(user.uid);
-    } else {
-      console.log('no user');
-      //console.log를 모달창으로 바꿀것
     }
   });
 
@@ -159,7 +153,6 @@ const PostForm = (props: any) => {
 
   const onSubmit = async () => {
     let images: Array<Object> = [];
-    //[이미지 다운로드 url, firebase에 저장한 이미지 이름, 이미지 설명]
     if (imgList.length >= 1) {
       images = imgList.map((v: Array<Object>) => {
         return { url: v[0], imgName: v[1], imgDetail: v[2] };
@@ -209,15 +202,9 @@ const PostForm = (props: any) => {
           updateOnePostAction({ postId: props.thisPostId, postData: post }),
         );
       }
-
-      //나중에 topic 페이지로 이동하도록 변경하기
-      // props.setEditOpen(false);
     }
-    //원하는 타겟으로 나중에 변경하기
   };
 
-  //이미지 업로드
-  //수정중, 복원이 어렵다면 notepad에 적어놓은거로 다시 돌려놓을것
   const handleUploadChange = (e: any) => {
     if (e.target.files[0]) {
       setPostImage(e.target.files[0]);
@@ -248,23 +235,22 @@ const PostForm = (props: any) => {
         });
       },
     );
-    //postImage가 계속 남아있어 지속적으로 업로드되는 것을 방지함
   };
 
   function deleteClick(targetPicture: string) {
     const storage = getStorage();
 
-    // Create a reference to the file to delete
     const desertRef = ref(storage, 'images/' + targetPicture);
 
-    // Delete the file
     deleteObject(desertRef)
       .then(() => {
-        console.log('사진이 삭제되었습니다.');
-        // File deleted successfully
+        showAlert('info', `사진이 삭제되었습니다`);
       })
       .catch((error) => {
-        console.log(error);
+        showAlert(
+          'error',
+          `사진 삭제 중 오류가 발생했습니다 다시 시도해 주세요`,
+        );
       });
   }
 
@@ -429,26 +415,6 @@ const PostForm = (props: any) => {
             cursor: 'pointer',
           }}
         >
-          {/* photoupload아이콘 */}
-          {/* 우선 미구현 */}
-          {/* <Box sx={{ position: 'relative' }}>
-          <Fab aria-label="save" color="primary" sx={buttonSx}>
-            {success ? <CheckIcon /> : <SaveIcon />}
-          </Fab>
-          {loading && (
-            <CircularProgress
-              size={68}
-              sx={{
-                color: green[500],
-                position: 'absolute',
-                top: -6,
-                left: -6,
-                zIndex: -1,
-              }}
-            />
-          )}
-        </Box> */}
-
           <AddAPhotoIcon sx={{ mt: 4, fontSize: 40 }} />
           <br />
 
@@ -477,7 +443,6 @@ const PostForm = (props: any) => {
           }}
           onChange={handleUploadChange}
         />
-        {/* <Button onClick={handleUpload}>Upload</Button> */}
         <br />
         {url}
         <br />
