@@ -64,7 +64,6 @@ export default function TopicPage() {
         topic: topicData.topic,
         pressPerson: topicData.pressPerson,
       };
-      console.log(returnData);
       topics.push(returnData);
     });
     setEnd(snapshots.docs[snapshots.docs.length - 1]);
