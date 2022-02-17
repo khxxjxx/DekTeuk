@@ -1,10 +1,9 @@
-import React, { useState, useContext, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
+  Box,
   Alert,
-  Avatar,
   Button,
   Container,
-  IconButton,
   Snackbar,
   Typography,
   TextField,
@@ -16,36 +15,21 @@ import {
   getDownloadURL,
   deleteObject,
 } from 'firebase/storage';
-import {
-  addDoc,
-  collection,
-  serverTimestamp,
-  updateDoc,
-  doc,
-  getDoc,
-  getDocs,
-} from 'firebase/firestore';
+import { serverTimestamp, updateDoc, doc } from 'firebase/firestore';
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 import { db } from '@firebase/firebase';
-import { Box } from '@mui/system';
 
-import Router from 'next/router';
 //select 부분을 위해서 사용
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
-import Link from 'next/link';
-//photoupload용 아이콘
-import CircularProgress from '@mui/material/CircularProgress';
-import { green } from '@mui/material/colors';
+import Select from '@mui/material/Select';
 
-import Fab from '@mui/material/Fab';
-import CheckIcon from '@mui/icons-material/Check';
-import SaveIcon from '@mui/icons-material/Save';
-import { RootReducer, updateOnePostAction } from 'store/reducer';
+//photoupload용 아이콘
+
+import { updateOnePostAction } from 'store/reducer';
 import { useDispatch, useSelector } from 'react-redux';
-import { withRouter } from 'next/router';
+
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -54,7 +38,6 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Modal from '@mui/material/Modal';
 import { StoreState, UserState } from '@interface/StoreInterface';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { RoungePost, TopicPost } from '@interface/CardInterface';
 
 const style = {
   position: 'absolute' as 'absolute',
@@ -211,7 +194,7 @@ const PostForm = (props: any) => {
       handleUpload(e.target.files[0]);
     }
   };
-  console.log(user);
+
   const handleUpload = (postImage: any) => {
     const storageRef = ref(storage, 'images/' + postImage.name);
     const uploadTask = uploadBytesResumable(storageRef, postImage, metadata);
@@ -228,7 +211,7 @@ const PostForm = (props: any) => {
         console.log(error);
       },
       () => {
-        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL: string) => {
           setUrl(url);
           //[이미지 다운로드 url, firebase에 저장한 이미지 이름, 이미지 설명]
           setImgList([...imgList, [downloadURL, postImage.name, '']]);
@@ -246,7 +229,7 @@ const PostForm = (props: any) => {
       .then(() => {
         showAlert('info', `사진이 삭제되었습니다`);
       })
-      .catch((error) => {
+      .catch(() => {
         showAlert(
           'error',
           `사진 삭제 중 오류가 발생했습니다 다시 시도해 주세요`,

@@ -5,37 +5,21 @@ import {
 } from '@store/reducer';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import { useDispatch } from 'react-redux';
+import { Box, Container, Divider, Typography } from '@mui/material';
+
 import {
-  Box,
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  Container,
-  Divider,
-  Grid,
-  Typography,
-} from '@mui/material';
-import moment from 'moment';
-import {
-  collection,
   getDoc,
-  getDocs,
   doc,
-  query,
-  where,
-  onSnapshot,
-  getDocsFromServer,
   updateDoc,
   arrayUnion,
   arrayRemove,
 } from 'firebase/firestore';
-import Link from 'next/link';
-import React, { useContext, useEffect, useState } from 'react';
+
+import React, { useEffect, useState } from 'react';
 import { db } from '@firebase/firebase';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FavoriteIcon from '@mui/icons-material/Favorite';
-import { useAuth } from '@hooks/Auth';
+
 import Comment from '@components/comment/Comment';
 import type { RootReducer } from 'store/reducer';
 import { useSelector } from 'react-redux';
@@ -43,8 +27,7 @@ import CustomSeparator from '@components/post/Separator';
 import Moment from 'react-moment';
 import 'moment/locale/ko';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import { typography } from '@mui/system';
-import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline';
+
 import UpdateLink from '@components/post/UpdateLink';
 import DeleteLink from '@components/post/DeleteLink';
 import EditPostForm from '@components/write/EditPostForm';
@@ -54,7 +37,7 @@ import { StoreState, UserState } from '@interface/StoreInterface';
 import AuthorClickMenu from '@components/items/AuthorClickMenu';
 import { ChatDefault, createChatRoom } from '@utils/createChatRoom';
 import { useRouter } from 'next/router';
-import NotFoundPage from '@pages/404';
+
 export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext,
 ) => {
