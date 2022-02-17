@@ -255,7 +255,9 @@ export const getHomePostsInfiniteFunction = async (
           .toString()
           .padEnd(13, 0)
           .toString(),
-        images: docData.images,
+        images: docData.images.map(
+          (v: { imageName: string; url: string; imgDetail: string }) => v.url,
+        ),
         likeCount: docData.pressPerson.length,
         postId: docData.postId,
         postType: docData.postType,
@@ -311,7 +313,9 @@ export const getHomePostsInfiniteFunction = async (
             .toString()
             .padEnd(13, 0)
             .toString(),
-          images: docData.images,
+          images: docData.images.map(
+            (v: { imageName: string; url: string; imgDetail: string }) => v.url,
+          ),
           likeCount: docData.pressPerson.length,
           postId: docData.postId,
           postType: docData.postType,
@@ -329,7 +333,9 @@ export const getHomePostsInfiniteFunction = async (
             .toString()
             .padEnd(13, 0)
             .toString(),
-          images: docData.images,
+          images: docData.images.map(
+            (v: { imageName: string; url: string; imgDetail: string }) => v.url,
+          ),
           likeCount: docData.pressPerson.length,
           postId: docData.postId,
           postType: docData.postType,
@@ -390,7 +396,9 @@ export const getHomePostsInfiniteFunction = async (
           .toString()
           .padEnd(13, 0)
           .toString(),
-        images: docData.images,
+        images: docData.images.map(
+          (v: { imageName: string; url: string; imgDetail: string }) => v.url,
+        ),
         likeCount: docData.pressPerson.length,
         postId: docData.postId,
         postType: docData.postType,
@@ -408,7 +416,9 @@ export const getHomePostsInfiniteFunction = async (
           .toString()
           .padEnd(13, 0)
           .toString(),
-        images: docData.images,
+        images: docData.images.map(
+          (v: { imageName: string; url: string; imgDetail: string }) => v.url,
+        ),
         likeCount: docData.pressPerson.length,
         postId: docData.postId,
         postType: docData.postType,
@@ -457,7 +467,9 @@ export const searchInfiniteFunction = async (
           content: docData.content,
           commentsCount: docData.commentsCount || 0,
           createdAt: docData.createdAt.toString(),
-          images: docData.images,
+          images: docData.images.map(
+            (v: { imageName: string; url: string; imgDetail: string }) => v.url,
+          ),
           likeCount: docData.pressPerson.length,
           postId: docData.postId,
           postType: docData.postType,
@@ -472,7 +484,9 @@ export const searchInfiniteFunction = async (
           content: docData.content,
           commentsCount: docData.commentsCount || 0,
           createdAt: docData.createdAt.toString(),
-          images: docData.images,
+          images: docData.images.map(
+            (v: { imageName: string; url: string; imgDetail: string }) => v.url,
+          ),
           likeCount: docData.pressPerson.length,
           postId: docData.postId,
           postType: docData.postType,
