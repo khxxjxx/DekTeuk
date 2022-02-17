@@ -455,7 +455,7 @@ export const searchInfiniteFunction = async (
       process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY,
     );
     const index = searchClient.initIndex('post');
-    const { hits } = await index.search(searchValue, {
+    const { hits } = await index.search(searchValue.toString(), {
       page: pageParam ? pageParam + 1 : 0,
       hitsPerPage: 40,
       filters: filterString,
