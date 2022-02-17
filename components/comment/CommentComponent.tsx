@@ -99,7 +99,13 @@ const Comment: React.FC<CommentProps> = ({
                 isDeleted={isDeleted}
                 userId={userId}
               />
-              <MenuIcon onClick={() => setMenu(!menu)} />
+              <MenuIcon
+                onClick={() => {
+                  setTimeout(() => {
+                    setMenu((pre) => !pre);
+                  }, 0);
+                }}
+              />
               {!isDeleted && menu && userInfo && (
                 <CommentDropBox
                   setNestedReply={setNestedReplyEditor}
@@ -160,7 +166,13 @@ const Comment: React.FC<CommentProps> = ({
                   isDeleted={isDeleted}
                   userId={userId}
                 />
-                <MenuIcon onClick={() => setMenu(!menu)} />
+                <MenuIcon
+                  onClick={() => {
+                    setTimeout(() => {
+                      setMenu((pre) => !pre);
+                    }, 0);
+                  }}
+                />
                 {!isDeleted && menu && userInfo == userId && (
                   <CommentDropBox
                     setMenu={setMenu}
