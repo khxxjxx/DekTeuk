@@ -2,9 +2,9 @@
   "name": "devily",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "NODE_ENV=development next dev -p 80",
     "build": "next build",
-    "start": "next start",
+    "start": "NODE_ENV=production next start -p 80",
     "lint": "next lint"
   },
   "dependencies": {

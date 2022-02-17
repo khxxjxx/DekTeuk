@@ -82,7 +82,7 @@ MyApp.getInitialProps = wrapper.getInitialAppProps(
                 email: string;
                 userData: Omit<UserInfo, 'email' | 'id'>;
               };
-            } = await fetch('http://localhost:3000/api/validate', {
+            } = await fetch('http://localhost/api/validate', {
               headers,
             }).then((res) => res.json());
             console.log(id);

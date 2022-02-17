@@ -40,7 +40,7 @@ const ImgComponent: React.FC<ImgProps> = ({ urls }: { urls: any }) => {
         width={'100%'}
         height={'100%'}
         objectFit={'cover'}
-        src={`${urls[0].url}`}
+        src={`${urls[0]}`}
         alt="test"
       />
     </ImgWrapper>

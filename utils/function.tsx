@@ -255,7 +255,9 @@ export const getHomePostsInfiniteFunction = async (
           .toString()
           .padEnd(13, 0)
           .toString(),
-        images: docData.images,
+        images: docData.images.map(
+          (v: { imageName: string; url: string; imgDetail: string }) => v.url,
+        ),
         likeCount: docData.pressPerson.length,
         postId: docData.postId,
         postType: docData.postType,
@@ -311,7 +313,9 @@ export const getHomePostsInfiniteFunction = async (
             .toString()
             .padEnd(13, 0)
             .toString(),
-          images: docData.images,
+          images: docData.images.map(
+            (v: { imageName: string; url: string; imgDetail: string }) => v.url,
+          ),
           likeCount: docData.pressPerson.length,
           postId: docData.postId,
           postType: docData.postType,
@@ -329,7 +333,9 @@ export const getHomePostsInfiniteFunction = async (
             .toString()
             .padEnd(13, 0)
             .toString(),
-          images: docData.images,
+          images: docData.images.map(
+            (v: { imageName: string; url: string; imgDetail: string }) => v.url,
+          ),
           likeCount: docData.pressPerson.length,
           postId: docData.postId,
           postType: docData.postType,
@@ -340,6 +346,7 @@ export const getHomePostsInfiniteFunction = async (
         returnArr.push(returnData);
       }
     });
+    console.log(returnArr);
     if (returnArr.length === 0) return { result: returnArr, nextPage: -1 };
     return { result: returnArr, nextPage: pageParam + 1 };
 
@@ -390,7 +397,9 @@ export const getHomePostsInfiniteFunction = async (
           .toString()
           .padEnd(13, 0)
           .toString(),
-        images: docData.images,
+        images: docData.images.map(
+          (v: { imageName: string; url: string; imgDetail: string }) => v.url,
+        ),
         likeCount: docData.pressPerson.length,
         postId: docData.postId,
         postType: docData.postType,
@@ -408,7 +417,9 @@ export const getHomePostsInfiniteFunction = async (
           .toString()
           .padEnd(13, 0)
           .toString(),
-        images: docData.images,
+        images: docData.images.map(
+          (v: { imageName: string; url: string; imgDetail: string }) => v.url,
+        ),
         likeCount: docData.pressPerson.length,
         postId: docData.postId,
         postType: docData.postType,
@@ -435,6 +446,7 @@ export const searchInfiniteFunction = async (
       .join(' OR ')
       .trim();
     const returnArr: any[] = [];
+    console.log(searchValue, pageParam, filterString);
     if (
       !process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_APP_ID ||
       !process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY
@@ -457,7 +469,9 @@ export const searchInfiniteFunction = async (
           content: docData.content,
           commentsCount: docData.commentsCount || 0,
           createdAt: docData.createdAt.toString(),
-          images: docData.images,
+          images: docData.images.map(
+            (v: { imageName: string; url: string; imgDetail: string }) => v.url,
+          ),
           likeCount: docData.pressPerson.length,
           postId: docData.postId,
           postType: docData.postType,
@@ -472,7 +486,9 @@ export const searchInfiniteFunction = async (
           content: docData.content,
           commentsCount: docData.commentsCount || 0,
           createdAt: docData.createdAt.toString(),
-          images: docData.images,
+          images: docData.images.map(
+            (v: { imageName: string; url: string; imgDetail: string }) => v.url,
+          ),
           likeCount: docData.pressPerson.length,
           postId: docData.postId,
           postType: docData.postType,
