@@ -48,7 +48,12 @@ export const getOcrData = async (imageUrl: string, imageExt: string) => {
       timestamp: timestamp,
       version: 'V1',
     };
-    const response = await axios.post('http://localhost:3000/api/ocr', data);
+    const response = await axios.post(
+      `http://localhost:${
+        process.env.NODE_ENV !== 'production' ? 5000 : 80
+      }/api/ocr`,
+      data,
+    );
     console.log(response.data.message);
     getOcrResult = resultTxt(response.data.message);
   } catch (e) {

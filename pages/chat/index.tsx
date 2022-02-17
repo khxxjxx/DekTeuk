@@ -1,11 +1,11 @@
 import { Fragment, useCallback, useEffect, useState } from 'react';
-import { chatList, updateNotification } from '../api/chat';
-import { getDateTime } from '../../utils/function';
+import { chatList, updateNotification } from '@utils/chat';
+import { getDateTime } from '@utils/function';
 import Link from 'next/link';
 import Layout from '@layouts/Layout';
 import wrapper from '@store/configureStore';
 import Empty from '@components/Empty';
-import { ChatMain, ChatWrapper, Text, Notice } from '../../styles/chatStyle';
+import { ChatMain, ChatWrapper, Text, Notice } from '@styles/chatStyle';
 
 const Chat = ({ user }: { user: Person }) => {
   const [myChats, setMyChats] = useState<ChatRoom[]>([]);

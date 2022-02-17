@@ -38,6 +38,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Modal from '@mui/material/Modal';
 import { StoreState, UserState } from '@interface/StoreInterface';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { RoungePost } from '@interface/CardInterface';
 
 const style = {
   position: 'absolute' as 'absolute',
@@ -164,7 +165,7 @@ const PostForm = (props: any) => {
           updateOnePostAction({
             postId: props.thisPostId,
             // @ts-ignore
-            postData: post,
+            postData: { ...post, images: post.images.map((v) => v.url) },
           }),
         );
       }
@@ -182,7 +183,15 @@ const PostForm = (props: any) => {
         setDiaOpen(true);
         dispatch(
           // @ts-ignore
-          updateOnePostAction({ postId: props.thisPostId, postData: post }),
+          updateOnePostAction({
+            postId: props.thisPostId,
+            // @ts-ignore
+            postData: {
+              ...post,
+              // @ts-ignore
+              images: post.images.map((v) => v.url),
+            },
+          }),
         );
       }
     }
