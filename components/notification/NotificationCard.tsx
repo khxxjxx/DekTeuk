@@ -23,6 +23,9 @@ const NotificationCardWrapper = styled.div`
   justify-content: space-between;
   padding: 8px 15px;
   background-color: white;
+  @media (prefers-color-scheme: dark) {
+    background-color: ${({ theme }: any) => theme.mainColorBlack};
+  }
 `;
 const NotificationMainContent = styled.div``;
 
