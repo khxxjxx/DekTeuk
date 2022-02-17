@@ -43,26 +43,32 @@ export default function SignUpIndex() {
         <h1 style={{ color: '#8946A6' }}>회원가입</h1>
         <WrapContents>
           <WrapInput>
-            <Link href="/user/email" passHref>
-              <SignupButton>
-                <EmailIcon />
-                이메일 계정으로 회원가입
+            <WrapButton>
+              <Link href="/user/email" passHref>
+                <SignupButton>
+                  <EmailIcon style={{ marginRight: '5px' }} />
+                  <div>이메일 계정으로 회원가입</div>
+                </SignupButton>
+              </Link>
+            </WrapButton>
+            <WrapButton>
+              <SignupButton onClick={loginWithGoogle}>
+                <GoogleIcon style={{ marginRight: '5px' }} />
+                구글 계정으로 회원가입
               </SignupButton>
-            </Link>
-            <SignupButton onClick={loginWithGoogle}>
-              <GoogleIcon />
-              구글 계정으로 회원가입
-            </SignupButton>
+            </WrapButton>
           </WrapInput>
-          <WrapButton>
-            <Label>이미 가입되어 있으시다면</Label>
-          </WrapButton>
-          <Link href="/user/login" passHref>
-            <SignupButton>
-              <LoginIcon />
-              로그인 페이지로 이동하기
-            </SignupButton>
-          </Link>
+          <WrapInput>
+            <h3 style={{ color: '#8946A6' }}>이미 가입되어 있으신가요?</h3>
+            <WrapButton>
+              <Link href="/user/login" passHref>
+                <SignupButton>
+                  <LoginIcon style={{ marginRight: '5px' }} />
+                  로그인 페이지로 이동하기
+                </SignupButton>
+              </Link>
+            </WrapButton>
+          </WrapInput>
         </WrapContents>
       </Main>
     </>
@@ -116,12 +122,16 @@ const WrapContents = styled.div`
 
 const WrapInput = styled.div`
   display: flex;
+  align-items: center;
   flex-direction: column;
-  margin: 20px;
   width: 100%;
 `;
 
 const Button = styled.button`
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  justify-content: center;
   background: #8946a6;
   border-radius: 5px;
   border: none;
@@ -130,31 +140,14 @@ const Button = styled.button`
   height: 50px;
   font-size: 12px;
   cursor: pointer;
-  vertical-align: middle;
   :hover {
     opacity: 0.8;
   }
 `;
 
 const WrapButton = styled.div`
-  display: flex;
-  justify-content: space-between;
-  margin: 20px;
+  margin: 10px;
   width: 313px;
-`;
-
-const SubmitButton = styled.button`
-  background: #8946a6;
-  border-radius: 5px;
-  border: none;
-  color: white;
-  width: 173px;
-  height: 58px;
-  font-size: 20px;
-  cursor: pointer;
-  :hover {
-    opacity: 0.8;
-  }
 `;
 
 const Label = styled.label`

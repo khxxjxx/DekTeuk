@@ -37,10 +37,10 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-
+import FactCheckIcon from '@mui/icons-material/FactCheck';
 import { validateData, getOcrData } from '@utils/ocrDataValidation';
 import { uploadImg } from '@utils/signupForm';
-
+import CircularProgress from '@mui/material/CircularProgress';
 const reducer = (state: UserInputData, action: any) => {
   return {
     ...state,
@@ -67,6 +67,7 @@ export default function Signup() {
   const [nicknameBtnChecked, setNicknameBtnChecked] = useState<boolean>(false);
   const [emailBtnChecked, setEmailBtnChecked] = useState<boolean>(false);
   const [imageOcrChecked, setImageOcrChecked] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const [ocrData, setOcrData] = useState<OcrData>({
     b_no: '',
@@ -77,6 +78,7 @@ export default function Signup() {
 
   const handleClose = () => {
     setDialogOpen(false);
+    setIsLoading(false);
   };
 
   const createUserWithEmail = async () => {
@@ -193,7 +195,9 @@ export default function Signup() {
   };
 
   const getImageToString = async () => {
+    setIsLoading(true);
     const result = await getOcrData(imageUrl, imageExt);
+    setIsLoading(false);
     if (!result) {
       alert('증명서에서 데이터를 가지고 오지 못했습니다!');
       resetOcrData();
@@ -206,6 +210,7 @@ export default function Signup() {
   };
 
   const validateOcrData = async () => {
+    setIsLoading(true);
     const validateResult = await validateData(ocrData);
     if (validateResult) {
       alert('인증 성공!');
@@ -223,7 +228,6 @@ export default function Signup() {
   };
 
   const onImageChange = (e: any) => {
-    console.log(ocrData);
     const image = e.target.files[0] as File;
     const reader = new FileReader();
     reader.readAsDataURL(image);
@@ -383,14 +387,26 @@ export default function Signup() {
                   width="150px"
                   height="200px"
                 />
-                <OcrButton
-                  type="button"
-                  variant="contained"
-                  disabled={imageOcrChecked}
-                  onClick={getImageToString}
-                >
-                  인증하기
-                </OcrButton>
+                <WrapButton>
+                  <OcrButton
+                    type="button"
+                    variant="contained"
+                    disabled={imageOcrChecked}
+                    onClick={getImageToString}
+                  >
+                    <FactCheckIcon style={{ marginRight: '5px' }} />
+                    인증하기
+                  </OcrButton>
+                  {isLoading && (
+                    <CircularProgress
+                      style={{
+                        color: '#8946a6',
+                        marginLeft: 10,
+                        marginTop: '15px',
+                      }}
+                    />
+                  )}
+                </WrapButton>
               </>
             )}
             <WrapInput>
@@ -435,15 +451,18 @@ export default function Signup() {
             <DialogContent>
               <DialogContentText id="alert-dialog-description">
                 사업자등록번호: {ocrData.b_no}
+                <br />
                 대표자: {ocrData.p_nm}
+                <br />
                 개업년월일: {ocrData.start_dt}
+                <br />
               </DialogContentText>
             </DialogContent>
-            <DialogActions>
-              <Button onClick={validateOcrData} autoFocus>
+            <DialogActions style={{ color: '#8946a6' }}>
+              <DialogButton onClick={validateOcrData} autoFocus>
                 인증하기
-              </Button>
-              <Button onClick={handleClose}>다시 올리기</Button>
+              </DialogButton>
+              <DialogButton onClick={handleClose}>다시 올리기</DialogButton>
             </DialogActions>
           </Dialog>
         </>
@@ -494,8 +513,8 @@ const CheckButton = styled.button`
   border-radius: 5px;
   border: none;
   color: white;
-  width: 60px;
-  height: 24px;
+  width: 80px;
+  height: 30px;
   margin: 5px;
   font-size: 12px;
   cursor: pointer;
@@ -540,7 +559,13 @@ const TextFields = styled(TextField)`
   color: #8946a6;
   margin: 5px;
 `;
+const DialogButton = styled(Button)`
+  color: #8946a6;
 
+  :hover {
+    opacity: 0.8;
+  }
+`;
 const OcrButton = styled(Button)`
   background: #8946a6;
   margin-top: 15px;
@@ -551,4 +576,13 @@ const OcrButton = styled(Button)`
     opacity: 0.8;
     background: #8946a6;
   }
+`;
+
+const WrapButton = styled.div`
+  margin: 10px;
+  align-item: center;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  justify-content: center;
 `;

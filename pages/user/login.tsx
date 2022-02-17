@@ -168,12 +168,16 @@ const WrapInput = styled.div`
 `;
 
 const Button = styled.button`
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  justify-content: center;
   background: #8946a6;
   border-radius: 5px;
   border: none;
   color: white;
-  width: 100px;
-  height: 35px;
+  width: 120px;
+  height: 40px;
   font-size: 12px;
   cursor: pointer;
   :hover {
@@ -189,6 +193,10 @@ const WrapButton = styled.div`
 `;
 
 const SubmitButton = styled.button`
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  justify-content: center;
   background: #8946a6;
   border-radius: 5px;
   border: none;

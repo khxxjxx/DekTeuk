@@ -6,6 +6,7 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import { signOut } from 'firebase/auth';
 import { db, auth } from '@firebase/firebase';
+
 import {
   doc,
   setDoc,
@@ -36,7 +37,8 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-
+import FactCheckIcon from '@mui/icons-material/FactCheck';
+import CircularProgress from '@mui/material/CircularProgress';
 const reducer = (state: UserInputData, action: any) => {
   return {
     ...state,
@@ -60,6 +62,7 @@ export default function Google() {
   const [imageExt, setImageExt] = useState<string>('');
   const [nicknameBtnChecked, setNicknameBtnChecked] = useState<boolean>(false);
   const [imageOcrChecked, setImageOcrChecked] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const [ocrData, setOcrData] = useState<OcrData>({
     b_no: '',
@@ -70,16 +73,15 @@ export default function Google() {
   useEffect(() => {
     const auth = getAuth();
     const curUser = auth.currentUser;
-    console.log('google account');
     inputDispatch({
       type: 'email',
       payload: { value: curUser?.email, error: '' },
     });
-    console.log(inputState);
   }, []);
 
   const handleClose = () => {
     setDialogOpen(false);
+    setIsLoading(false);
   };
 
   const SignUpSubmitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -149,7 +151,9 @@ export default function Google() {
   };
 
   const getImageToString = async () => {
+    setIsLoading(true);
     const result = await getOcrData(imageUrl, imageExt);
+    setIsLoading(false);
     if (!result) {
       alert('증명서에서 데이터를 가지고 오지 못했습니다!');
       resetOcrData();
@@ -162,6 +166,7 @@ export default function Google() {
   };
 
   const validateOcrData = async () => {
+    setIsLoading(true);
     const validateResult = await validateData(ocrData);
     if (validateResult) {
       alert('인증 성공!');
@@ -286,14 +291,26 @@ export default function Google() {
                   width="150px"
                   height="200px"
                 />
-                <OcrButton
-                  type="button"
-                  variant="contained"
-                  disabled={imageOcrChecked}
-                  onClick={getImageToString}
-                >
-                  인증하기
-                </OcrButton>
+                <WrapButton>
+                  <OcrButton
+                    type="button"
+                    variant="contained"
+                    disabled={imageOcrChecked}
+                    onClick={getImageToString}
+                  >
+                    <FactCheckIcon style={{ marginRight: '5px' }} />
+                    인증하기
+                  </OcrButton>
+                  {isLoading && (
+                    <CircularProgress
+                      style={{
+                        color: '#8946a6',
+                        marginLeft: 10,
+                        marginTop: '15px',
+                      }}
+                    />
+                  )}
+                </WrapButton>
               </>
             )}
             <WrapInput>
@@ -333,16 +350,19 @@ export default function Google() {
             </DialogTitle>
             <DialogContent>
               <DialogContentText id="alert-dialog-description">
-                <text>사업자등록번호: {ocrData.b_no}</text>
-                <text>대표자: {ocrData.p_nm}</text>
-                <text>개업년월일: {ocrData.start_dt}</text>
+                사업자등록번호: {ocrData.b_no}
+                <br />
+                대표자: {ocrData.p_nm}
+                <br />
+                개업년월일: {ocrData.start_dt}
+                <br />
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={validateOcrData} autoFocus>
+              <DialogButton onClick={validateOcrData} autoFocus>
                 인증하기
-              </Button>
-              <Button onClick={handleClose}>다시 올리기</Button>
+              </DialogButton>
+              <DialogButton onClick={handleClose}>다시 올리기</DialogButton>
             </DialogActions>
           </Dialog>
         </>
@@ -373,7 +393,14 @@ const WrapContents = styled.div`
   flex-direction: column;
   align-items: center;
 `;
-
+const WrapButton = styled.div`
+  margin: 10px;
+  align-item: center;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  justify-content: center;
+`;
 const WrapInput = styled.div`
   display: flex;
   flex-direction: column;
@@ -451,5 +478,12 @@ const OcrButton = styled(Button)`
   :hover {
     opacity: 0.8;
     background: #8946a6;
+  }
+`;
+const DialogButton = styled(Button)`
+  color: #8946a6;
+
+  :hover {
+    opacity: 0.8;
   }
 `;

@@ -49,7 +49,6 @@ export const getOcrData = async (imageUrl: string, imageExt: string) => {
       version: 'V1',
     };
     const response = await axios.post('http://localhost:3000/api/ocr', data);
-    console.log(response.data.message);
     getOcrResult = resultTxt(response.data.message);
   } catch (e) {
     console.error(e);
@@ -59,8 +58,6 @@ export const getOcrData = async (imageUrl: string, imageExt: string) => {
 };
 
 const resultTxt = (data: any) => {
-  console.log(data);
-
   const regNum = /([0-9]{3})-([0-9]{2})-([0-9]{5})/;
   const regex = /[^0-9]/g;
   const regDate = /([0-9]{4})년([0-1][0-9])월([0-3][0-9])일/;
@@ -72,29 +69,23 @@ const resultTxt = (data: any) => {
   data.forEach((el: any, idx: number) => {
     filteredText.push(el.inferText);
   });
-  console.log(filteredText);
   const res = filteredText.join().replaceAll(',', '').replaceAll(' ', '');
 
   // 사업자 등록번호 가져옴
   if (!res.match(regNum)) {
-    console.log('b_no err');
     return false;
   }
   const b_no: string = res.match(regNum)[0].replaceAll('-', '');
 
   // 개업연월일 가져옴
   if (res.indexOf('개업연월일:') > 0) {
-    console.log('연월일');
     startDTFilter = res.substr(res.indexOf('개업연월일:'));
   } else if (res.indexOf('개업년월일:') > 0) {
-    console.log('년월일');
     startDTFilter = res.substr(res.indexOf('개업년월일:'));
   } else {
     return false;
   }
-  console.log(startDTFilter);
   if (!startDTFilter.match(regDate)) {
-    console.log('not match');
     return false;
   }
   const start_dt: string = startDTFilter.match(regDate)[0].replace(regex, '');
@@ -107,7 +98,6 @@ const resultTxt = (data: any) => {
     nameFilterIdx = res.indexOf('대표자:');
     p_nm = res.substr(nameFilterIdx + 4, 3);
   } else {
-    console.log('p_nm err');
     return false;
   }
 
@@ -135,7 +125,6 @@ export const validateData = async (ocrData: OcrData) => {
       'http://localhost:3000/api/validateOcrData',
       validateData,
     );
-    console.log(data.data.message);
     if (data.data.message) {
       return true;
     } else {
