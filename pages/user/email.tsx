@@ -23,13 +23,19 @@ import { useRouter } from 'next/router';
 import MenuItem from '@mui/material/MenuItem';
 import { UserInfo, Rounge } from '@interface/StoreInterface';
 import { HomeListUrlString } from '@interface/GetPostsInterface';
-import { userInputInitialState, jobSectors, UserInputData } from './constants';
+import {
+  userInputInitialState,
+  jobSectors,
+  UserInputData,
+  OcrData,
+  UserInputDataAction,
+} from '@interface/constants';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import {
-  userInputValidation,
-  inputErrorCheck,
+  userInputChangeValidation,
+  userInputSubmitValidation,
 } from '@utils/userInputValidation';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import Dialog from '@mui/material/Dialog';
@@ -41,23 +47,17 @@ import FactCheckIcon from '@mui/icons-material/FactCheck';
 import { validateData, getOcrData } from '@utils/ocrDataValidation';
 import { uploadImg } from '@utils/signupForm';
 import CircularProgress from '@mui/material/CircularProgress';
-const reducer = (state: UserInputData, action: any) => {
+import { reg_email } from '@interface/constants';
+const reducer = (state: UserInputData, action: UserInputDataAction) => {
   return {
     ...state,
     [action.type]: { value: action.payload.value, error: action.payload.error },
   };
 };
 
-type OcrData = {
-  b_no: string;
-  start_dt: string;
-  p_nm: string;
-};
-
 export default function Signup() {
   const router = useRouter();
   const dispatch = useDispatch();
-
   const [inputState, inputDispatch] = useReducer(
     reducer,
     userInputInitialState,
@@ -74,6 +74,11 @@ export default function Signup() {
     start_dt: '',
     p_nm: '',
   });
+
+  const [emailSuccess, setEmailSuccess] = useState<string>('');
+  const [nicknameSuccess, setNicknameSuccess] = useState<string>('');
+  const [ocrSuccess, setOcrSuccess] = useState<string>('');
+
   const { email, password, checkPassword, nickname, jobSector } = inputState;
 
   const handleClose = () => {
@@ -90,60 +95,53 @@ export default function Signup() {
       );
       sendEmailVerification(result);
       return result.uid;
-    } catch (err: any) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
     }
   };
 
   const SignUpSubmitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (checkPassword.value !== password.value) {
-      alert('비밀번호가 다릅니다!');
-      inputDispatch({
-        type: 'checkPassword',
-        payload: { value: checkPassword.value, error: '비밀번호가 다릅니다!' },
-      });
+    if (userInputSubmitValidation(inputState).length !== 0) {
+      alert('잘못된 입력이 있습니다!');
       return;
     }
+
     if (!imageUrl) {
       alert('증명서 파일을 찾을 수 없습니다!');
       return;
     }
-    const success = inputErrorCheck(inputState);
 
-    if (success) {
-      const uid = (await createUserWithEmail()) as string;
-      const userData: UserInfo = {
-        nickname: nickname.value,
-        jobSector: jobSector.value,
-        validRounges: [
-          {
-            title: '타임라인',
-            url: 'timeline',
-          },
-          {
-            title: '토픽',
-            url: 'topic',
-          },
-          {
-            title: jobSector.value,
-            url: jobSectors.find((v) => v.title === jobSector.value)
-              ?.url as HomeListUrlString,
-          } as Rounge,
-        ],
-        id: uid,
-        hasNewNotification: false,
-        hasNewChatNotification: false,
-        posts: [],
-        email: email.value,
-      };
+    const uid = (await createUserWithEmail()) as string;
+    const userData: UserInfo = {
+      nickname: nickname.value,
+      jobSector: jobSector.value,
+      validRounges: [
+        {
+          title: '타임라인',
+          url: 'timeline',
+        },
+        {
+          title: '토픽',
+          url: 'topic',
+        },
+        {
+          title: jobSector.value,
+          url: jobSectors.find((v) => v.title === jobSector.value)
+            ?.url as HomeListUrlString,
+        } as Rounge,
+      ],
+      id: uid,
+      hasNewNotification: false,
+      hasNewChatNotification: false,
+      posts: [],
+      email: email.value,
+    };
 
-      uploadImg(uid, imageExt, imageUrl);
-      console.log('success');
-      await setDoc(doc(db, 'user', uid), userData);
-      await signOut(auth);
-      router.push('/user/login');
-    }
+    uploadImg(uid, imageExt, imageUrl);
+    await setDoc(doc(db, 'user', uid), userData);
+    await signOut(auth);
+    router.push('/user/login');
   };
 
   const checkEmail = async () => {
@@ -153,16 +151,15 @@ export default function Signup() {
     );
     let emailHelperText;
     const emailCheckSnap = await getDocs(emailCheckQuery);
-    if (emailCheckSnap.docs.length !== 0 || email.value.length < 3) {
+    if (
+      emailCheckSnap.docs.length !== 0 ||
+      email.value.length < 3 ||
+      !reg_email.test(email.value)
+    ) {
       emailHelperText = '사용 불가능한 이메일 입니다!';
-      alert(emailHelperText);
     } else {
-      if (email.error) {
-        alert(email.error);
-        return;
-      }
       emailHelperText = '';
-      alert('사용 가능한 이메일 입니다!');
+      setEmailSuccess('사용 가능한 이메일 입니다!');
       setEmailBtnChecked(true);
     }
 
@@ -181,11 +178,10 @@ export default function Signup() {
     const nicknameCheckSnap = await getDocs(nicknameCheckQuery);
     if (nicknameCheckSnap.docs.length !== 0 || nickname.value.length < 3) {
       nicknameHelperText = '사용 불가능한 닉네임 입니다!';
-      alert(nicknameHelperText);
     } else {
       nicknameHelperText = '';
-      alert('사용 가능한 닉네임 입니다!');
       setNicknameBtnChecked(true);
+      setNicknameSuccess('사용 가능한 닉네임 입니다!');
     }
 
     inputDispatch({
@@ -251,13 +247,23 @@ export default function Signup() {
 
   const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+
     if (name === 'nickname' && nicknameBtnChecked) {
       setNicknameBtnChecked(false);
+      setNicknameSuccess('');
     }
     if (name === 'email' && emailBtnChecked) {
       setEmailBtnChecked(false);
+      setEmailSuccess('');
     }
-    const error = userInputValidation(name, value);
+    if (name === 'checkPassword' && password.value !== value) {
+      inputDispatch({
+        type: name,
+        payload: { value: value, error: '비밀번호가 다릅니다!' },
+      });
+      return;
+    }
+    const error = userInputChangeValidation(name, value);
     inputDispatch({ type: name, payload: { value, error } });
   };
   return (
@@ -288,7 +294,7 @@ export default function Signup() {
                 name="email"
                 value={email.value}
                 onChange={onInputChange}
-                helperText={email.error}
+                helperText={email.error ? email.error : emailSuccess}
               />
             </WrapInput>
             <WrapInput>
@@ -344,7 +350,7 @@ export default function Signup() {
                 placeholder="닉네임을 입력해 주세요."
                 value={nickname.value}
                 onChange={onInputChange}
-                helperText={nickname.error}
+                helperText={nickname.error ? nickname.error : nicknameSuccess}
               />
             </WrapInput>
             <WrapImageUpload>
@@ -407,6 +413,7 @@ export default function Signup() {
             <WrapInput>
               <Label>직종</Label>
               <TextFields
+                required
                 select
                 error={jobSector.error ? true : false}
                 variant="outlined"
@@ -548,6 +555,11 @@ const ButtonStyled = styled(Button)<{ component: string }>`
   @media (prefers-color-scheme: dark) {
     background: ${({ theme }: any) => theme.mainColorBlue};
   }
+
+  :hover {
+    opacity: 0.8;
+    background: ${({ theme }: any) => theme.mainColorViolet};
+  }
 `;
 
 const CheckButton = styled.button`
@@ -555,8 +567,8 @@ const CheckButton = styled.button`
   border-radius: 5px;
   border: none;
   color: white;
-  width: 80px;
-  height: 30px;
+  width: 75px;
+  height: 25px;
   margin: 5px;
   font-size: 12px;
   cursor: pointer;
@@ -622,10 +634,14 @@ const TextFields = styled(TextField)`
   }
 `;
 const DialogButton = styled(Button)`
-  color: #8946a6;
+  color: ${({ theme }: any) => theme.mainColorViolet};
 
   :hover {
     opacity: 0.8;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    color: ${({ theme }: any) => theme.mainColorBlue};
   }
 `;
 const OcrButton = styled(Button)`
@@ -636,6 +652,7 @@ const OcrButton = styled(Button)`
   }
   :hover {
     opacity: 0.8;
+    background: ${({ theme }: any) => theme.mainColorViolet};
   }
 
   @media (prefers-color-scheme: dark) {

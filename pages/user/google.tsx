@@ -20,11 +20,17 @@ import { useRouter } from 'next/router';
 import MenuItem from '@mui/material/MenuItem';
 import { UserInfo, Rounge } from '@interface/StoreInterface';
 import { HomeListUrlString } from '@interface/GetPostsInterface';
-import { UserInputData, userInputInitialState, jobSectors } from './constants';
+import {
+  UserInputData,
+  userInputInitialState,
+  jobSectors,
+  OcrData,
+  UserInputDataAction,
+} from '@interface/constants';
 import { getAuth } from 'firebase/auth';
 import {
-  userInputValidation,
-  inputErrorCheck,
+  userInputChangeValidation,
+  userInputSubmitValidation,
 } from '@utils/userInputValidation';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
@@ -39,17 +45,13 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import FactCheckIcon from '@mui/icons-material/FactCheck';
 import CircularProgress from '@mui/material/CircularProgress';
-const reducer = (state: UserInputData, action: any) => {
+const reducer = (state: UserInputData, action: UserInputDataAction) => {
   return {
     ...state,
     [action.type]: { value: action.payload.value, error: action.payload.error },
   };
 };
-type OcrData = {
-  b_no: string;
-  start_dt: string;
-  p_nm: string;
-};
+
 export default function Google() {
   const router = useRouter();
   const dispatch = useDispatch();
@@ -61,6 +63,7 @@ export default function Google() {
   const [imageUrl, setImageUrl] = useState<string>('');
   const [imageExt, setImageExt] = useState<string>('');
   const [nicknameBtnChecked, setNicknameBtnChecked] = useState<boolean>(false);
+  const [nicknameSuccess, setNicknameSuccess] = useState<string>('');
   const [imageOcrChecked, setImageOcrChecked] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
@@ -75,7 +78,7 @@ export default function Google() {
     const curUser = auth.currentUser;
     inputDispatch({
       type: 'email',
-      payload: { value: curUser?.email, error: '' },
+      payload: { value: curUser?.email as string, error: '' },
     });
   }, []);
 
@@ -95,37 +98,35 @@ export default function Google() {
       alert('증명서 파일을 찾을 수 없습니다!');
       return;
     }
-    const success = inputErrorCheck(inputState);
-    if (success) {
-      const userData: UserInfo = {
-        nickname: nickname.value,
-        jobSector: jobSector.value,
-        validRounges: [
-          {
-            title: '타임라인',
-            url: 'timeline',
-          },
-          {
-            title: '토픽',
-            url: 'topic',
-          },
-          {
-            title: jobSector.value,
-            url: jobSectors.find((v) => v.title === jobSector.value)
-              ?.url as HomeListUrlString,
-          } as Rounge,
-        ],
-        id: uid,
-        hasNewNotification: false,
-        hasNewChatNotification: false,
-        posts: [],
-        email: email.value,
-      };
-      uploadImg(uid, imageExt, imageUrl);
-      const docSnap = await setDoc(doc(db, 'user', uid), userData);
-      await signOut(auth);
-      router.push('/user/login');
-    }
+
+    const userData: UserInfo = {
+      nickname: nickname.value,
+      jobSector: jobSector.value,
+      validRounges: [
+        {
+          title: '타임라인',
+          url: 'timeline',
+        },
+        {
+          title: '토픽',
+          url: 'topic',
+        },
+        {
+          title: jobSector.value,
+          url: jobSectors.find((v) => v.title === jobSector.value)
+            ?.url as HomeListUrlString,
+        } as Rounge,
+      ],
+      id: uid,
+      hasNewNotification: false,
+      hasNewChatNotification: false,
+      posts: [],
+      email: email.value,
+    };
+    uploadImg(uid, imageExt, imageUrl);
+    const docSnap = await setDoc(doc(db, 'user', uid), userData);
+    await signOut(auth);
+    router.push('/user/login');
   };
 
   const checkNickname = async () => {
@@ -137,11 +138,10 @@ export default function Google() {
     let nicknameHelperText;
     if (nicknameCheckSnap.docs.length !== 0 || nickname.value.length < 3) {
       nicknameHelperText = '사용 불가능한 닉네임 입니다!';
-      alert(nicknameHelperText);
     } else {
       nicknameHelperText = '';
-      alert('사용 가능한 닉네임 입니다!');
       setNicknameBtnChecked(true);
+      setNicknameSuccess('사용 가능한 닉네임 입니다!');
     }
 
     inputDispatch({
@@ -210,8 +210,9 @@ export default function Google() {
     const { name, value } = e.target;
     if (name === 'nickname' && nicknameBtnChecked) {
       setNicknameBtnChecked(false);
+      setNicknameSuccess('');
     }
-    const error = userInputValidation(name, value);
+    const error = userInputChangeValidation(name, value);
     inputDispatch({ type: name, payload: { value, error } });
   };
 
@@ -249,7 +250,7 @@ export default function Google() {
                 placeholder="닉네임을 입력해 주세요."
                 value={nickname.value}
                 onChange={onInputChange}
-                helperText={nickname.error}
+                helperText={nickname.error ? nickname.error : nicknameSuccess}
               />
             </WrapInput>
             <WrapImageUpload>
@@ -446,6 +447,11 @@ const ButtonStyled = styled(Button)<{ component: string }>`
   @media (prefers-color-scheme: dark) {
     background: ${({ theme }: any) => theme.mainColorBlue};
   }
+
+  :hover {
+    opacity: 0.8;
+    background: ${({ theme }: any) => theme.mainColorViolet};
+  }
 `;
 
 const CheckButton = styled.button`
@@ -453,8 +459,8 @@ const CheckButton = styled.button`
   border-radius: 5px;
   border: none;
   color: white;
-  width: 60px;
-  height: 24px;
+  width: 75px;
+  height: 25px;
   margin: 5px;
   font-size: 12px;
   cursor: pointer;
@@ -527,6 +533,7 @@ const OcrButton = styled(Button)`
   }
   :hover {
     opacity: 0.8;
+    background: ${({ theme }: any) => theme.mainColorViolet};
   }
 
   @media (prefers-color-scheme: dark) {
@@ -534,9 +541,13 @@ const OcrButton = styled(Button)`
   }
 `;
 const DialogButton = styled(Button)`
-  color: #8946a6;
+  color: ${({ theme }: any) => theme.mainColorViolet};
 
   :hover {
     opacity: 0.8;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    color: ${({ theme }: any) => theme.mainColorBlue};
   }
 `;
