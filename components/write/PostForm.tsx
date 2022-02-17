@@ -1,10 +1,8 @@
-import React, { useState, useContext, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Alert,
-  Avatar,
   Button,
   Container,
-  IconButton,
   Snackbar,
   Typography,
   TextField,
@@ -24,11 +22,9 @@ import {
   serverTimestamp,
   updateDoc,
   doc,
-  getDoc,
-  getDocs,
 } from 'firebase/firestore';
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
-import { db, firebase } from '@firebase/firebase';
+import { db } from '@firebase/firebase';
 import { Box } from '@mui/material';
 
 import Router from 'next/router';
@@ -36,22 +32,19 @@ import Router from 'next/router';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
+import Select from '@mui/material/Select';
 import Link from 'next/link';
 //photoupload용 아이콘
-import CircularProgress from '@mui/material/CircularProgress';
-import { green } from '@mui/material/colors';
+
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
-import Fab from '@mui/material/Fab';
-import CheckIcon from '@mui/icons-material/Check';
-import SaveIcon from '@mui/icons-material/Save';
+
 import { resetViewAction } from '@store/reducer';
 import { useDispatch, useSelector } from 'react-redux';
-import { withRouter } from 'next/router';
+
 import { StoreState, UserState } from '@interface/StoreInterface';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { ValidRounge } from '../../interface/StoreInterface';
+
 import Layout from '@layouts/Layout';
 
 const ContainerStyled = styled(Container)`

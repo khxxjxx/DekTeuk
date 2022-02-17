@@ -38,7 +38,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Modal from '@mui/material/Modal';
 import { StoreState, UserState } from '@interface/StoreInterface';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-
+import styled from '@emotion/styled';
 const style = {
   position: 'absolute' as 'absolute',
   top: '50%',
@@ -50,6 +50,71 @@ const style = {
   boxShadow: 24,
   p: 4,
 };
+const ContainerStyled = styled(Container)`
+  & .MuiOutlinedInput-input {
+    color: black;
+  }
+  & label {
+    color: ${({ theme }: any) => theme.darkGray};
+  }
+  & .MuiOutlinedInput-notchedOutline {
+    border: 1px solid ${({ theme }: any) => theme.darkGray};
+  }
+
+  @media (prefers-color-scheme: dark) {
+    & .MuiOutlinedInput-input {
+      color: white;
+    }
+    & label {
+      color: ${({ theme }: any) => theme.lightGray};
+    }
+    & .MuiInput-root {
+      color: white;
+      border-bottom: 1px solid ${({ theme }: any) => theme.darkGray};
+    }
+    & .MuiOutlinedInput-notchedOutline {
+      border: 1px solid ${({ theme }: any) => theme.darkGray};
+    }
+    & .MuiSvgIcon-root {
+      color: ${({ theme }: any) => theme.lightGray};
+    }
+  }
+`;
+
+const DialogStyled = styled(Dialog)`
+  background: ${({ theme }: any) => theme.lightGray};
+  & .MuiDialog-paper {
+    background: white;
+  }
+  & .MuiDialogContentText-root {
+    color: black;
+  }
+  @media (prefers-color-scheme: dark) {
+    background: ${({ theme }: any) => theme.darkGray};
+    & .MuiDialog-paper {
+      background: rgb(17, 17, 19);
+    }
+    & .MuiDialogContentText-root {
+      color: white;
+    }
+  }
+`;
+const ModalStyled = styled(Modal)`
+  background: ${({ theme }: any) => theme.lightGray};
+  & .css-1vocdem {
+    background: white;
+    color: black;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    background: ${({ theme }: any) => theme.darkGray};
+    & .css-1vocdem {
+      background: rgb(17, 17, 19);
+      color: white;
+    }
+  }
+`;
+
 const PostForm = (props: any) => {
   const dispatch = useDispatch();
   const postInfo = props.postInfo;
@@ -247,7 +312,7 @@ const PostForm = (props: any) => {
   }
 
   return (
-    <Container maxWidth="sm">
+    <ContainerStyled maxWidth="sm">
       <Box sx={{ minWidth: 120, mt: 6 }}>
         <FormControl fullWidth>
           <InputLabel id="demo-simple-select-label">등록위치</InputLabel>
@@ -457,7 +522,7 @@ const PostForm = (props: any) => {
       >
         <Typography></Typography>
       </Box>
-      <Modal
+      <ModalStyled
         open={modalOpen}
         onClose={() => {
           props.setEditOpen(false);
@@ -478,14 +543,13 @@ const PostForm = (props: any) => {
             게시물을 수정하였습니다
           </Typography>
         </Box>
-      </Modal>
-      <Dialog
+      </ModalStyled>
+      <DialogStyled
         open={diaOpen}
         onClose={handleClose}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle id="alert-dialog-title">{props.thisPostTitle}</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
             이 게시물을 수정하시겠습니까?
@@ -497,8 +561,8 @@ const PostForm = (props: any) => {
             확인
           </Button>
         </DialogActions>
-      </Dialog>
-    </Container>
+      </DialogStyled>
+    </ContainerStyled>
   );
 };
 
