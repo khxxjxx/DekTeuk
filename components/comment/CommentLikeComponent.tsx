@@ -4,6 +4,8 @@ import { db } from '@firebase/firebase';
 import styled from '@emotion/styled';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import { RootReducer } from '@store/reducer';
+import { useSelector } from 'react-redux';
 
 const LikeDiv = styled.div`
   margin-bottom: 15px;
@@ -28,20 +30,22 @@ const LikeComponent: React.FC<LikeProps> = ({
   isDeleted,
   userId,
 }) => {
+  const { user } = useSelector((state: RootReducer) => state.user);
   const addLike = async () => {
     if (!userId) {
       alert('로그인이 필요합니다.');
       return;
     }
     const commentRef = doc(db, 'comment', commentId);
+
     if (isClicked) {
       await updateDoc(commentRef, {
-        pressedPerson: arrayRemove(userId),
+        pressedPerson: arrayRemove(user.id),
         likes: likes - 1,
       });
     } else {
       await updateDoc(commentRef, {
-        pressedPerson: arrayUnion(userId),
+        pressedPerson: arrayUnion(user.id),
         likes: likes + 1,
       });
     }
