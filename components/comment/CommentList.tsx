@@ -3,7 +3,7 @@ import Comment from './CommentComponent';
 import styled from '@emotion/styled';
 import { onSnapshot } from 'firebase/firestore';
 import { commentQuery } from '@firebase/firebase';
-import { PostData } from '@interface/comment';
+import { PostData, CommentData } from '@interface/comment';
 
 const CommentListDiv = styled.div`
   width: 100%;
@@ -20,16 +20,15 @@ const CommentList: React.FC<CommentListProps> = ({
   postData,
   userId,
 }) => {
-  const [comments, setComments] = useState<any>([]); // todo: 타입 지정
+  const [comments, setComments] = useState<Array<CommentData>>([]); // todo: 타입 지정
 
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     const unSubscribe = onSnapshot(commentQuery(postData.id), (snapshot) => {
-      const newData = snapshot.docs.map((value) => ({
+      const newData: any = snapshot.docs.map((value) => ({
         id: value.id,
         ...value.data(),
       }));
-
       setComments(newData);
       setSum(newData.length);
       setLoading(false);
@@ -38,7 +37,8 @@ const CommentList: React.FC<CommentListProps> = ({
     return () => unSubscribe();
   }, []);
 
-  const isClicked = (arr: any) => (arr.indexOf(userId) === -1 ? false : true); // todo: 타입 지정
+  const isClicked = (arr: Array<string>) =>
+    arr.indexOf(userId as string) === -1 ? false : true; // todo: 타입 지정
 
   if (loading) {
     return <div style={{ marginBottom: '20px' }}>댓글을 불러오는 중...</div>;
@@ -49,7 +49,7 @@ const CommentList: React.FC<CommentListProps> = ({
       {comments.length == 0 ? (
         <div style={{ marginBottom: '20px' }}>등록된 댓글이 없습니다.</div>
       ) : (
-        comments.map((data: any) => {
+        comments.map((data: CommentData) => {
           // todo: 타입 지정
           return (
             <Comment
