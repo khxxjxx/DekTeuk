@@ -18,7 +18,7 @@ import {
   query,
   where,
 } from 'firebase/firestore';
-import { getStorage, ref, uploadString } from 'firebase/storage';
+
 import { useRouter } from 'next/router';
 import MenuItem from '@mui/material/MenuItem';
 import { UserInfo, Rounge } from '@interface/StoreInterface';
@@ -47,6 +47,7 @@ const reducer = (state: UserInputData, action: any) => {
     [action.type]: { value: action.payload.value, error: action.payload.error },
   };
 };
+
 type OcrData = {
   b_no: string;
   start_dt: string;

@@ -7,7 +7,7 @@ export const uploadImg = async (
 ) => {
   const storage = getStorage();
   const imageName = `${uid}.${imageExt}`;
-  const imgRef = ref(storage, imageName);
+  const imgRef = ref(storage, 'users/' + imageName);
   try {
     await uploadString(imgRef, imageUrl, 'data_url');
   } catch (e: any) {
