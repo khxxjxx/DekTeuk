@@ -9,7 +9,7 @@ import { useInView } from 'react-intersection-observer';
 import useGetMyPost from '@hooks/useGetMyPost';
 import { useEffect } from 'react';
 import MyPagePost from '@components/mypage/MyPagePost';
-import { LoadingDiv } from '@components/items/LoadingDiv';
+import Empty from '@components/Empty';
 
 const MyPost: NextPage = () => {
   const { ref, inView } = useInView();
@@ -37,6 +37,7 @@ const MyPost: NextPage = () => {
               </Link>
               <h1>내가 작성한 게시물</h1>
             </header>
+            <Empty ment="아직 작성된 게시물이 없습니다." />
           </MyPageChangeCom>
         </Container>
       </Layout>
