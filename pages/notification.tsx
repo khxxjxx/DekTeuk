@@ -4,7 +4,7 @@ import Layout from '@layouts/Layout';
 import { Container } from '@mui/material';
 import Head from 'next/head';
 import NotificationCard from '@components/notification/NotificationCard';
-
+import { NotificationData } from '@interface/notification';
 import { LoadingDiv } from '@components/items/LoadingDiv';
 import { getDateTime } from '@utils/function';
 import { useInView } from 'react-intersection-observer';
@@ -46,7 +46,7 @@ const Notification: NextPage = () => {
         <Container>
           <div style={{ marginTop: '30px' }}>
             {data.length != 0 &&
-              data.map((v: any, i: number) => (
+              data.map((v: NotificationData, i: number) => (
                 <NotificationCard
                   key={i}
                   type={v.alertType}

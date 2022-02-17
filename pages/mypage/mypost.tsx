@@ -10,6 +10,7 @@ import useGetMyPost from '@hooks/useGetMyPost';
 import { useEffect } from 'react';
 import MyPagePost from '@components/mypage/MyPagePost';
 import Empty from '@components/Empty';
+import { MyPostData } from '@interface/mypost';
 
 const MyPost: NextPage = () => {
   const { ref, inView } = useInView();
@@ -26,7 +27,7 @@ const MyPost: NextPage = () => {
     }
   }, [inView]);
 
-  if (!data[0]?.title) {
+  if (!data[0]?.url?.url) {
     return (
       <Layout>
         <Container>
@@ -61,7 +62,7 @@ const MyPost: NextPage = () => {
               <h1>내가 작성한 게시물</h1>
             </header>
             {data.length !== 0 &&
-              data.map((v: any) => (
+              data.map((v: MyPostData) => (
                 <MyPagePost
                   key={v.postId}
                   title={v.title}
