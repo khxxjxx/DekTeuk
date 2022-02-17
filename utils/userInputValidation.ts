@@ -8,7 +8,7 @@ import {
   query,
   where,
 } from 'firebase/firestore';
-import { UserInputData } from 'pages/user/constants';
+import { UserInputData } from '@interface/constants';
 
 export const userInputValidation = (name: string, value: string) => {
   if (name === 'email') {

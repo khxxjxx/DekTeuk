@@ -23,7 +23,11 @@ import { useRouter } from 'next/router';
 import MenuItem from '@mui/material/MenuItem';
 import { UserInfo, Rounge } from '@interface/StoreInterface';
 import { HomeListUrlString } from '@interface/GetPostsInterface';
-import { userInputInitialState, jobSectors, UserInputData } from './constants';
+import {
+  userInputInitialState,
+  jobSectors,
+  UserInputData,
+} from '@interface/constants';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
