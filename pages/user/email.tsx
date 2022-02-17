@@ -434,9 +434,9 @@ export default function Signup() {
             </DialogTitle>
             <DialogContent>
               <DialogContentText id="alert-dialog-description">
-                <text>사업자등록번호: {ocrData.b_no}</text>
-                <text>대표자: {ocrData.p_nm}</text>
-                <text>개업년월일: {ocrData.start_dt}</text>
+                사업자등록번호: {ocrData.b_no}
+                대표자: {ocrData.p_nm}
+                개업년월일: {ocrData.start_dt}
               </DialogContentText>
             </DialogContent>
             <DialogActions>

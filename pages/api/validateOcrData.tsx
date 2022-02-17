@@ -6,8 +6,7 @@ export default async function handler(
 ) {
   //api.odcloud.kr/api/nts-businessman/v1/validate?serviceKey=[서비스키]&returnType=XML
 
-  const MY_VALIDATE_API_URL =
-    'http://api.odcloud.kr/api/nts-businessman/v1/validate?serviceKey=AUDK5ZvziJtI94SD0nxj3BsDqZ0dnwkGsKalTMUet8ED1mDkQ2qlc9iZirgz0pQ9pRvix9HPPeIsUCcThYzzpg==';
+  const MY_VALIDATE_API_URL = process.env.NEXT_PUBLIC_MY_VALIDATE_API_URL;
 
   const headers = {
     headers: {
@@ -15,7 +14,11 @@ export default async function handler(
     },
   };
   try {
-    const data = await axios.post(MY_VALIDATE_API_URL, req.body, headers);
+    const data = await axios.post(
+      MY_VALIDATE_API_URL as string,
+      req.body,
+      headers,
+    );
 
     return res.status(200).json({ message: data.data.data[0].status });
   } catch (e) {
