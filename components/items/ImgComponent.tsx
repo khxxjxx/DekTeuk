@@ -28,7 +28,6 @@ const ImgCount = styled.div`
 `;
 
 const ImgComponent: React.FC<ImgProps> = ({ urls }: { urls: any }) => {
-  console.log(urls);
   return (
     <ImgWrapper>
       {urls.length > 1 && (
