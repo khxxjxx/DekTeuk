@@ -29,7 +29,16 @@ const MyPost: NextPage = () => {
   if (!data[0]?.title) {
     return (
       <Layout>
-        <LoadingDiv />
+        <Container>
+          <MyPageChangeCom>
+            <header style={{ marginBottom: '2rem' }}>
+              <Link href={'/mypage'} passHref>
+                <ArrowBackIosNewIcon />
+              </Link>
+              <h1>내가 작성한 게시물</h1>
+            </header>
+          </MyPageChangeCom>
+        </Container>
       </Layout>
     );
   }

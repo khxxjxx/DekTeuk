@@ -36,12 +36,12 @@ const MyPageProfile: React.FC<MyPageProfileProps> = ({ email, nickname }) => {
             <ArrowForwardIosIcon color="disabled" />
           </MyPageProfileLi>
         </Link>
-        <Link href={'/mypage/password'} passHref>
+        {/* <Link href={'/mypage/password'} passHref>
           <MyPageProfileLi>
             <span>비밀번호 변경하기</span>
             <ArrowForwardIosIcon color="disabled" />
           </MyPageProfileLi>
-        </Link>
+        </Link> */}
 
         <Link href={'/mypage/mypost'} passHref>
           <MyPageProfileLi>
