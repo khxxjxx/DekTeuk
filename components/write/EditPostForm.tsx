@@ -193,6 +193,7 @@ const PostForm = (props: any) => {
         );
       }
       if (postInfo.rounge) {
+        delete post.createdAt;
         const postUpdated = {
           ...post,
           updatedAt: serverTimestamp(),

@@ -15,6 +15,7 @@ import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import { useDispatch } from 'react-redux';
 import { setDataAction } from '@store/reducer';
+import { deleteOnePostAction } from '@store/reducer';
 const style = {
   position: 'absolute' as 'absolute',
   top: '50%',
@@ -94,7 +95,7 @@ export default function DeleteLink(props: any) {
             }),
           );
           Router.back();
-          dispatch(resetViewAction());
+          dispatch(deleteOnePostAction({ postId: props.thisPost }));
         }}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
