@@ -18,15 +18,12 @@ import {
   query,
   where,
 } from 'firebase/firestore';
-import { getStorage, ref, uploadString } from 'firebase/storage';
+
 import { useRouter } from 'next/router';
 import MenuItem from '@mui/material/MenuItem';
-import {
-  userInputInitialState,
-  jobSectors,
-  UserInputData,
-  InputHelperText,
-} from './constants';
+import { UserInfo, Rounge } from '@interface/StoreInterface';
+import { HomeListUrlString } from '@interface/GetPostsInterface';
+import { userInputInitialState, jobSectors, UserInputData } from './constants';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
@@ -35,6 +32,14 @@ import {
   inputErrorCheck,
 } from '@utils/userInputValidation';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+
+import { validateData, getOcrData } from '@utils/ocrDataValidation';
+import { uploadImg } from '@utils/signupForm';
 
 const reducer = (state: UserInputData, action: any) => {
   return {
@@ -43,21 +48,37 @@ const reducer = (state: UserInputData, action: any) => {
   };
 };
 
+type OcrData = {
+  b_no: string;
+  start_dt: string;
+  p_nm: string;
+};
+
 export default function Signup() {
   const router = useRouter();
   const dispatch = useDispatch();
-  const storage = getStorage();
+
   const [inputState, inputDispatch] = useReducer(
     reducer,
     userInputInitialState,
   );
-
   const [imageUrl, setImageUrl] = useState<string>('');
   const [imageExt, setImageExt] = useState<string>('');
   const [nicknameBtnChecked, setNicknameBtnChecked] = useState<boolean>(false);
   const [emailBtnChecked, setEmailBtnChecked] = useState<boolean>(false);
+  const [imageOcrChecked, setImageOcrChecked] = useState<boolean>(false);
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+  const [ocrData, setOcrData] = useState<OcrData>({
+    b_no: '',
+    start_dt: '',
+    p_nm: '',
+  });
   const { email, password, checkPassword, nickname, jobSector } = inputState;
-  console.log(inputState);
+
+  const handleClose = () => {
+    setDialogOpen(false);
+  };
+
   const createUserWithEmail = async () => {
     try {
       const { user: result } = await createUserWithEmailAndPassword(
@@ -90,7 +111,7 @@ export default function Signup() {
 
     if (success) {
       const uid = (await createUserWithEmail()) as string;
-      const userData = {
+      const userData: UserInfo = {
         nickname: nickname.value,
         jobSector: jobSector.value,
         validRounges: [
@@ -105,9 +126,8 @@ export default function Signup() {
           {
             title: jobSector.value,
             url: jobSectors.find((v) => v.title === jobSector.value)
-              ?.url as string,
-            // type error 잡아야 함
-          },
+              ?.url as HomeListUrlString,
+          } as Rounge,
         ],
         id: uid,
         hasNewNotification: false,
@@ -116,21 +136,11 @@ export default function Signup() {
         email: email.value,
       };
 
-      uploadImg(uid);
+      uploadImg(uid, imageExt, imageUrl);
       console.log('success');
       await setDoc(doc(db, 'user', uid), userData);
       await signOut(auth);
       router.push('/user/login');
-    }
-  };
-
-  const uploadImg = async (uid: string) => {
-    const imageName = `${uid}.${imageExt}`;
-    const imgRef = ref(storage, imageName);
-    try {
-      await uploadString(imgRef, imageUrl, 'data_url');
-    } catch (e: any) {
-      console.error(e);
     }
   };
 
@@ -182,8 +192,38 @@ export default function Signup() {
     });
   };
 
+  const getImageToString = async () => {
+    const result = await getOcrData(imageUrl, imageExt);
+    if (!result) {
+      alert('증명서에서 데이터를 가지고 오지 못했습니다!');
+      resetOcrData();
+    } else {
+      const { b_no, p_nm, start_dt } = result as OcrData;
+      const newOcrData = { b_no, p_nm, start_dt };
+      setOcrData(newOcrData);
+      setDialogOpen(true);
+    }
+  };
+
+  const validateOcrData = async () => {
+    const validateResult = await validateData(ocrData);
+    if (validateResult) {
+      alert('인증 성공!');
+      setImageOcrChecked(true);
+      handleClose();
+    } else {
+      alert('인증 실패! 증명서를 다시 확인 해 주세요!');
+      handleClose();
+    }
+  };
+
+  const resetOcrData = () => {
+    const resetOcrData = { b_no: '', p_nm: '', start_dt: '' };
+    setOcrData(resetOcrData);
+  };
+
   const onImageChange = (e: any) => {
-    console.log(e.target.name);
+    console.log(ocrData);
     const image = e.target.files[0] as File;
     const reader = new FileReader();
     reader.readAsDataURL(image);
@@ -195,8 +235,15 @@ export default function Signup() {
     };
     setImageExt(e.target.value.split('.')[1]);
     e.target.value = '';
+    setImageOcrChecked(false);
+    resetOcrData();
   };
-  const onClearImg = () => setImageUrl('');
+
+  const onClearImg = () => {
+    setImageUrl('');
+    setImageOcrChecked(false);
+    resetOcrData();
+  };
 
   const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -212,7 +259,7 @@ export default function Signup() {
   return (
     <>
       <Main>
-        <h1 style={{ color: '#8946A6' }}>회원가입</h1>
+        <Title>회원가입</Title>
         <form onSubmit={SignUpSubmitHandler}>
           <WrapContents>
             <WrapInput>
@@ -309,27 +356,37 @@ export default function Signup() {
                   type="file"
                   onChange={onImageChange}
                 />
-                <Button
-                  variant="contained"
-                  component="span"
-                  style={{ background: '#8946a6', marginLeft: 10 }}
-                >
+                <ButtonStyled variant="contained" component="span">
                   <CameraAltIcon style={{ marginRight: '5px' }} />
                   파일 선택
-                </Button>
+                </ButtonStyled>
               </label>
-              <Button
+              <ButtonStyled
                 variant="contained"
                 component="span"
                 onClick={onClearImg}
-                style={{ background: '#8946a6', marginLeft: 10 }}
               >
                 <DeleteForeverIcon style={{ marginRight: '5px' }} />
                 사진 지우기
-              </Button>
+              </ButtonStyled>
             </WrapImageUpload>
             {imageUrl && (
-              <img src={imageUrl} alt={imageUrl} width="150px" height="200px" />
+              <>
+                <img
+                  src={imageUrl}
+                  alt={imageUrl}
+                  width="150px"
+                  height="200px"
+                />
+                <OcrButton
+                  type="button"
+                  variant="contained"
+                  disabled={imageOcrChecked}
+                  onClick={getImageToString}
+                >
+                  인증하기
+                </OcrButton>
+              </>
             )}
             <WrapInput>
               <Label>직종</Label>
@@ -360,6 +417,31 @@ export default function Signup() {
             </SubmitButton>
           </WrapContents>
         </form>
+        <>
+          <Dialog
+            open={dialogOpen}
+            onClose={handleClose}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+          >
+            <DialogTitle id="alert-dialog-title">
+              {'아래의 정보로 인증하시겠습니까?'}
+            </DialogTitle>
+            <DialogContent>
+              <DialogContentText id="alert-dialog-description">
+                사업자등록번호: {ocrData.b_no}
+                대표자: {ocrData.p_nm}
+                개업년월일: {ocrData.start_dt}
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={validateOcrData} autoFocus>
+                인증하기
+              </Button>
+              <Button onClick={handleClose}>다시 올리기</Button>
+            </DialogActions>
+          </Dialog>
+        </>
       </Main>
     </>
   );
@@ -376,6 +458,14 @@ export const getServerSideProps: GetServerSideProps = async (
   return { props: {} };
 };
 
+const Title = styled.h1`
+  color: ${({ theme }: any) => theme.mainColorViolet};
+
+  @media (prefers-color-scheme: dark) {
+    color: ${({ theme }: any) => theme.mainColorBlue};
+  }
+`;
+
 const Main = styled.div`
   display: flex;
   align-items: center;
@@ -386,6 +476,36 @@ const WrapContents = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  & .MuiOutlinedInput-input {
+    color: black;
+  }
+  & .MuiOutlinedInput-root {
+    border: 1px solid ${({ theme }: any) => theme.lightGray};
+  }
+
+  & input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px #eaeaea inset;
+    border-radius: 0;
+    -webkit-text-fill-color: #000000 !important;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    & .MuiOutlinedInput-input {
+      color: white;
+    }
+    & .MuiOutlinedInput-root {
+      border: 1px solid ${({ theme }: any) => theme.darkGray};
+    }
+    & .MuiSvgIcon-root {
+      color: ${({ theme }: any) => theme.lightGray};
+    }
+    & input:-webkit-autofill {
+      -webkit-box-shadow: 0 0 0 1000px #111113 inset;
+      border-radius: 0;
+      -webkit-text-fill-color: #fff !important;
+      caret-color: white;
+    }
+  }
 `;
 
 const WrapInput = styled.div`
@@ -402,8 +522,17 @@ const WrapImageUpload = styled.div`
   width: 100%;
 `;
 
+const ButtonStyled = styled(Button)<{ component: string }>`
+  margin-left: 10px;
+  background: ${({ theme }: any) => theme.mainColorViolet};
+
+  @media (prefers-color-scheme: dark) {
+    background: ${({ theme }: any) => theme.mainColorBlue};
+  }
+`;
+
 const CheckButton = styled.button`
-  background: #8946a6;
+  background: ${({ theme }: any) => theme.mainColorViolet};
   border-radius: 5px;
   border: none;
   color: white;
@@ -418,10 +547,14 @@ const CheckButton = styled.button`
   :disabled {
     background: gray;
   }
+
+  @media (prefers-color-scheme: dark) {
+    background: ${({ theme }: any) => theme.mainColorBlue};
+  }
 `;
 
 const SubmitButton = styled.button`
-  background: #8946a6;
+  background: ${({ theme }: any) => theme.mainColorViolet};
   border-radius: 5px;
   border: none;
   color: white;
@@ -429,27 +562,58 @@ const SubmitButton = styled.button`
   height: 58px;
   font-size: 20px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   :hover {
     opacity: 0.8;
   }
   :disabled {
     background: gray;
   }
+
+  @media (prefers-color-scheme: dark) {
+    background: ${({ theme }: any) => theme.mainColorBlue};
+  }
 `;
 
 const Label = styled.label`
-  color: #8946a6;
+  color: ${({ theme }: any) => theme.mainColorViolet};
   margin: 5px;
   ::after {
     content: '*';
     color: red;
   }
+
+  @media (prefers-color-scheme: dark) {
+    color: ${({ theme }: any) => theme.mainColorBlue};
+  }
 `;
+
 const Input = styled('input')({
   display: 'none',
 });
 
 const TextFields = styled(TextField)`
-  color: #8946a6;
+  color: ${({ theme }: any) => theme.mainColorViolet};
   margin: 5px;
+
+  @media (prefers-color-scheme: dark) {
+    color: ${({ theme }: any) => theme.mainColorBlue};
+  }
+`;
+
+const OcrButton = styled(Button)`
+  background: ${({ theme }: any) => theme.mainColorViolet};
+  margin-top: 15px;
+  :disabled {
+    background: 'gray';
+  }
+  :hover {
+    opacity: 0.8;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    background: ${({ theme }: any) => theme.mainColorBlue};
+  }
 `;

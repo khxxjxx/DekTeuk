@@ -15,8 +15,8 @@ const ChangePage: NextPage = ({
     case 'nickname':
       return <MyPageNickName userId={userId} />;
 
-    case 'password':
-      return <MyPagePassword />;
+    // case 'password':
+    //   return <MyPagePassword />;
 
     default:
       return <></>;

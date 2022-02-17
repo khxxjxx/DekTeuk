@@ -28,6 +28,7 @@ const AlertDiv = styled(Alert)`
   left: 50%;
   opacity: 0;
   bottom: 20px;
+  z-index: 9999;
   animation: ${AlertOpen} 2s ease;
 `;
 const AlertComponent = ({

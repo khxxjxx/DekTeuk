@@ -1,5 +1,6 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { RootReducer } from '@store/reducer';
+import { notificationCheck } from '@utils/notificationUpdate';
 import { useRouter } from 'next/router';
 import { useState, useEffect, useLayoutEffect } from 'react';
 import { setDataAction } from '@store/reducer';
@@ -117,6 +118,10 @@ export default function useNotification() {
 
   useLayoutEffect(() => {
     if (!user.id) router.push('/user/login');
+  }, []);
+
+  useEffect(() => {
+    notificationCheck(user.id);
   }, []);
 
   return { data, key, stopFetch, getMoreNotifications };
