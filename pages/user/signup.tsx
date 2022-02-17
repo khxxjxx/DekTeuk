@@ -11,7 +11,7 @@ import GoogleIcon from '@mui/icons-material/Google';
 import EmailIcon from '@mui/icons-material/Email';
 import LoginIcon from '@mui/icons-material/Login';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
-
+import Button from '@mui/material/Button';
 export default function SignUpIndex() {
   const router = useRouter();
   const provider = new GoogleAuthProvider();
@@ -40,7 +40,7 @@ export default function SignUpIndex() {
   return (
     <>
       <Main>
-        <h1 style={{ color: '#8946A6' }}>회원가입</h1>
+        <Title>회원가입</Title>
         <WrapContents>
           <WrapInput>
             <WrapButton>
@@ -86,11 +86,18 @@ export const getServerSideProps: GetServerSideProps = async (
   return { props: {} };
 };
 
+const Title = styled.h1`
+  color: ${({ theme }: any) => theme.mainColorViolet};
+
+  @media (prefers-color-scheme: dark) {
+    color: ${({ theme }: any) => theme.mainColorBlue};
+  }
+`;
+
 const Main = styled.div`
   display: flex;
   align-items: center;
   flex-direction: column;
-  padding-bottom: 30px;
 `;
 
 const WrapContents = styled.div`
@@ -127,36 +134,22 @@ const WrapInput = styled.div`
   width: 100%;
 `;
 
-const Button = styled.button`
-  display: flex;
-  align-items: center;
-  flex-direction: row;
-  justify-content: center;
-  background: #8946a6;
-  border-radius: 5px;
-  border: none;
-  color: white;
-  width: 200px;
-  height: 50px;
-  font-size: 12px;
-  cursor: pointer;
-  :hover {
-    opacity: 0.8;
-  }
-`;
-
 const WrapButton = styled.div`
   margin: 10px;
   width: 313px;
 `;
 
 const Label = styled.label`
-  color: #8946a6;
+  color: ${({ theme }: any) => theme.mainColorViolet};
   margin: 5px;
+
+  @media (prefers-color-scheme: dark) {
+    color: ${({ theme }: any) => theme.mainColorBlue};
+  }
 `;
 
 const SignupButton = styled(Button)`
-  background: #8946a6;
+  background: ${({ theme }: any) => theme.mainColorViolet};
   border-radius: 5px;
   border: none;
   color: white;
@@ -166,5 +159,12 @@ const SignupButton = styled(Button)`
   cursor: pointer;
   :hover {
     opacity: 0.8;
+    background: ${({ theme }: any) => theme.mainColorViolet};
+  }
+  & > svg {
+    margin-right: 10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    background: ${({ theme }: any) => theme.mainColorBlue};
   }
 `;
