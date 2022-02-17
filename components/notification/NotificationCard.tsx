@@ -22,8 +22,7 @@ const NotificationCardWrapper = styled.div`
   align-items: center;
   justify-content: space-between;
   padding: 8px 15px;
-  background-color: ${({ theme }: any) =>
-    theme.customTheme.defaultMode.cardWrapperBackgroundColor};
+  background-color: white;
 `;
 const NotificationMainContent = styled.div``;
 

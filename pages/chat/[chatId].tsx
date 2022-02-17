@@ -18,7 +18,6 @@ import {
 import {
   NewMessage,
   ChatHeader,
-  ChatList,
   ChatBox,
   ChatText,
   ChatImg,
@@ -27,6 +26,9 @@ import {
   InputBox,
   SendIconStyled,
   PageDownBtn,
+  DateWrapper,
+  Line,
+  Date,
   KeyboardArrowDownIcon,
   ArrowBackIosNewIcon,
   DensityMediumIcon,
@@ -34,11 +36,13 @@ import {
 } from '../../styles/chatStyle';
 import { useRouter } from 'next/router';
 import { Timestamp } from 'firebase/firestore';
+import { getDate } from '../../utils/function';
 import { encodeFile } from '../../utils/upload';
 import wrapper from '@store/configureStore';
 import debounce from 'lodash/debounce';
 import ImgPreviewModal from '@components/ImgPreviewModal';
 import ChatSetting from '@components/ChatSetting';
+import { ParsedUrlQuery } from 'querystring';
 
 const ChatRoom = ({ user }: { user: Person }) => {
   const [messages, setMessages] = useState<ChatText[]>([]);
@@ -53,7 +57,7 @@ const ChatRoom = ({ user }: { user: Person }) => {
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputValue = useRef<HTMLInputElement>(null);
   const router = useRouter();
-  const { chatId, other, id } = router.query;
+  const [query, setQuery] = useState<ParsedUrlQuery>(router.query);
 
   const onFileReset = () => {
     setImgData(null);
@@ -64,7 +68,7 @@ const ChatRoom = ({ user }: { user: Person }) => {
   };
 
   const onExitChat = () => {
-    exitChat(chatId, user.id);
+    exitChat(query.chatId, user.id);
     router.replace(`/chat`);
   };
 
@@ -86,11 +90,11 @@ const ChatRoom = ({ user }: { user: Person }) => {
   const onSendMessage = async (img?: ImgType) => {
     if (img) {
       await sendMessage(
-        chatId,
+        query.chatId,
         img.src as string,
         'img',
         user.id,
-        id,
+        query.id,
         img.file,
       );
     } else {
@@ -98,9 +102,17 @@ const ChatRoom = ({ user }: { user: Person }) => {
       inputValue.current!.value = '';
       if (messages.length === 0) {
         // 채팅방 개설하고 첫 메세지일 경우
-        await sendMessage(chatId, value, 'msg', user.id, id, undefined, id);
+        await sendMessage(
+          query.chatId,
+          value,
+          'msg',
+          user.id,
+          query.id,
+          undefined,
+          query.id,
+        );
       } else {
-        await sendMessage(chatId, value, 'msg', user.id, id);
+        await sendMessage(query.chatId, value, 'msg', user.id, query.id);
       }
     }
   };
@@ -111,18 +123,20 @@ const ChatRoom = ({ user }: { user: Person }) => {
   );
 
   const getInitData = useCallback(async () => {
-    const { initMessage, _startKey, _endKey } = await getChatMessages(chatId);
+    const { initMessage, _startKey, _endKey } = await getChatMessages(
+      query.chatId,
+    );
     setMessages(initMessage);
     setLastMessage(initMessage[0]);
     setStartKey(_startKey);
 
-    return chatMessages(chatId, setMessages, _endKey);
-  }, [chatId]);
+    return chatMessages(query.chatId, setMessages, _endKey);
+  }, [query.chatId]);
 
   const getMessages = useCallback(
     async (prevScrollHeight) => {
       const { moreMessage, _startKey } = await moreChatMessages(
-        chatId,
+        query.chatId,
         startKey,
       );
       setMessages((current) => [...current, ...moreMessage]);
@@ -130,7 +144,7 @@ const ChatRoom = ({ user }: { user: Person }) => {
       setStartKey(_startKey);
       scrollKeep(prevScrollHeight);
     },
-    [chatId, startKey],
+    [query.chatId, startKey],
   );
 
   const onScroll = debounce(() => {
@@ -157,13 +171,21 @@ const ChatRoom = ({ user }: { user: Person }) => {
     getInitData();
     window.addEventListener('scroll', onScroll);
 
+    if (!router.query.other) {
+      const otherData = window.localStorage.getItem('otherData');
+      setQuery(JSON.parse(otherData as string));
+    } else {
+      window.localStorage.setItem('otherData', JSON.stringify(query));
+    }
+
     return () => {
       window.removeEventListener('scroll', onScroll);
+      window.localStorage.removeItem('otherData');
       getInitData();
       setStartKey(null);
-      leaveChat(chatId, user.id);
+      leaveChat(query.chatId, user.id);
     };
-  }, [getInitData, chatId, user]);
+  }, [getInitData, query.chatId, user]);
 
   useEffect(() => {
     const newMsg = messages[0];
@@ -211,33 +233,50 @@ const ChatRoom = ({ user }: { user: Person }) => {
           onClick={() => router.replace(`/chat`)}
           style={{ cursor: 'pointer' }}
         />
-        <div>{other}</div>
+        <div>{query.other}</div>
         <DensityMediumIcon onClick={onToggle} />
       </ChatHeader>
-      <ChatList ref={listRef}>
+      <div ref={listRef}>
         <ChatBox>
-          {reversedMessages.map(({ id, from, msg, img }) => (
-            <ChatText className={from === user.id ? 'mine' : ''} key={id}>
-              {msg ? (
-                msg
-              ) : (
-                <ChatImg
-                  src={img as string}
-                  alt="preview-img"
-                  onClick={() =>
-                    setImgData({
-                      type: id as string,
-                      file: [],
-                      src: [img as string],
-                    })
-                  }
-                />
+          {reversedMessages.map(({ id, from, msg, img, createAt }, idx) => (
+            <div key={id}>
+              {(idx === 0 ||
+                getDate(createAt).isAnotherDay(
+                  reversedMessages[idx - 1].createAt,
+                )) && (
+                <DateWrapper>
+                  <Line />
+                  <Date>
+                    {`${
+                      getDate(createAt).isAnotherYear()
+                        ? `${getDate(createAt).year}년 `
+                        : ``
+                    }${getDate(createAt).month}월 ${getDate(createAt).date}일`}
+                  </Date>
+                </DateWrapper>
               )}
-            </ChatText>
+              <ChatText className={from === user.id ? 'mine' : ''}>
+                {msg ? (
+                  msg
+                ) : (
+                  <ChatImg
+                    src={img as string}
+                    alt="preview-img"
+                    onClick={() =>
+                      setImgData({
+                        type: id as string,
+                        file: [],
+                        src: [img as string],
+                      })
+                    }
+                  />
+                )}
+              </ChatText>
+            </div>
           ))}
           <div ref={bottomRef} />
         </ChatBox>
-      </ChatList>
+      </div>
       <ChatInputWrapper className="input">
         {!isBottom && !newMessage && (
           <PageDownBtn onClick={onPageDown}>
@@ -288,26 +327,27 @@ const ChatRoom = ({ user }: { user: Person }) => {
 export default ChatRoom;
 
 export const getServerSideProps = wrapper.getServerSideProps(
-  (store) => async () => {
-    const data = store.getState();
+  (store) =>
+    async ({ params }) => {
+      const data = store.getState();
 
-    if (data.user.user.nickname == '') {
+      if (data.user.user.nickname == '') {
+        return {
+          redirect: {
+            destination: '/404',
+            permanent: false,
+          },
+        };
+      }
+
       return {
-        redirect: {
-          destination: '/404',
-          permanent: false,
+        props: {
+          user: {
+            nickname: data.user.user.nickname,
+            jobSector: data.user.user.jobSector,
+            id: data.user.user.id,
+          },
         },
       };
-    }
-
-    return {
-      props: {
-        user: {
-          nickname: data.user.user.nickname,
-          jobSector: data.user.user.jobSector,
-          id: data.user.user.id,
-        },
-      },
-    };
-  },
+    },
 );

@@ -67,6 +67,17 @@ export const userSlice = createSlice({
   },
 });
 
+const getPostAndIndex = (viewState: Array<SearchResult>, postId: string) => {
+  for (let i = 0; i < viewState.length; i++) {
+    for (let j = 0; j < viewState[i].result.length; j++) {
+      if (viewState[i].result[j].postId === postId) {
+        return { viewPage: viewState[i].result, index: j };
+      }
+    }
+  }
+  return { viewPage: null, index: -1 };
+};
+
 const view = createSlice({
   name: 'view',
   initialState: { view: <any>[], searchValue: '' },
@@ -90,48 +101,52 @@ const view = createSlice({
       state,
       action: { payload: { postId: string; userId: string } },
     ) {
-      outer: for (let i = 0; i < state.view.length; i++) {
-        for (let j = 0; j < state.view[i].result.length; j++) {
-          if (state.view[i].result[j].postId === action.payload.postId) {
-            state.view[i].result[j].pressPerson.push(action.payload.userId);
-            state.view[i].result[j].likeCount++;
-            break outer;
-          }
-        }
+      const { viewPage, index } = getPostAndIndex(
+        state.view,
+        action.payload.postId,
+      );
+      if (viewPage) {
+        viewPage[index].pressPerson.push(action.payload.userId);
+        viewPage[index].likeCount++;
       }
     },
     unLikeViewPost(
       state,
       action: { payload: { postId: string; userId: string } },
     ) {
-      outer: for (let i = 0; i < state.view.length; i++) {
-        // 이중반복분 탈출을 위한 플래그
-        for (let j = 0; j < state.view[i].result.length; j++) {
-          if (state.view[i].result[j].postId === action.payload.postId) {
-            state.view[i].result[j].pressPerson = state.view[i].result[
-              j
-            ].pressPerson.filter((id: string) => id !== action.payload.userId);
-            state.view[i].result[j].likeCount--;
-            break outer;
-          }
-        }
+      const { viewPage, index } = getPostAndIndex(
+        state.view,
+        action.payload.postId,
+      );
+      if (viewPage) {
+        viewPage[index].pressPerson = viewPage[index].pressPerson.filter(
+          (id: string) => id !== action.payload.userId,
+        );
+        viewPage[index].likeCount--;
       }
     },
     updateOnePost(
       state,
       action: { payload: { postId: string; postData: TopicPost | RoungePost } },
     ) {
-      outer: for (let i = 0; i < state.view.length; i++) {
-        // 이중반복분 탈출을 위한 플래그
-        for (let j = 0; j < state.view[i].result.length; j++) {
-          if (state.view[i].result[j].postId === action.payload.postId) {
-            state.view[i].result[j] = {
-              ...state.view[i].result[j],
-              ...action.payload.postData,
-            };
-            break outer;
-          }
-        }
+      const { viewPage, index } = getPostAndIndex(
+        state.view,
+        action.payload.postId,
+      );
+      if (viewPage) {
+        viewPage[index] = {
+          ...viewPage[index],
+          ...action.payload.postData,
+        };
+      }
+    },
+    deleteOnePost(state, action: { payload: { postId: string } }) {
+      const { viewPage, index } = getPostAndIndex(
+        state.view,
+        action.payload.postId,
+      );
+      if (viewPage) {
+        viewPage.splice(index, 1);
       }
     },
   },
@@ -174,6 +189,7 @@ export const setMyInfoAction = userSlice.actions.setMyInfo;
 export const likeViewPostAction = view.actions.likeViewPost;
 export const unLikeViewPostAction = view.actions.unLikeViewPost;
 export const updateOnePostAction = view.actions.updateOnePost;
+export const deleteOnePostAction = view.actions.deleteOnePost;
 const rootReducer = (
   state: {
     user: UserState;
@@ -200,8 +216,7 @@ const rootReducer = (
           status: 'standby',
           error: '',
         };
-        console.log(action.payload.tempData, '페이로드');
-        console.log(state.tempData, '스테이트');
+
         if (action.payload.user.user.nickname) userState = action.payload.user;
         else userState = state.user;
         if (state.view.view.length === 0) {

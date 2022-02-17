@@ -1,4 +1,3 @@
-import { useRouter } from 'next/router';
 import Link from 'next/link';
 import styled from '@emotion/styled';
 import { MyPageProfileComponent } from './MyPageProfileComponent';
@@ -17,6 +16,7 @@ const MyPageProfileLi = styled.div`
   font-weight: 500;
   display: flex;
   justify-content: space-between;
+  cursor: pointer;
 `;
 
 const MyPageProfile: React.FC<MyPageProfileProps> = ({ email, nickname }) => {
@@ -43,7 +43,7 @@ const MyPageProfile: React.FC<MyPageProfileProps> = ({ email, nickname }) => {
           </MyPageProfileLi>
         </Link>
 
-        <Link href={'/mypage/posts'} passHref>
+        <Link href={'/mypage/mypost'} passHref>
           <MyPageProfileLi>
             <span>내가 작성한 게시물 보기</span>
             <ArrowForwardIosIcon color="disabled" />

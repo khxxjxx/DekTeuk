@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 import { addOriginComment, addNestedComment } from '@utils/commentUtils';
 import CommentInputComponent from '@components/items/CommentInputComponent';
@@ -54,7 +54,7 @@ const CommentEditor: React.FC<CommentEditorProps> = ({
   const userInfo = useSelector((state: RootReducer) => state.user.user);
 
   const router = useRouter();
-
+  let timer: any;
   const getAlertInfo = (result: string) => {
     setAlert(true);
     if (result === 'success')
@@ -68,7 +68,7 @@ const CommentEditor: React.FC<CommentEditorProps> = ({
         alerType: 'error',
       });
     }
-    setTimeout(() => {
+    timer = setTimeout(() => {
       setAlert(false);
       setAlertInfo({
         alerMessage: '',
@@ -116,6 +116,12 @@ const CommentEditor: React.FC<CommentEditorProps> = ({
     }
     setComment('');
   };
+
+  useEffect(() => {
+    return () => {
+      clearTimeout(timer);
+    };
+  }, []);
 
   return (
     <CommentEditorSection>

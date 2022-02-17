@@ -4,6 +4,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
+import { resetViewAction } from '@store/reducer';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import { useState } from 'react';
@@ -12,6 +13,8 @@ import { db } from '@firebase/firebase';
 import Router from 'next/router';
 import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
+import { useDispatch } from 'react-redux';
+import { deleteOnePostAction } from '@store/reducer';
 const style = {
   position: 'absolute' as 'absolute',
   top: '50%',
@@ -25,6 +28,7 @@ const style = {
 };
 
 export default function DeleteLink(props: any) {
+  const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [delError, setDelError] = useState('');
@@ -83,7 +87,8 @@ export default function DeleteLink(props: any) {
       <Modal
         open={modalOpen}
         onClose={() => {
-          Router.push('/');
+          Router.back();
+          dispatch(deleteOnePostAction({ postId: props.thisPost }));
         }}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"

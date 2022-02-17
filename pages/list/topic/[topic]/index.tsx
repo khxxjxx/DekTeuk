@@ -1,19 +1,25 @@
 import { useRouter } from 'next/router';
 import { useEffect, useLayoutEffect, useState } from 'react';
-import wrapper from '@store/configureStore';
 import Layout from '@layouts/Layout';
-import { getTopics } from '@utils/function';
 import { TestTopicCard } from '@components/Card';
 import { TopicPost } from '@interface/CardInterface';
 import { useInView } from 'react-intersection-observer';
 import { useSelector, useDispatch } from 'react-redux';
 import { setDataAction } from '@store/reducer';
 import { RootReducer } from '@store/reducer';
-import type {
-  NextPage,
-  GetServerSideProps,
-  InferGetServerSidePropsType,
-} from 'next';
+import styled from '@emotion/styled';
+// import { LoadingDiv } from '@components/items/LoadingDiv';
+
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  limit,
+  orderBy,
+  startAfter,
+} from 'firebase/firestore';
+import { db } from '@firebase/firebase';
 
 export default function TopicPage() {
   const router = useRouter();
@@ -21,7 +27,6 @@ export default function TopicPage() {
   const topicType = router.query.topic as string;
 
   const { ref, inView } = useInView();
-  const [test, setTest] = useState(false);
 
   const [stopFetch, setStopFetch] = useState<boolean>(false); // 파이어베이스 연동시 사용
 
@@ -32,63 +37,146 @@ export default function TopicPage() {
   const { data, key } = useSelector(
     (state: RootReducer) => state.tempData.tempData,
   );
-  useLayoutEffect(() => {
-    if (data.length === 0 || router.asPath.split('/')[3] !== key) {
-      console.log('첫 번째 디스패치', '이거 언제 실행됨?');
-      dispatch(
-        setDataAction({
-          data: getTopics(topicType, 'test'),
-          key: router.asPath.split('/')[3],
-        }),
-      );
+
+  const getTopicPost = async () => {
+    const q = query(
+      collection(db, 'post'),
+      where('topic.url', '==', `${router.asPath.split('/')[3]}`),
+      orderBy('createdAt', 'desc'),
+      limit(20),
+    );
+    const snapshots = await getDocs(q);
+    const topics: Array<TopicPost> = [];
+    snapshots.forEach((doc) => {
+      const topicData = doc.data();
+      const returnData: TopicPost = {
+        author: { nickname: topicData.nickname, jobSector: topicData.job },
+        content: topicData.content,
+        commentsCount: topicData.commentsCount || 0,
+        createdAt: topicData.createdAt.seconds
+          .toString()
+          .padEnd(13, 0)
+          .toString(),
+        images: topicData.images,
+        likeCount: topicData.pressPerson.length,
+        postId: topicData.postId,
+        postType: topicData.postType,
+        title: topicData.title,
+        topic: topicData.topic,
+        pressPerson: topicData.pressPerson,
+      };
+      topics.push(returnData);
+    });
+    setEnd(snapshots.docs[snapshots.docs.length - 1]);
+    dispatch(
+      setDataAction({
+        data: topics,
+        key: router.asPath.split('/')[3],
+      }),
+    );
+    if (topics.length < 20) {
+      setStopFetch(true);
     }
-    setTest(true);
+  };
+
+  const getMoreNotification = async (lastNum: number) => {
+    const postRef = collection(db, 'post');
+    let lastSnap;
+    if (end === 0) {
+      const after = query(
+        postRef,
+        where('topic.url', '==', `${router.asPath.split('/')[3]}`),
+        orderBy('createdAt', 'desc'),
+        limit(lastNum),
+      );
+      const current = await getDocs(after);
+      lastSnap = current.docs[current.docs.length - 1];
+    } else {
+      lastSnap = end;
+    }
+    const q = query(
+      postRef,
+      where('topic.url', '==', `${router.asPath.split('/')[3]}`),
+      orderBy('createdAt', 'desc'),
+      limit(20),
+      startAfter(lastSnap),
+    );
+    const snapshots = await getDocs(q);
+    const topics: Array<TopicPost> = [];
+    snapshots.forEach((doc) => {
+      const topicData = doc.data();
+      const returnData: TopicPost = {
+        author: { nickname: topicData.nickname, jobSector: topicData.job },
+        content: topicData.content,
+        commentsCount: topicData.commentsCount || 0,
+        createdAt: topicData.createdAt.seconds
+          .toString()
+          .padEnd(13, 0)
+          .toString(),
+        images: topicData.images,
+        likeCount: topicData.pressPerson.length,
+        postId: topicData.postId,
+        postType: topicData.postType,
+        title: topicData.title,
+        topic: topicData.topic,
+        pressPerson: topicData.pressPerson,
+      };
+      topics.push(returnData);
+    });
+
+    if (topics.length < 20) {
+      setStopFetch(true);
+    }
+    setEnd(snapshots.docs[snapshots.docs.length - 1]);
+    dispatch(
+      setDataAction({
+        data: [...data, ...topics],
+        key: `${router.asPath.split('/')[3]}`,
+      }),
+    );
+  };
+  useEffect(() => {
+    if (data.length === 0 || router.asPath.split('/')[3] !== key) {
+      getTopicPost();
+    }
   }, []);
 
   useEffect(() => {
-    if (inView === true && stopFetch === false && data.length >= 10) {
-      const newtPosts = getTopics(topicType, 'test');
-      dispatch(
-        setDataAction({
-          data: [...data, ...newtPosts],
-          key: router.asPath.split('/')[3],
-        }),
-      );
+    if (
+      inView === true &&
+      stopFetch === false &&
+      data.length >= 20 &&
+      key == router.asPath.split('/')[3]
+    ) {
+      getMoreNotification(data.length);
     }
   }, [inView]);
-  console.log('@@@', data, '@@@@');
+
+  if (!data[0]?.title) {
+    return (
+      <Layout>
+        <LoadingDiv />
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
-      {test &&
-        data.length !== 0 &&
-        data.map((post: any, idx: number) => {
-          return idx == data.length - 2 ? (
-            <TestTopicCard topicCardData={post} key={idx} />
-          ) : (
-            <TestTopicCard topicCardData={post} key={idx} />
-          );
-        })}
+      {data.length !== 0 &&
+        data.map((post: any, idx: number) => (
+          <TestTopicCard topicCardData={post} key={idx} />
+        ))}
       <div ref={ref} style={{ height: '50px' }}></div>
     </Layout>
   );
 }
 
-export const getServerSideProps: GetServerSideProps =
-  wrapper.getServerSideProps((store) => async (ctx) => {
-    const type = ctx.query.topic;
-    const data = store.getState();
-    console.log('@@@@@@@@@@', data.tempData, 'asdasd');
-
-    // if (data.tempData.key !== type) {
-    //   store.dispatch(
-    //     setDataAction({
-    //       data: [],
-    //       key: type,
-    //     }),
-    //   );
-    // }
-
-    return {
-      props: {},
-    };
-  });
+const LoadingDiv = styled.div`
+  position: fixed;
+  bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  backgroundcolor: black;
+  opacity: 0.3;
+`;

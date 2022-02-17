@@ -29,12 +29,22 @@ const Search = () => {
   const { view, searchValue }: ViewPosts = useSelector(
     (state: StoreState) => state.view,
   );
+  const { user: myInfo }: UserState = useSelector(
+    (state: StoreState) => state.user,
+  );
+
   const { ref, inView } = useInView();
   useEffect(() => {
     if (view.length === 0 && searchValue) {
       (async () => {
         dispatch(
-          initialViewAction(await searchInfiniteFunction(searchValue, 0)),
+          initialViewAction(
+            await searchInfiniteFunction(
+              searchValue,
+              0,
+              myInfo.validRounges.map((v) => v.url),
+            ),
+          ),
         );
       })();
     }
@@ -42,13 +52,12 @@ const Search = () => {
   useEffect(() => {
     if (inView) {
       (async () => {
-        console.log(searchValue);
-        console.log(view);
         dispatch(
           setViewAction(
             await searchInfiniteFunction(
               searchValue,
               view[view.length - 1].nextPage,
+              myInfo.validRounges.map((v) => v.url),
             ),
           ),
         );
@@ -60,17 +69,40 @@ const Search = () => {
     return (
       <SearchResultsWrapperDiv>
         {(renderData as Array<TopicPost | RoungePost>)?.map((post, i) => {
-          if (i >= (renderData as Array<TopicPost | RoungePost>).length - 10) {
+          let isLiked = false;
+          if (myInfo?.id) {
+            // @ts-ignore
+            if (post.pressPerson.indexOf(myInfo.id) !== -1) isLiked = true;
+          }
+          if (i === (renderData as Array<TopicPost | RoungePost>).length - 20) {
             return post.postType === 'topic' ? (
-              <TopicCard topicCardData={post} key={post.postId} ref={ref} />
+              <TopicCard
+                topicCardData={post}
+                key={post.postId}
+                ref={ref}
+                isLiked={isLiked}
+              />
             ) : (
-              <RoungeCard roungeCardData={post} key={post.postId} ref={ref} />
+              <RoungeCard
+                roungeCardData={post}
+                key={post.postId}
+                ref={ref}
+                isLiked={isLiked}
+              />
             );
           }
           return post.postType === 'topic' ? (
-            <TopicCard topicCardData={post} key={post.postId} />
+            <TopicCard
+              topicCardData={post}
+              key={post.postId}
+              isLiked={isLiked}
+            />
           ) : (
-            <RoungeCard roungeCardData={post} key={post.postId} />
+            <RoungeCard
+              roungeCardData={post}
+              key={post.postId}
+              isLiked={isLiked}
+            />
           );
         })}
       </SearchResultsWrapperDiv>
