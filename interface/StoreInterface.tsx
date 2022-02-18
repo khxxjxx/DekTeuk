@@ -53,9 +53,30 @@ export interface StoreState {
   user: UserState;
   view: ViewPosts;
   scroll: { scrollY: number };
-  // data: any;
+  headerIndex: { index: number };
+  viewSwiper: Array<ViewSwiperData>;
 }
 export interface SearchResult {
   result: Array<TopicPost | RoungePost>;
   nextPage: number;
 }
+export interface ViewSwiperData {
+  key: string;
+  data: Array<SearchResult>;
+}
+// [
+//   {
+//     key: 'timeline',
+//     data: [
+//       { result: [{}, {}, {}, {}, {}], nextPage: 1 },
+//       { result: [{}, {}, {}, {}, {}], nextPage: 2 },
+//     ],
+//   },
+//   {
+//     key: 'topic',
+//     data: [
+//       { result: [{}, {}, {}, {}, {}], nextPage: 1 },
+//       { result: [{}, {}, {}, {}, {}], nextPage: 2 },
+//     ],
+//   },
+// ];

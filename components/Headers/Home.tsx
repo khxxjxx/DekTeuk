@@ -5,10 +5,10 @@ import 'swiper/css/pagination';
 import 'swiper/css';
 import { Pagination } from 'swiper';
 import { useRouter } from 'next/router';
-import { useSelector } from 'react-redux';
-import { UserState, ValidRounge, UserInfo } from '@interface/StoreInterface';
-import { RootReducer } from '../../store/reducer';
-const SwiperStyled = styled(Swiper)`
+import { useDispatch, useSelector } from 'react-redux';
+import { UserState, ValidRounge, StoreState } from '@interface/StoreInterface';
+import { setHeaderIndex } from '@store/reducer';
+export const SwiperStyled = styled(Swiper)`
   background-color: ${({ theme }: any) => theme.mainColorViolet};
   height: 60px;
   width: 100%;
@@ -56,7 +56,13 @@ const SwiperStyled = styled(Swiper)`
 `;
 
 const HeaderHome: React.FC = () => {
-  const { user: myInfo } = useSelector((state: RootReducer) => state.user);
+  const { user: myInfo }: UserState = useSelector(
+    (state: StoreState) => state.user,
+  );
+  const { index } = useSelector((state: StoreState) => state.headerIndex);
+  const dispatch = useDispatch();
+  console.log(index);
+  console.log(myInfo?.validRounges.map((v) => v.url));
   const router = useRouter();
   const headerLinks: { url: string; title: string }[] = [];
   if (myInfo?.validRounges)
@@ -84,7 +90,9 @@ const HeaderHome: React.FC = () => {
       initialSlide={initialSlide}
       onSlideChange={(e: TypesSwiper) => {
         e.slideTo(e.activeIndex);
-        router.push(headerLinks[e.activeIndex].url);
+        dispatch(setHeaderIndex(e.activeIndex));
+        console.log(index);
+        // router.push(headerLinks[e.activeIndex].url);
       }}
       slideToClickedSlide
       modules={[Pagination]}

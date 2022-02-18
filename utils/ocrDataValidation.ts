@@ -48,7 +48,7 @@ export const getOcrData = async (imageUrl: string, imageExt: string) => {
       timestamp: timestamp,
       version: 'V1',
     };
-    const response = await axios.post('http://localhost:3000/api/ocr', data);
+    const response = await axios.post('/api/ocr', data);
     console.log(response.data.message);
     getOcrResult = resultTxt(response.data.message);
   } catch (e) {
@@ -131,10 +131,7 @@ export const validateData = async (ocrData: OcrData) => {
   // };
 
   try {
-    const data = await axios.post(
-      'http://localhost:3000/api/validateOcrData',
-      validateData,
-    );
+    const data = await axios.post('/api/validateOcrData', validateData);
     console.log(data.data.message);
     if (data.data.message) {
       return true;

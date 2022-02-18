@@ -2,12 +2,18 @@ import { HYDRATE } from 'next-redux-wrapper';
 import { AnyAction, combineReducers } from '@reduxjs/toolkit';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { getMyInfo } from '@utils/function';
-import { SearchResult, UserState, ViewPosts } from '@interface/StoreInterface';
+import {
+  SearchResult,
+  UserState,
+  ViewPosts,
+  ViewSwiperData,
+} from '@interface/StoreInterface';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '@firebase/firebase';
 import { createStore } from 'redux';
 import { useSelector, useDispatch } from 'react-redux';
 import { RoungePost, TopicPost } from '@interface/CardInterface';
+import { HomeListUrlString } from '@interface/GetPostsInterface';
 const initialUserState: UserState = {
   user: {
     nickname: '',
@@ -38,6 +44,159 @@ export const setTempDataInitializing = createAsyncThunk(
 //   return await getMyInfo(result);
 // });
 // console.log(getUser.name);
+const headerIndex = createSlice({
+  name: 'headerIndex',
+  initialState: { index: 0 },
+  reducers: {
+    initializeHeaderIndex: (state) => {
+      state.index = 0;
+    },
+    setHeaderIndex: (state, action: { payload: number }) => {
+      state.index = action.payload;
+    },
+  },
+});
+
+const getViewPageAndIndex = (viewWindow: Array<SearchResult>, id: string) => {
+  for (let i = 0; i < viewWindow.length; i++) {
+    for (let j = 0; j < viewWindow[i].result.length; j++) {
+      if (viewWindow[i].result[j].postId === id) {
+        return { targetViewPage: viewWindow[i].result, index: j };
+      }
+    }
+  }
+  return { targetViewPage: null, index: -1 };
+};
+
+const viewSwiper = createSlice({
+  name: 'viewSwiper',
+  initialState: <Array<ViewSwiperData>>[],
+  reducers: {
+    // [
+    //   {
+    //     key: 'timeline',
+    //     data: [
+    //       { result: [{}, {}, {}, {}, {}], nextPage: 1 },
+    //       { result: [{}, {}, {}, {}, {}], nextPage: 2 },
+    //     ],
+    //   },
+    //   {
+    //     key: 'topic',
+    //     data: [
+    //       { result: [{}, {}, {}, {}, {}], nextPage: 1 },
+    //       { result: [{}, {}, {}, {}, {}], nextPage: 2 },
+    //     ],
+    //   },
+    // ];
+    addViewWindow: (
+      state,
+      action: { payload: { key: HomeListUrlString; addData: SearchResult } },
+    ) => {
+      const { key, addData } = action.payload;
+      state.push({ key, data: [addData] });
+    },
+    addViewData: (
+      state,
+      action: { payload: { key: HomeListUrlString; addData: SearchResult } },
+    ) => {
+      const { key, addData } = action.payload;
+      const targetViewWindow = state.find(
+        (viewWindow) => viewWindow.key === key,
+      );
+      targetViewWindow?.data.push(addData);
+    },
+    updateOneViewData: (
+      state,
+      action: {
+        payload: {
+          key: HomeListUrlString;
+          oneViewData: TopicPost | RoungePost;
+          oneViewId: string;
+        };
+      },
+    ) => {
+      const { key, oneViewData, oneViewId } = action.payload;
+      const targetViewWindow = state.find(
+        (viewWindow) => viewWindow.key === key,
+      );
+      if (targetViewWindow?.data) {
+        const { targetViewPage, index } = getViewPageAndIndex(
+          targetViewWindow.data,
+          oneViewId,
+        );
+        if (targetViewPage && targetViewPage.length > 0 && index !== -1) {
+          targetViewPage[index] = {
+            ...targetViewPage[index],
+            ...oneViewData,
+          };
+        }
+      }
+    },
+    deleteOneViewData: (
+      state,
+      action: { payload: { key: HomeListUrlString; oneViewId: string } },
+    ) => {
+      const { key, oneViewId } = action.payload;
+      const targetViewWindow = state.find(
+        (viewWindow) => viewWindow.key === key,
+      );
+      if (targetViewWindow?.data) {
+        const { targetViewPage, index } = getViewPageAndIndex(
+          targetViewWindow.data,
+          oneViewId,
+        );
+        if (targetViewPage && targetViewPage.length > 0 && index !== -1) {
+          targetViewPage.splice(index, 1);
+        }
+      }
+    },
+    likeOneViewData: (
+      state,
+      action: {
+        payload: { key: HomeListUrlString; oneViewId: string; userId: string };
+      },
+    ) => {
+      const { key, oneViewId, userId } = action.payload;
+      const targetViewWindow = state.find(
+        (viewWindow) => viewWindow.key === key,
+      );
+      if (targetViewWindow?.data) {
+        const { targetViewPage, index } = getViewPageAndIndex(
+          targetViewWindow.data,
+          oneViewId,
+        );
+        if (targetViewPage && targetViewPage.length > 0 && index !== -1) {
+          const newPressPerson = Array.from(
+            new Set([...targetViewPage[index].pressPerson, userId]),
+          );
+          targetViewPage[index].pressPerson = newPressPerson;
+        }
+      }
+    },
+    unLikeOneViewData: (
+      state,
+      action: {
+        payload: { key: HomeListUrlString; oneViewId: string; userId: string };
+      },
+    ) => {
+      const { key, oneViewId, userId } = action.payload;
+      const targetViewWindow = state.find(
+        (viewWindow) => viewWindow.key === key,
+      );
+      if (targetViewWindow?.data) {
+        const { targetViewPage, index } = getViewPageAndIndex(
+          targetViewWindow.data,
+          oneViewId,
+        );
+        if (targetViewPage && targetViewPage.length > 0 && index !== -1) {
+          targetViewPage[index].pressPerson = targetViewPage[
+            index
+          ].pressPerson.filter((id) => id !== userId);
+        }
+      }
+    },
+  },
+});
 export const userSlice = createSlice({
   name: 'user',
   initialState: initialUserState,
@@ -190,12 +349,25 @@ export const likeViewPostAction = view.actions.likeViewPost;
 export const unLikeViewPostAction = view.actions.unLikeViewPost;
 export const updateOnePostAction = view.actions.updateOnePost;
 export const deleteOnePostAction = view.actions.deleteOnePost;
+
+export const initializeHeaderIndexAction =
+  headerIndex.actions.initializeHeaderIndex;
+export const setHeaderIndex = headerIndex.actions.setHeaderIndex;
+export const addViewWindowAction = viewSwiper.actions.addViewWindow;
+export const addViewDataAction = viewSwiper.actions.addViewData;
+export const updateOneViewDataAction = viewSwiper.actions.updateOneViewData;
+export const deleteOneViewDataAction = viewSwiper.actions.deleteOneViewData;
+export const likeOneViewDataAction = viewSwiper.actions.likeOneViewData;
+export const unLikeOneViewDataAction = viewSwiper.actions.unLikeOneViewData;
+
 const rootReducer = (
   state: {
     user: UserState;
     view: ViewPosts;
     scroll: { scrollY: number };
     tempData: any;
+    headerIndex: { index: number };
+    viewSwiper: Array<ViewSwiperData>;
   },
   action: AnyAction,
 ) => {
@@ -232,6 +404,8 @@ const rootReducer = (
               state.tempData.key == action.payload.tempData.tempData.key
                 ? action.payload.tempData
                 : state.tempData,
+            headerIndex: state.headerIndex,
+            viewSwiper: state.viewSwiper,
           };
         } else
           return {
@@ -246,6 +420,8 @@ const rootReducer = (
               state.tempData.key == action.payload.tempData.tempData.key
                 ? action.payload.tempData
                 : state.tempData,
+            headerIndex: state.headerIndex,
+            viewSwiper: state.viewSwiper,
           };
       default:
         const combineReducer = combineReducers({
@@ -253,6 +429,8 @@ const rootReducer = (
           view: view.reducer,
           scroll: scroll.reducer,
           tempData: tempData.reducer,
+          headerIndex: headerIndex.reducer,
+          viewSwiper: viewSwiper.reducer,
         });
         return combineReducer(state, action);
     }
