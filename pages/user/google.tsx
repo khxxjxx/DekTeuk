@@ -409,6 +409,9 @@ const WrapContents = styled.div`
   }
 
   @media (prefers-color-scheme: dark) {
+    & .MuiFormHelperText-root {
+      color: ${({ theme }: any) => theme.lightGray};
+    }
     & .MuiOutlinedInput-input {
       color: white;
     }
@@ -418,7 +421,7 @@ const WrapContents = styled.div`
     & .MuiSvgIcon-root {
       color: ${({ theme }: any) => theme.lightGray};
     }
-    & .css-1t8l2tu-MuiInputBase-input-MuiOutlinedInput-input.Mui-disabled {
+    & input.Mui-disabled {
       text-fill-color: ${({ theme }: any) => theme.darkGray};
     }
     & input:-webkit-autofill {
