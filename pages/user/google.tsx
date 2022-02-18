@@ -410,6 +410,9 @@ const WrapContents = styled.div`
   }
 
   @media (prefers-color-scheme: dark) {
+    & .MuiFormHelperText-root {
+      color: ${({ theme }: any) => theme.lightGray};
+    }
     & .MuiOutlinedInput-input {
       color: white;
     }
