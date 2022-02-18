@@ -54,7 +54,7 @@ const CommentEditor: React.FC<CommentEditorProps> = ({
   const userInfo = useSelector((state: RootReducer) => state.user.user);
 
   const router = useRouter();
-  let timer: any;
+
   const getAlertInfo = (result: string) => {
     if (result === 'success') {
       setAlertInfo({

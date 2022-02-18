@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import HeaderHome from '@components/Headers/Home';
 import HeaderSkeleton from '@components/Headers/Skeleton';
 import Chatting from '@components/Headers/Chatting';
-import TestHeader from './TestHeader';
+import PageHeader from './PageHeader';
 
 const Header: React.FC = () => {
   const router = useRouter();
@@ -12,11 +12,11 @@ const Header: React.FC = () => {
 
   return (
     <HeaderWrapperDivStyled>
-      {topic !== undefined && <TestHeader title={topic} />}
-      {headerKey === 'notification' && <TestHeader title={'알림페이지'} />}
+      {topic !== undefined && <PageHeader title={topic} />}
+      {headerKey === 'notification' && <PageHeader title={'알림페이지'} />}
       {headerKey === 'list' && topic == undefined && <HeaderHome />}
       {headerKey === 'chat' && <Chatting />}
-      {headerKey === 'mypage' && <TestHeader title={'마이페이지'} />}
+      {headerKey === 'mypage' && <PageHeader title={'마이페이지'} />}
     </HeaderWrapperDivStyled>
   );
 };

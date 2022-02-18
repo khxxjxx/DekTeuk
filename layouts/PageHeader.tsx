@@ -1,5 +1,4 @@
 import styled from '@emotion/styled';
-import { type } from 'os';
 
 const MyPageheader = styled.div`
   height: 60px;
@@ -20,12 +19,12 @@ const MyPageheader = styled.div`
   }
 `;
 
-type TestHeaderProps = {
+type PageHeaderProps = {
   title: string;
 };
 
-const TestHeader: React.FC<TestHeaderProps> = ({ title }) => {
+const PageHeader: React.FC<PageHeaderProps> = ({ title }) => {
   return <MyPageheader>{title}</MyPageheader>;
 };
 
-export default TestHeader;
+export default PageHeader;

@@ -215,9 +215,9 @@ export default function Signup() {
     if (userFormValidation(inputState).length !== 0) {
       return true;
     } else {
-      // return !(nicknameBtnChecked && emailBtnChecked && imageOcrChecked);
+      return !(nicknameBtnChecked && emailBtnChecked && imageOcrChecked);
       // 임시로 ocr 체크는 빼놓음
-      return !(nicknameBtnChecked && emailBtnChecked);
+      //return !(nicknameBtnChecked && emailBtnChecked);
     }
   };
   const resetOcrData = () => {

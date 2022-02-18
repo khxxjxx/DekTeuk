@@ -9,6 +9,8 @@ import CommentEditor from './CommentEditor';
 import { useSelector } from 'react-redux';
 import { RootReducer } from '@store/reducer';
 import { PostData } from '@interface/comment';
+import Image from 'next/image';
+import enterArrow from '@public/enterArrow.png';
 
 type CommentProps = {
   text: string;
@@ -25,6 +27,17 @@ type CommentProps = {
   postData: PostData;
 };
 
+const ImageWrapper = styled.div`
+  flex: 1;
+  padding: 0 0 20px 20px;
+  & .enter {
+    @media (prefers-color-scheme: dark) {
+      -webkit-filter: opacity(0.5) drop-shadow(0 0 0 white);
+      filter: opacity(0.5) drop-shadow(0 0 0 white);
+    }
+  }
+`;
+
 const CommentDiv = styled.div<{ isClicked: boolean }>`
   width: 100%;
   display: flex;
@@ -34,6 +47,7 @@ const CommentDiv = styled.div<{ isClicked: boolean }>`
 `;
 
 const NestedCommentDiv = styled.div<{ isClicked: boolean }>`
+  flex: 5;
   width: 80%;
   display: flex;
   flex-direction: column;
@@ -85,7 +99,13 @@ const Comment: React.FC<CommentProps> = ({
                 isDeleted={isDeleted}
                 userId={userId}
               />
-              <MenuIcon onClick={() => setMenu(!menu)} />
+              <MenuIcon
+                onClick={() => {
+                  setTimeout(() => {
+                    setMenu((pre) => !pre);
+                  }, 0);
+                }}
+              />
               {!isDeleted && menu && userInfo && (
                 <CommentDropBox
                   setNestedReply={setNestedReplyEditor}
@@ -121,47 +141,63 @@ const Comment: React.FC<CommentProps> = ({
           )}
         </CommentDiv>
       ) : (
-        <NestedCommentDiv isClicked={isClicked}>
-          {!modify && (
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                position: 'relative',
-              }}
-            >
-              <LikeComponent
-                likes={likes}
-                isClicked={isClicked}
-                commentId={commentId}
-                isDeleted={isDeleted}
-                userId={userId}
-              />
-              <MenuIcon onClick={() => setMenu(!menu)} />
-              {!isDeleted && menu && userInfo == userId && (
-                <CommentDropBox
-                  setMenu={setMenu}
-                  setModify={setModify}
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <ImageWrapper>
+            <Image
+              className="enter"
+              src={enterArrow}
+              width="25px"
+              height="25px"
+            />
+          </ImageWrapper>
+          <NestedCommentDiv isClicked={isClicked}>
+            {!modify && (
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  position: 'relative',
+                }}
+              >
+                <LikeComponent
+                  likes={likes}
+                  isClicked={isClicked}
                   commentId={commentId}
+                  isDeleted={isDeleted}
                   userId={userId}
-                  isNested={isNested}
                 />
-              )}
-            </div>
-          )}
-          <CommentTextComponent
-            modify={modify}
-            setModify={setModify}
-            commentId={commentId}
-            commentText={isDeleted ? deleteMessage : text}
-          ></CommentTextComponent>
-          <CommentAuthorComponent
-            nickname={nickname}
-            job={job}
-            date={date}
-            userId={userId}
-          ></CommentAuthorComponent>
-        </NestedCommentDiv>
+                <MenuIcon
+                  onClick={() => {
+                    setTimeout(() => {
+                      setMenu((pre) => !pre);
+                    }, 0);
+                  }}
+                />
+                {!isDeleted && menu && userInfo == userId && (
+                  <CommentDropBox
+                    setMenu={setMenu}
+                    setModify={setModify}
+                    commentId={commentId}
+                    userId={userId}
+                    isNested={isNested}
+                  />
+                )}
+              </div>
+            )}
+            <CommentTextComponent
+              modify={modify}
+              setModify={setModify}
+              commentId={commentId}
+              commentText={isDeleted ? deleteMessage : text}
+            ></CommentTextComponent>
+            <CommentAuthorComponent
+              nickname={nickname}
+              job={job}
+              date={date}
+              userId={userId}
+            ></CommentAuthorComponent>
+          </NestedCommentDiv>
+        </div>
       )}
     </>
   );

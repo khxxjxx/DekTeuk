@@ -220,7 +220,7 @@ export default function Google() {
       setNicknameBtnChecked(false);
       setNicknameSuccess('');
     }
-    const error = userInputChangeValidation(name, value);
+    const error = userInputChangeValidation(name, value, inputState);
     inputDispatch({ type: name, payload: { value, error } });
   };
 

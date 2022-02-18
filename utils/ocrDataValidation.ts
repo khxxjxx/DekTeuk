@@ -40,20 +40,18 @@ const resultTxt = (data: any) => {
   let startDTFilter;
   let nameFilterIdx;
   let p_nm: string;
-  //const res = data;
+
   const filteredText: any = [];
   data.forEach((el: any, idx: number) => {
     filteredText.push(el.inferText);
   });
   const res = filteredText.join().replaceAll(',', '').replaceAll(' ', '');
 
-  // 사업자 등록번호 가져옴
   if (!res.match(regNum)) {
     return false;
   }
   const b_no: string = res.match(regNum)[0].replaceAll('-', '');
 
-  // 개업연월일 가져옴
   if (res.indexOf('개업연월일:') > 0) {
     startDTFilter = res.substr(res.indexOf('개업연월일:'));
   } else if (res.indexOf('개업년월일:') > 0) {
@@ -66,7 +64,6 @@ const resultTxt = (data: any) => {
   }
   const start_dt: string = startDTFilter.match(regDate)[0].replace(regex, '');
 
-  //이름 가져옴
   if (res.indexOf('성명:') > 0) {
     nameFilterIdx = res.indexOf('성명:');
     p_nm = res.substr(nameFilterIdx + 3, 3);
@@ -84,17 +81,6 @@ export const validateData = async (ocrData: OcrData) => {
   const validateData = {
     businesses: [ocrData],
   };
-
-  // // req data format - 실패확인용 데이터
-  // const validateData = {
-  //   businesses: [
-  //     {
-  //       b_no: '8290700318',
-  //       start_dt: '20160401',
-  //       p_nm: '백봉',
-  //     },
-  //   ],
-  // };
 
   try {
     const data = await axios.post('/api/validateOcrData', validateData);

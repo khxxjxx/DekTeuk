@@ -14,6 +14,7 @@ import {
   startAfter,
 } from 'firebase/firestore';
 import { db } from '@firebase/firebase';
+import { NotificationData } from '@interface/notification';
 
 export default function useNotification() {
   const router = useRouter();
@@ -35,7 +36,7 @@ export default function useNotification() {
       limit(10),
     );
     const snapshots = await getDocs(q);
-    const myNotis: any = [];
+    const myNotis: Array<NotificationData> = [];
     snapshots.forEach((snapshot) => {
       const returnData = snapshot.data();
       const myNotiData = {
@@ -84,7 +85,7 @@ export default function useNotification() {
       startAfter(lastSnap),
     );
     const snapshots = await getDocs(q);
-    const myNotis: any = [];
+    const myNotis: Array<NotificationData> = [];
     snapshots.forEach((snapshot) => {
       const returnData = snapshot.data();
       const myNotiData = {
