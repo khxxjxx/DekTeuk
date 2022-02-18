@@ -84,7 +84,6 @@ const ContainerStyled = styled(Container)`
 `;
 
 const DialogStyled = styled(Dialog)`
-  background: ${({ theme }: any) => theme.lightGray};
   & .MuiDialog-paper {
     background: white;
   }
@@ -92,9 +91,8 @@ const DialogStyled = styled(Dialog)`
     color: black;
   }
   @media (prefers-color-scheme: dark) {
-    background: ${({ theme }: any) => theme.darkGray};
     & .MuiDialog-paper {
-      background: rgb(17, 17, 19);
+      background: ${({ theme }: any) => theme.blackGray};
     }
     & .MuiDialogContentText-root {
       color: white;
@@ -102,16 +100,14 @@ const DialogStyled = styled(Dialog)`
   }
 `;
 const ModalStyled = styled(Modal)`
-  background: ${({ theme }: any) => theme.lightGray};
   & .css-1vocdem {
     background: white;
     color: black;
   }
 
   @media (prefers-color-scheme: dark) {
-    background: ${({ theme }: any) => theme.darkGray};
     & .css-1vocdem {
-      background: rgb(17, 17, 19);
+      background: ${({ theme }: any) => theme.blackGray};
       color: white;
     }
   }

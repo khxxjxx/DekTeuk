@@ -85,7 +85,11 @@ const ButtonStyled = styled(Button)`
     background: ${({ theme }: any) => theme.mainColorBlue};
   }
 `;
-
+const BoxStyled = styled(Box)`
+  @media (prefers-color-scheme: dark) {
+    background-color: ${({ theme }: any) => theme.blackGray};
+  }
+`;
 const style = {
   position: 'absolute' as 'absolute',
   top: '50%',
@@ -196,7 +200,7 @@ const PostForm = ({ from }: { from: string }) => {
       // https://firebase.google.com/docs/reference/js/firebase.User
       setUid(user.uid);
     } else {
-      console.log('no user');
+      setUid('noUser');
       //console.log를 모달창으로 바꿀것
     }
   });
@@ -371,7 +375,7 @@ const PostForm = ({ from }: { from: string }) => {
 
   return (
     <Layout>
-      {uid === '' ? (
+      {uid === 'noUser' ? (
         <ContainerStyled maxWidth="sm">
           <Box sx={{ minWidth: 120, mt: 6 }}>
             <Box sx={{ mt: 6 }}>
@@ -393,7 +397,7 @@ const PostForm = ({ from }: { from: string }) => {
               aria-labelledby="modal-modal-title"
               aria-describedby="modal-modal-description"
             >
-              <Box sx={style}>
+              <BoxStyled sx={style}>
                 <Typography
                   id="modal-modal-title"
                   variant="h6"
@@ -402,7 +406,7 @@ const PostForm = ({ from }: { from: string }) => {
                 >
                   로그인 후 이용해주세요
                 </Typography>
-              </Box>
+              </BoxStyled>
             </Modal>
           </Box>
         </ContainerStyled>
@@ -663,7 +667,7 @@ const PostForm = ({ from }: { from: string }) => {
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
           >
-            <Box sx={style}>
+            <BoxStyled sx={style}>
               <Typography
                 id="modal-modal-title"
                 variant="h6"
@@ -675,7 +679,7 @@ const PostForm = ({ from }: { from: string }) => {
               <Typography id="modal-modal-description" sx={{ mt: 2 }}>
                 게시물을 등록하였습니다
               </Typography>
-            </Box>
+            </BoxStyled>
           </Modal>
         </ContainerStyled>
       )}
