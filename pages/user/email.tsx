@@ -34,8 +34,8 @@ import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import {
+  userFormValidation,
   userInputChangeValidation,
-  userInputSubmitValidation,
 } from '@utils/userInputValidation';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import Dialog from '@mui/material/Dialog';
@@ -57,7 +57,7 @@ const reducer = (state: UserInputData, action: UserInputDataAction) => {
 
 export default function Signup() {
   const router = useRouter();
-  const dispatch = useDispatch();
+
   const [inputState, inputDispatch] = useReducer(
     reducer,
     userInputInitialState,
@@ -77,8 +77,6 @@ export default function Signup() {
 
   const [emailSuccess, setEmailSuccess] = useState<string>('');
   const [nicknameSuccess, setNicknameSuccess] = useState<string>('');
-  const [ocrSuccess, setOcrSuccess] = useState<string>('');
-
   const { email, password, checkPassword, nickname, jobSector } = inputState;
 
   const handleClose = () => {
@@ -102,10 +100,6 @@ export default function Signup() {
 
   const SignUpSubmitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (userInputSubmitValidation(inputState).length !== 0) {
-      alert('잘못된 입력이 있습니다!');
-      return;
-    }
 
     if (!imageUrl) {
       alert('증명서 파일을 찾을 수 없습니다!');
@@ -217,7 +211,15 @@ export default function Signup() {
       handleClose();
     }
   };
-
+  const submitButtonDisabled = () => {
+    if (userFormValidation(inputState).length !== 0) {
+      return true;
+    } else {
+      // return !(nicknameBtnChecked && emailBtnChecked && imageOcrChecked);
+      // 임시로 ocr 체크는 빼놓음
+      return !(nicknameBtnChecked && emailBtnChecked);
+    }
+  };
   const resetOcrData = () => {
     const resetOcrData = { b_no: '', p_nm: '', start_dt: '' };
     setOcrData(resetOcrData);
@@ -244,7 +246,16 @@ export default function Signup() {
     setImageOcrChecked(false);
     resetOcrData();
   };
-
+  const passwordCheck = (value: string) => {
+    let errorMessage = '';
+    if (checkPassword.value !== value) {
+      errorMessage = '비밀번호가 다릅니다!';
+    }
+    inputDispatch({
+      type: 'checkPassword',
+      payload: { value: checkPassword.value, error: errorMessage },
+    });
+  };
   const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
@@ -256,14 +267,12 @@ export default function Signup() {
       setEmailBtnChecked(false);
       setEmailSuccess('');
     }
-    if (name === 'checkPassword' && password.value !== value) {
-      inputDispatch({
-        type: name,
-        payload: { value: value, error: '비밀번호가 다릅니다!' },
-      });
-      return;
+
+    if (name === 'password') {
+      passwordCheck(value);
     }
-    const error = userInputChangeValidation(name, value);
+
+    const error = userInputChangeValidation(name, value, inputState);
     inputDispatch({ type: name, payload: { value, error } });
   };
   return (
@@ -431,10 +440,7 @@ export default function Signup() {
               </TextFields>
             </WrapInput>
 
-            <SubmitButton
-              type="submit"
-              disabled={!(nicknameBtnChecked && emailBtnChecked)}
-            >
+            <SubmitButton type="submit" disabled={submitButtonDisabled()}>
               <GroupAddIcon style={{ marginRight: '10px' }} />
               회원가입
             </SubmitButton>

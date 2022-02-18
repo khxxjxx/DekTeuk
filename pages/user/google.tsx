@@ -30,7 +30,7 @@ import {
 import { getAuth } from 'firebase/auth';
 import {
   userInputChangeValidation,
-  userInputSubmitValidation,
+  userFormValidation,
 } from '@utils/userInputValidation';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
@@ -86,7 +86,15 @@ export default function Google() {
     setDialogOpen(false);
     setIsLoading(false);
   };
-
+  const submitButtonDisabled = () => {
+    if (jobSector.error) {
+      return true;
+    } else {
+      //return !(nicknameBtnChecked && imageOcrChecked);
+      // 임시로 ocr 체크는 빼놓음
+      return !nicknameBtnChecked;
+    }
+  };
   const SignUpSubmitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const uid = auth.currentUser?.uid as string;
@@ -328,7 +336,7 @@ export default function Google() {
                 ))}
               </TextFields>
             </WrapInput>
-            <SubmitButton type="submit" disabled={!nicknameBtnChecked}>
+            <SubmitButton type="submit" disabled={submitButtonDisabled()}>
               <GroupAddIcon style={{ marginRight: '10px' }} />
               회원가입
             </SubmitButton>
