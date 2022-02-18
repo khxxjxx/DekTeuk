@@ -78,7 +78,9 @@ const ListPage = () => {
       router.events.on(
         'routeChangeComplete',
         () => {
-          window.scrollTo({ top: scrollY });
+          const cntPath = window.location.pathname.split('/');
+          if (!cntPath[3] && cntPath[2] != 'topic')
+            window.scrollTo({ top: scrollY });
         },
         // setTimeout(() => window.scrollTo({ top: scrollY }), 0),
       );

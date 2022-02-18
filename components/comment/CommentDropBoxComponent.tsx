@@ -36,6 +36,9 @@ const CommentDropBoxDiv = styled.div`
   right: 10px;
   top: 20px;
   animation: ${open} 0.2s ease;
+  @media (prefers-color-scheme: dark) {
+    background-color: transparent;
+  }
 `;
 
 const CommentDropBoxOption = styled.div`
@@ -43,6 +46,7 @@ const CommentDropBoxOption = styled.div`
   padding: 5px;
   &:hover {
     background-color: #e6e6e6;
+    color: black;
   }
 `;
 
