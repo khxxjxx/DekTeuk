@@ -142,7 +142,6 @@ export default function TopicPage() {
   }, []);
 
   useEffect(() => {
-    console.log(inView);
     if (
       inView === true &&
       stopFetch === false &&
