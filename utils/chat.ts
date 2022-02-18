@@ -16,7 +16,7 @@ import {
   arrayUnion,
   deleteDoc,
 } from 'firebase/firestore';
-import { db, storage } from '../../firebase/firebase';
+import { db, storage } from '@firebase/firebase';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { Dispatch, SetStateAction } from 'react';
 

@@ -14,7 +14,7 @@ import {
   leaveChat,
   downloadImg,
   getChatMessages,
-} from '../api/chat';
+} from '@utils/chat';
 import {
   NewMessage,
   ChatHeader,
@@ -33,11 +33,11 @@ import {
   ArrowBackIosNewIcon,
   DensityMediumIcon,
   AddIcon,
-} from '../../styles/chatStyle';
+} from '@styles/chatStyle';
 import { useRouter } from 'next/router';
 import { Timestamp } from 'firebase/firestore';
-import { getDate } from '../../utils/function';
-import { encodeFile } from '../../utils/upload';
+import { getDate } from '@utils/function';
+import { encodeFile } from '@utils/upload';
 import wrapper from '@store/configureStore';
 import debounce from 'lodash/debounce';
 import ImgPreviewModal from '@components/ImgPreviewModal';

@@ -160,7 +160,7 @@ export const getHomePostsInfiniteFunction = async (
   //   };
   //   updateDoc(docRef, postUpdated);
 
-  // for (let i = 0; i < 2; i++) {
+  // for (let i = 0; i < 10; i++) {
   //   for (const rounge of DefaultListsAndTopics.rounges) {
   //     const collectionRef = collection(db, 'post');
   //     console.log(rounge);
@@ -172,19 +172,19 @@ export const getHomePostsInfiniteFunction = async (
   //       postType: 'rounge',
   //       topic: '',
   //       updatedAt: serverTimestamp(),
-  //       userId: 'rBbTwMFvMdZULOcNqYyDleySd5n2',
-  //       job: rounge.title,
-  //       nickname: '닉네임2222222222',
+  //       userId: 'PhKS5dZfaIRWQXWCEzm1lM778fC3',
+  //       job: '디자인',
+  //       nickname: '니이잉이이이이익네임',
   //       rounge,
   //       createdAt: serverTimestamp(),
   //       images: [],
-  //       urlKey: rounge.url,
+  //       urlKey: 'design',
   //     });
   //     const wroteDocRef = doc(db, 'post', newId);
   //     await updateDoc(wroteDocRef, { postId: newId });
   //   }
   // }
-  // for (let i = 0; i < 4; i++) {
+  // for (let i = 0; i < 20; i++) {
   //   for (const topic of DefaultListsAndTopics.topics) {
   //     const collectionRef = collection(db, 'post');
   //     console.log(topic);
@@ -196,9 +196,9 @@ export const getHomePostsInfiniteFunction = async (
   //       postType: 'topic',
   //       topic,
   //       updatedAt: serverTimestamp(),
-  //       userId: 'rBbTwMFvMdZULOcNqYyDleySd5n2',
-  //       job: '서비스',
-  //       nickname: '닉네임',
+  //       userId: 'PhKS5dZfaIRWQXWCEzm1lM778fC3',
+  //       job: '디자인',
+  //       nickname: '니이잉이이이이익네임',
   //       rounge: '',
   //       createdAt: serverTimestamp(),
   //       images: [],
@@ -455,7 +455,7 @@ export const searchInfiniteFunction = async (
       process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY,
     );
     const index = searchClient.initIndex('post');
-    const { hits } = await index.search(searchValue, {
+    const { hits } = await index.search(searchValue.toString(), {
       page: pageParam ? pageParam + 1 : 0,
       hitsPerPage: 40,
       filters: filterString,
