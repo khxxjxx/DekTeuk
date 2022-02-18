@@ -215,8 +215,6 @@ export default function Signup() {
       return true;
     } else {
       return !(nicknameBtnChecked && emailBtnChecked && imageOcrChecked);
-      // 임시로 ocr 체크는 빼놓음
-      //return !(nicknameBtnChecked && emailBtnChecked);
     }
   };
   const resetOcrData = () => {

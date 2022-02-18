@@ -64,9 +64,11 @@ export default function Login() {
       return result.user.uid;
     } catch (error: any) {
       if (error.code === 'auth/invalid-email')
-        setEmailErrorMessage('이메일을 잘못 입력하셨습니다!');
+        setEmailErrorMessage('이메일을 입력해주세요!');
       else if (error.code === 'auth/wrong-password')
         setPasswordErrorMessage('비밀번호를 잘못 입력하셨습니다!');
+      else if (error.code === 'auth/user-not-found')
+        setEmailErrorMessage('가입되지 않은 이메일입니다!');
     }
   };
 
