@@ -418,7 +418,7 @@ const WrapContents = styled.div`
     & .MuiSvgIcon-root {
       color: ${({ theme }: any) => theme.lightGray};
     }
-    & .css-1t8l2tu-MuiInputBase-input-MuiOutlinedInput-input.Mui-disabled {
+    & .Mui-disabled {
       text-fill-color: ${({ theme }: any) => theme.darkGray};
     }
   }
