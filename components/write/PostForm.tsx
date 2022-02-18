@@ -417,6 +417,20 @@ const PostForm = ({ from }: { from: string }) => {
                 value={post.postType}
                 label="postMenu"
                 onChange={(e) => setPost({ ...post, postType: e.target.value })}
+                MenuProps={{
+                  PaperProps: {
+                    sx: {
+                      bgcolor: 'white',
+                      '@media (prefers-color-scheme: dark)': {
+                        bgcolor: 'rgb(59, 59, 59)',
+                        color: 'white',
+                        '& .MuiMenuItem-root': {
+                          padding: 2,
+                        },
+                      },
+                    },
+                  },
+                }}
               >
                 <MenuItem value={'rounge'}>라운지</MenuItem>
                 <MenuItem value={'topic'}>토픽</MenuItem>
@@ -433,6 +447,20 @@ const PostForm = ({ from }: { from: string }) => {
                   value={topicMenu}
                   label="postMenu"
                   onChange={(e) => setTopicMenu(e.target.value)}
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        bgcolor: 'white',
+                        '@media (prefers-color-scheme: dark)': {
+                          bgcolor: 'rgb(59, 59, 59)',
+                          color: 'white',
+                          '& .MuiMenuItem-root': {
+                            padding: 2,
+                          },
+                        },
+                      },
+                    },
+                  }}
                 >
                   <MenuItem value={'연말정산'}>연말정산</MenuItem>
                   <MenuItem value={'여행'}>여행</MenuItem>
@@ -452,6 +480,20 @@ const PostForm = ({ from }: { from: string }) => {
                   value={roungeMenu}
                   label="RoungeMenu"
                   onChange={(e) => setRoungeMenu(e.target.value)}
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        bgcolor: 'white',
+                        '@media (prefers-color-scheme: dark)': {
+                          bgcolor: 'rgb(59, 59, 59)',
+                          color: 'white',
+                          '& .MuiMenuItem-root': {
+                            padding: 2,
+                          },
+                        },
+                      },
+                    },
+                  }}
                 >
                   {user.validRounges &&
                     user.validRounges.map((v: any, i: number) => {

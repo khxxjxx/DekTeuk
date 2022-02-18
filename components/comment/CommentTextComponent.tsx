@@ -17,6 +17,12 @@ const CommentTextDiv = styled.div`
   }
 `;
 
+const CommentContentSpan = styled.span`
+  width: 100%;
+  overflow: hidden;
+  word-break: break-all;
+`;
+
 type CommentProps = {
   commentText: string;
   modify: boolean;
@@ -44,7 +50,7 @@ const CommentTextComponent: React.FC<CommentProps> = ({
           />
         </>
       ) : (
-        <span>{commentText}</span>
+        <CommentContentSpan>{commentText}</CommentContentSpan>
       )}
     </CommentTextDiv>
   );

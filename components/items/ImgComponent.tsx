@@ -1,9 +1,11 @@
 import styled from '@emotion/styled';
 import Image from 'next/image';
 
-type ImgProps = {
-  urls: string[];
-};
+// interface Url {
+//   url: string;
+//   imgName: string;
+//   imgDetail: string;
+// }
 
 const ImgWrapper = styled.div`
   display: flex;
@@ -27,8 +29,7 @@ const ImgCount = styled.div`
   z-index: 50;
 `;
 
-const ImgComponent: React.FC<ImgProps> = ({ urls }: { urls: any }) => {
-  console.log(urls);
+const ImgComponent = ({ urls }: { urls: Array<string> }) => {
   return (
     <ImgWrapper>
       {urls.length > 1 && (
@@ -41,7 +42,7 @@ const ImgComponent: React.FC<ImgProps> = ({ urls }: { urls: any }) => {
         width={'100%'}
         height={'100%'}
         objectFit={'cover'}
-        src={`${urls[0].url}`}
+        src={`${urls[0]}`}
         alt="test"
       />
     </ImgWrapper>

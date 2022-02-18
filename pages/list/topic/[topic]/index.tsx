@@ -1,14 +1,13 @@
 import { useRouter } from 'next/router';
 import { useEffect, useLayoutEffect, useState } from 'react';
 import Layout from '@layouts/Layout';
-import { TestTopicCard } from '@components/Card';
+import { TopicPageCard } from '@components/Card';
 import { TopicPost } from '@interface/CardInterface';
 import { useInView } from 'react-intersection-observer';
 import { useSelector, useDispatch } from 'react-redux';
 import { setDataAction } from '@store/reducer';
 import { RootReducer } from '@store/reducer';
 import styled from '@emotion/styled';
-// import { LoadingDiv } from '@components/items/LoadingDiv';
 
 import {
   collection,
@@ -24,7 +23,7 @@ import { db } from '@firebase/firebase';
 export default function TopicPage() {
   const router = useRouter();
 
-  const topicType = router.query.topic as string;
+  // const topicType = router.query.topic as string;
 
   const { ref, inView } = useInView();
 
@@ -121,6 +120,7 @@ export default function TopicPage() {
         topic: topicData.topic,
         pressPerson: topicData.pressPerson,
       };
+
       topics.push(returnData);
     });
 
@@ -152,7 +152,7 @@ export default function TopicPage() {
     }
   }, [inView]);
 
-  if (!data[0]?.title) {
+  if (!data[0]?.topic?.url) {
     return (
       <Layout>
         <LoadingDiv />
@@ -163,8 +163,8 @@ export default function TopicPage() {
   return (
     <Layout>
       {data.length !== 0 &&
-        data.map((post: any, idx: number) => (
-          <TestTopicCard topicCardData={post} key={idx} />
+        data.map((post: TopicPost, idx: number) => (
+          <TopicPageCard topicCardData={post} key={idx} />
         ))}
       <div ref={ref} style={{ height: '50px' }}></div>
     </Layout>

@@ -13,6 +13,7 @@ import {
   startAfter,
 } from 'firebase/firestore';
 import { db } from '@firebase/firebase';
+import { MyPostData } from '@interface/mypost';
 
 export default function useGetMyPost() {
   const router = useRouter();
@@ -34,7 +35,7 @@ export default function useGetMyPost() {
       limit(20),
     );
     const snapshots = await getDocs(q);
-    const myPosts: any = [];
+    const myPosts: Array<MyPostData> = [];
     snapshots.forEach((snapshot) => {
       const returnData = snapshot.data();
       const myPostData = {
@@ -83,7 +84,7 @@ export default function useGetMyPost() {
       startAfter(lastSnap),
     );
     const snapshots = await getDocs(q);
-    const myPosts: any = [];
+    const myPosts: Array<MyPostData> = [];
     snapshots.forEach((snapshot) => {
       const returnData = snapshot.data();
       const myPostData = {

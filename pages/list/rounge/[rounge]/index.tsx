@@ -98,24 +98,43 @@ const RoungePage = () => {
         <TimelinePageWrapperDiv>
           <TimelineResultsWrapperDiv>
             {(renderData as Array<TopicPost | RoungePost>)?.map((post, i) => {
+              let isLiked = false;
+              if (myInfo?.id) {
+                // @ts-ignore
+                if (post.pressPerson.indexOf(myInfo.id) !== -1) isLiked = true;
+              }
               if (
-                i >=
-                (renderData as Array<TopicPost | RoungePost>).length - 10
+                i ===
+                (renderData as Array<TopicPost | RoungePost>).length - 20
               ) {
                 return post.postType === 'topic' ? (
-                  <TopicCard topicCardData={post} key={post.postId} ref={ref} />
+                  <TopicCard
+                    topicCardData={post}
+                    key={post.postId}
+                    ref={ref}
+                    isLiked={isLiked}
+                  />
                 ) : (
                   <RoungeCard
                     roungeCardData={post}
                     key={post.postId}
                     ref={ref}
+                    isLiked={isLiked}
                   />
                 );
               }
               return post.postType === 'topic' ? (
-                <TopicCard topicCardData={post} key={post.postId} />
+                <TopicCard
+                  topicCardData={post}
+                  key={post.postId}
+                  isLiked={isLiked}
+                />
               ) : (
-                <RoungeCard roungeCardData={post} key={post.postId} />
+                <RoungeCard
+                  roungeCardData={post}
+                  key={post.postId}
+                  isLiked={isLiked}
+                />
               );
             })}
           </TimelineResultsWrapperDiv>
