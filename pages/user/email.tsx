@@ -1,5 +1,5 @@
 import React, { useState, useReducer } from 'react';
-import { useDispatch } from 'react-redux';
+
 import styled from '@emotion/styled';
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
@@ -57,7 +57,6 @@ const reducer = (state: UserInputData, action: UserInputDataAction) => {
 
 export default function Signup() {
   const router = useRouter();
-
   const [inputState, inputDispatch] = useReducer(
     reducer,
     userInputInitialState,
