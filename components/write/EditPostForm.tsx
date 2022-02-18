@@ -18,15 +18,12 @@ import {
 import { serverTimestamp, updateDoc, doc } from 'firebase/firestore';
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 import { db } from '@firebase/firebase';
-
-//select 부분을 위해서 사용
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 
 //photoupload용 아이콘
-
 import { updateOnePostAction } from 'store/reducer';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -34,12 +31,11 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
+
 import Modal from '@mui/material/Modal';
 import { StoreState, UserState } from '@interface/StoreInterface';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
+
 import styled from '@emotion/styled';
-import { RoungePost } from '@interface/CardInterface';
 
 const style = {
   position: 'absolute' as 'absolute',
@@ -117,8 +113,7 @@ const PostForm = (props: any) => {
   const dispatch = useDispatch();
   const postInfo = props.postInfo;
   const [diaOpen, setDiaOpen] = useState(false);
-  // 이미지 업로드 부분
-  const [postImage, setPostImage] = useState<any>(null);
+
   const [url, setUrl] = useState('');
   const [progress, setProgress] = useState(0);
   const [imgList, setImgList] = useState<any>(
@@ -130,16 +125,12 @@ const PostForm = (props: any) => {
   //텍스트 처리
   const { user }: UserState = useSelector((state: StoreState) => state.user);
 
-  //유저
-  const [uid, setUid] = useState<string>('');
-
-  const [userInfoList, setuserInfoList] = useState<any>('');
   const [alertType, setAlertType] = useState<
     'error' | 'info' | 'success' | 'warning'
   >('success');
   const [alertMessage, setAlertMessage] = useState('');
   const [open, setOpen] = useState(false);
-  const [clickState, setClickState] = useState(true);
+
   const [post, setPost] = useState({
     title: postInfo.title,
     content: postInfo.content,
@@ -153,25 +144,9 @@ const PostForm = (props: any) => {
     images: postInfo.images,
     commentsCount: postInfo.commentsCount,
   });
-  //rougne,topic info 확인
-  const [postTopic, setPostTopic] = useState<any>({});
-  const [postRounge, setPostRounge] = useState<any>({});
 
-  const [loading, setLoading] = React.useState(false);
-  const [success, setSuccess] = React.useState(false);
-  //모달창
   const [modalOpen, setModalOpen] = useState(false);
-  //rougne,topic info 확인
-  useEffect(() => {
-    if (postInfo.topic) {
-      setPostTopic(postInfo.topic);
-    }
-    if (postInfo.rounge) {
-      setPostRounge(postInfo.rounge);
-    }
-  }, [postInfo]);
 
-  const timer = React.useRef<number>();
   const storage = getStorage();
   // Create the file metadata
   /** @type {any} */
@@ -183,14 +158,8 @@ const PostForm = (props: any) => {
     setAlertMessage(msg);
     setOpen(true);
   };
-  const auth = getAuth();
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      setUid(user.uid);
-    }
-  });
 
-  const handleClose: any = (event: any, reason: any) => {
+  const handleClose = () => {
     setDiaOpen(!diaOpen);
   };
   const handAlertClose = () => {
@@ -261,7 +230,6 @@ const PostForm = (props: any) => {
 
   const handleUploadChange = (e: any) => {
     if (e.target.files[0]) {
-      setPostImage(e.target.files[0]);
       handleUpload(e.target.files[0]);
     }
   };

@@ -101,33 +101,26 @@ const style = {
   boxShadow: 24,
   p: 4,
 };
-interface postSubTheme {
-  title: string;
-  url: string;
-}
+
 const PostForm = ({ from }: { from: string }) => {
   const dispatch = useDispatch();
 
   //이미지 업로드 부분
   const [modalOpen, setModalOpen] = useState(false);
-  const [postImage, setPostImage] = useState<any>(null);
   const [url, setUrl] = useState('');
   const [progress, setProgress] = useState(0);
   const [imgList, setImgList] = useState<any>([]);
-  //
+
   const [postedUrl, setPostedUrl] = useState<string>('');
-  //
-  //텍스트 처리
+
   const { user }: UserState = useSelector((state: StoreState) => state.user);
 
-  //유저
   const [uid, setUid] = useState<string>('');
   const [alertType, setAlertType] = useState<
     'error' | 'info' | 'success' | 'warning'
   >('success');
   const [alertMessage, setAlertMessage] = useState('');
   const [open, setOpen] = useState(false);
-  const [clickState, setClickState] = useState(true);
   const [post, setPost] = useState({
     title: '',
     content: '',
@@ -153,11 +146,7 @@ const PostForm = ({ from }: { from: string }) => {
   //memuselector
   const [topicMenu, setTopicMenu] = useState<any>('');
   const [roungeMenu, setRoungeMenu] = useState<any>('');
-  //photoupload 확인 아이콘-아직 미구현
-  const [loading, setLoading] = React.useState(false);
-  const [success, setSuccess] = React.useState(false);
 
-  const timer = React.useRef<number>();
   const storage = getStorage();
   // Create the file metadata
   /** @type {any} */
@@ -165,7 +154,6 @@ const PostForm = ({ from }: { from: string }) => {
     contentType: 'images/jpeg',
   };
 
-  //rounge,topic 바뀔때마다 세부주제value값 menu에 반영
   useEffect(() => {
     if (post.postType === 'topic') {
       const topicArr = [
@@ -188,7 +176,10 @@ const PostForm = ({ from }: { from: string }) => {
     }
   }, [topicMenu, roungeMenu]);
 
-  const showAlert = (type: any, msg: any) => {
+  const showAlert = (
+    type: 'error' | 'info' | 'success' | 'warning',
+    msg: string,
+  ) => {
     setAlertType(type);
     setAlertMessage(msg);
     setOpen(true);
@@ -196,21 +187,17 @@ const PostForm = ({ from }: { from: string }) => {
   const auth = getAuth();
   onAuthStateChanged(auth, (user) => {
     if (user) {
-      // User is signed in, see docs for a list of available properties
-      // https://firebase.google.com/docs/reference/js/firebase.User
       setUid(user.uid);
     } else {
       setUid('noUser');
-      //console.log를 모달창으로 바꿀것
     }
   });
 
-  const handleClose: any = (event: any, reason: any) => {
+  const handleClose = () => {
     setOpen(!open);
   };
 
   const onSubmit = async () => {
-    //사진 정보 저장
     let images: Array<Object> = [];
     //[이미지 다운로드 url, firebase에 저장한 이미지 이름, 이미지 설명]
     if (imgList.length >= 1) {
@@ -254,7 +241,7 @@ const PostForm = ({ from }: { from: string }) => {
 
       const { id: newId } = await addDoc(collectionRef, putObj);
       //새로 생성된 post id를 user 정보에 추가
-      //
+
       setPostedUrl(`/list/topic/${postTopic.url}/${newId}`);
       //
       const docRef = doc(db, 'user', uid);
@@ -270,9 +257,9 @@ const PostForm = ({ from }: { from: string }) => {
         postId: newId,
       };
       updateDoc(docPostRef, PostUpdate);
-      //유저에 게시물 id 추가
+
       setModalOpen(true);
-      //나중에 topic 페이지로 이동하도록 변경하기
+
       if (from === 'topic' || from === 'timeline' || !from) {
         // [rounge] 페이지가 아닌 페이지에서 write로 접근 후 topic 글 작성
         dispatch(resetViewAction()); // 서버상태와 동기화를 위해 초기화
@@ -297,7 +284,6 @@ const PostForm = ({ from }: { from: string }) => {
       };
 
       const { id: newId } = await addDoc(collectionRef, putObj);
-      //새로 생성된 post id를 user 정보에 추가
 
       const docRef = doc(db, 'user', uid);
       const userPostUpdate = {
@@ -305,14 +291,14 @@ const PostForm = ({ from }: { from: string }) => {
         post: [...user.posts, newId],
       };
       updateDoc(docRef, userPostUpdate);
-      //새로 생성된 post id를 post 정보에 추가
+
       const docPostRef = doc(db, 'post', newId);
       const PostUpdate = {
         ...putObj,
         postId: newId,
       };
       updateDoc(docPostRef, PostUpdate);
-      //유저에 게시물 id 추가
+
       setModalOpen(true);
 
       setPostedUrl(`/list/rounge/${postRounge.url}/${newId}`);
@@ -326,7 +312,6 @@ const PostForm = ({ from }: { from: string }) => {
 
   const handleUploadChange = (e: any) => {
     if (e.target.files[0]) {
-      setPostImage(e.target.files[0]);
       handleUpload(e.target.files[0]);
     }
   };

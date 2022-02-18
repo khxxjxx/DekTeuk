@@ -38,6 +38,7 @@ import Router, { useRouter } from 'next/router';
 import Layout from '@layouts/Layout';
 import { StoreState, UserState } from '@interface/StoreInterface';
 import { ChatDefault, createChatRoom } from '@utils/createChatRoom';
+import AuthorClickMenu from '@components/items/AuthorClickMenu';
 
 const BoxStyled = styled(Box)`
   @media (prefers-color-scheme: dark) {
@@ -468,6 +469,7 @@ export default function RoungePost({
           />
         </Container>
       )}
+      {toggle && <AuthorClickMenu onToggle={onToggle} openChat={openChat} />}
     </Layout>
   );
 }
