@@ -14,11 +14,6 @@ export interface ChatDefault {
   jobSector: string;
 }
 
-interface alreadyChatType {
-  id: string | null;
-  counterInfo: undefined | ChatDefault;
-}
-
 export const createChatRoom = async (
   myInfo: ChatDefault,
   counterInfo: ChatDefault,
@@ -31,22 +26,23 @@ export const createChatRoom = async (
 
   const querySnapshot = await getDocs(chatQuery);
 
-  let alreadyChat: alreadyChatType = {
-    id: null,
-    counterInfo: undefined,
-  };
+  let alreadyChatId = null;
 
   querySnapshot.forEach((data) => {
     const { users } = data.data();
-    alreadyChat.id = data.id;
-    alreadyChat.counterInfo = users.find(
+
+    const isAlreadyChat = users.find(
       (user: ChatDefault) =>
         user.id === counterInfo.id && user.nickname === counterInfo.nickname,
     );
+
+    if (isAlreadyChat) {
+      alreadyChatId = data.id;
+    }
   });
 
-  if (alreadyChat.id && alreadyChat.counterInfo) {
-    return alreadyChat.id;
+  if (alreadyChatId) {
+    return alreadyChatId;
   } else {
     const { id } = await addDoc(collection(db, 'chat'), {
       users: [
