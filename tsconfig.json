@@ -32,7 +32,8 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "pages/list/rounge/[rounge]/[postid].tsx.back"
+    "pages/list/rounge/[rounge]/[postid].tsx.back",
+    "pages/index._123tsx"
   ],
   "exclude": ["node_modules"]
 }

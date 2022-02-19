@@ -261,7 +261,11 @@ export const getHomePostsInfiniteFunction = async (
 
   // console.log(lastIndex);
   return { result: dummyPosts, nextPage: pageParam + 1 };
-
+  //
+  //
+  //
+  //
+  //
   //
   // 아래 주석은 전체 post 갯수 출력과 랜덤 데이터 생성을 코드임
   //

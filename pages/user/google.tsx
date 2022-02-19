@@ -19,7 +19,11 @@ import { useRouter } from 'next/router';
 import MenuItem from '@mui/material/MenuItem';
 import { UserInfo, Rounge } from '@interface/StoreInterface';
 import { HomeListUrlString } from '@interface/GetPostsInterface';
-import { UserInputData, userInputInitialState, jobSectors } from './constants';
+import {
+  UserInputData,
+  userInputInitialState,
+  jobSectors,
+} from '@interface/constants';
 import { getAuth } from 'firebase/auth';
 import {
   userInputValidation,

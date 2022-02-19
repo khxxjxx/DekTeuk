@@ -53,7 +53,7 @@ export interface StoreState {
   user: UserState;
   view: ViewPosts;
   scroll: { scrollY: number };
-  headerIndex: { index: number };
+  viewSwiperScroll: Array<ViewSwiperScroll>;
   viewSwiper: Array<ViewSwiperData>;
 }
 export interface SearchResult {
@@ -63,6 +63,10 @@ export interface SearchResult {
 export interface ViewSwiperData {
   key: string;
   data: Array<SearchResult>;
+}
+export interface ViewSwiperScroll {
+  key: HomeListUrlString;
+  scroll: number;
 }
 // [
 //   {

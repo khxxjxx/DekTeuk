@@ -7,6 +7,7 @@ import {
   UserState,
   ViewPosts,
   ViewSwiperData,
+  ViewSwiperScroll,
 } from '@interface/StoreInterface';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '@firebase/firebase';
@@ -44,15 +45,24 @@ export const setTempDataInitializing = createAsyncThunk(
 //   return await getMyInfo(result);
 // });
 // console.log(getUser.name);
-const headerIndex = createSlice({
-  name: 'headerIndex',
-  initialState: { index: 0 },
+const viewSwiperScroll = createSlice({
+  name: 'viewSwiperScroll',
+  initialState: <Array<ViewSwiperScroll>>[],
   reducers: {
-    initializeHeaderIndex: (state) => {
-      state.index = 0;
+    initialViewSwiperScroll: (
+      state,
+      action: { payload: { key: HomeListUrlString } },
+    ) => {
+      const { key } = action.payload;
+      state.push({ key, scroll: 0 });
     },
-    setHeaderIndex: (state, action: { payload: number }) => {
-      state.index = action.payload;
+    setViewSwiperScroll: (
+      state,
+      action: { payload: { key: HomeListUrlString; scroll: number } },
+    ) => {
+      const { key, scroll } = action.payload;
+      const target = state.find((v) => v.key === key);
+      if (target?.key) target.scroll = scroll;
     },
   },
 });
@@ -349,10 +359,10 @@ export const likeViewPostAction = view.actions.likeViewPost;
 export const unLikeViewPostAction = view.actions.unLikeViewPost;
 export const updateOnePostAction = view.actions.updateOnePost;
 export const deleteOnePostAction = view.actions.deleteOnePost;
-
-export const initializeHeaderIndexAction =
-  headerIndex.actions.initializeHeaderIndex;
-export const setHeaderIndex = headerIndex.actions.setHeaderIndex;
+export const initialViewSwiperScrollAction =
+  viewSwiperScroll.actions.initialViewSwiperScroll;
+export const setViewSwiperScrollAction =
+  viewSwiperScroll.actions.setViewSwiperScroll;
 export const addViewWindowAction = viewSwiper.actions.addViewWindow;
 export const addViewDataAction = viewSwiper.actions.addViewData;
 export const updateOneViewDataAction = viewSwiper.actions.updateOneViewData;
@@ -366,7 +376,7 @@ const rootReducer = (
     view: ViewPosts;
     scroll: { scrollY: number };
     tempData: any;
-    headerIndex: { index: number };
+    viewSwiperScroll: Array<ViewSwiperScroll>;
     viewSwiper: Array<ViewSwiperData>;
   },
   action: AnyAction,
@@ -404,7 +414,7 @@ const rootReducer = (
               state.tempData.key == action.payload.tempData.tempData.key
                 ? action.payload.tempData
                 : state.tempData,
-            headerIndex: state.headerIndex,
+            viewSwiperScroll: state.viewSwiperScroll,
             viewSwiper: state.viewSwiper,
           };
         } else
@@ -420,7 +430,7 @@ const rootReducer = (
               state.tempData.key == action.payload.tempData.tempData.key
                 ? action.payload.tempData
                 : state.tempData,
-            headerIndex: state.headerIndex,
+            viewSwiperScroll: state.viewSwiperScroll,
             viewSwiper: state.viewSwiper,
           };
       default:
@@ -429,7 +439,7 @@ const rootReducer = (
           view: view.reducer,
           scroll: scroll.reducer,
           tempData: tempData.reducer,
-          headerIndex: headerIndex.reducer,
+          viewSwiperScroll: viewSwiperScroll.reducer,
           viewSwiper: viewSwiper.reducer,
         });
         return combineReducer(state, action);
