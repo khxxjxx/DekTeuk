@@ -17,9 +17,11 @@ import Layout from '@layouts/Layout';
 import { RoungeCard, TopicCard } from '@components/Card';
 import NotFoundPage from '@pages/404';
 import {
+  getUser,
   setViewAction,
   resetViewAction,
   setScrollAction,
+  initialViewAction,
   setSearchValueAction,
 } from '@store/reducer';
 import wrapper from '@store/configureStore';
@@ -39,7 +41,10 @@ const ListPage = () => {
   const { user: myInfo }: UserState = useSelector(
     (state: StoreState) => state.user,
   );
-  const { view }: { view: Array<SearchResult> } = useSelector(
+  const {
+    view,
+    searchValue,
+  }: { view: Array<SearchResult>; searchValue: string } = useSelector(
     (state: StoreState) => state.view,
   );
   const { scrollY }: { scrollY: number } = useSelector(
@@ -73,19 +78,16 @@ const ListPage = () => {
         // setTimeout(() => window.scrollTo({ top: 0 }), 0),
       );
     } else
-      router.events.on(
-        'routeChangeComplete',
-        () => {
-          const cntPath = window.location.pathname.split('/');
-          if (!cntPath[3] && cntPath[2] != 'topic')
-            window.scrollTo({ top: scrollY });
-        },
-        // setTimeout(() => window.scrollTo({ top: scrollY }), 0),
-      );
+      router.events.on('routeChangeComplete', (url) => {
+        if (!(url?.split('/')?.length > 3 && url?.split('/')[2] === 'topic'))
+          window.scrollTo({ top: scrollY });
+      });
 
     setAsPath(router.asPath);
   }, [router.asPath]);
-
+  useEffect(() => {
+    if (searchValue) dispatch(resetViewAction());
+  }, []);
   useEffect(() => {
     if (view.length === 0)
       (async () => {
@@ -104,7 +106,6 @@ const ListPage = () => {
     if (inView && view[view.length - 1].nextPage !== -1) {
       // if (inView) {
       (async () => {
-        console.log('inView');
         setIsLoading(true);
         const nextResults = await getHomePostsInfiniteFunction(
           router.asPath.split('/')[2] as HomeListUrlString,

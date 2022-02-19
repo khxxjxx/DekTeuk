@@ -88,8 +88,9 @@ const view = createSlice({
     setViewPosts(state, action) {
       state.view.push(action.payload);
     },
-    resetViewPosts(state) {
+    resetViewPosts(state, action: { payload: string | undefined }) {
       state.view = [];
+      state.searchValue = '';
     },
     setSearchValue(state, action) {
       state.searchValue = action.payload;
@@ -216,7 +217,6 @@ const rootReducer = (
           status: 'standby',
           error: '',
         };
-
         if (action.payload.user.user.nickname) userState = action.payload.user;
         else userState = state.user;
         if (state.view.view.length === 0) {
