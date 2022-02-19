@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import Link from 'next/link';
+import React from 'react';
 
 type MyPagePost = {
   title: string;
@@ -52,4 +53,4 @@ const MyPagePost: React.FC<MyPagePost> = ({
   );
 };
 
-export default MyPagePost;
+export default React.memo(MyPagePost);
