@@ -286,7 +286,14 @@ const ChatRoom = ({ user }: { user: Person }) => {
           </PageDownBtn>
         )}
         {newMessage && (
-          <NewMessage onClick={onPageDown}>새로운 메세지가 있습니다</NewMessage>
+          <NewMessage
+            onClick={() => {
+              onPageDown();
+              setNewMessage(false);
+            }}
+          >
+            새로운 메세지가 있습니다
+          </NewMessage>
         )}
         <label htmlFor="file">
           <AddIcon style={{ cursor: 'pointer', color: 'white' }} />
