@@ -1,3 +1,4 @@
+import React from 'react';
 import Link from 'next/link';
 import styled from '@emotion/styled';
 import NotificationInfo from './NotificationInfo';
@@ -54,4 +55,4 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
   );
 };
 
-export default NotificationCard;
+export default React.memo(NotificationCard);

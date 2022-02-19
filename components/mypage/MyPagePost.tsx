@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import Link from 'next/link';
+import React from 'react';
 
 type MyPagePost = {
   title: string;
@@ -43,7 +44,7 @@ const MyPagePost: React.FC<MyPagePost> = ({
   url,
 }) => {
   return (
-    <Link href={`/list/${postType}/${url.url}/${postId}`}>
+    <Link href={`/list/${postType}/${url.url}/${postId}`} passHref>
       <MyPagePostLi>
         <h4>{title}</h4>
         <div>{content}</div>
@@ -52,4 +53,4 @@ const MyPagePost: React.FC<MyPagePost> = ({
   );
 };
 
-export default MyPagePost;
+export default React.memo(MyPagePost);

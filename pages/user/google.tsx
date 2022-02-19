@@ -65,9 +65,9 @@ export default function Google() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const [ocrData, setOcrData] = useState<OcrData>({
-    b_no: '',
-    start_dt: '',
-    p_nm: '',
+    bNo: '',
+    startDate: '',
+    pName: '',
   });
   const { email, nickname, jobSector } = inputState;
   useEffect(() => {
@@ -87,9 +87,7 @@ export default function Google() {
     if (jobSector.error) {
       return true;
     } else {
-      //return !(nicknameBtnChecked && imageOcrChecked);
-      // 임시로 ocr 체크는 빼놓음
-      return !nicknameBtnChecked;
+      return !(nicknameBtnChecked && imageOcrChecked);
     }
   };
   const SignUpSubmitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -163,8 +161,8 @@ export default function Google() {
       alert('증명서에서 데이터를 가지고 오지 못했습니다!');
       resetOcrData();
     } else {
-      const { b_no, p_nm, start_dt } = result as OcrData;
-      const newOcrData = { b_no, p_nm, start_dt };
+      const { bNo, pName, startDate } = result as OcrData;
+      const newOcrData = { bNo, pName, startDate };
       setOcrData(newOcrData);
       setDialogOpen(true);
     }
@@ -184,7 +182,7 @@ export default function Google() {
   };
 
   const resetOcrData = () => {
-    const resetOcrData = { b_no: '', p_nm: '', start_dt: '' };
+    const resetOcrData = { bNo: '', pName: '', startDate: '' };
     setOcrData(resetOcrData);
   };
 
@@ -346,11 +344,11 @@ export default function Google() {
             </DialogTitle>
             <DialogContent>
               <DialogContentText id="alert-dialog-description">
-                사업자등록번호: {ocrData.b_no}
+                사업자등록번호: {ocrData.bNo}
                 <br />
-                대표자: {ocrData.p_nm}
+                대표자: {ocrData.pName}
                 <br />
-                개업년월일: {ocrData.start_dt}
+                개업년월일: {ocrData.startDate}
                 <br />
               </DialogContentText>
             </DialogContent>
@@ -583,15 +581,6 @@ const StyledCircularProgress = styled(CircularProgress)`
     color: ${({ theme }: any) => theme.mainColorBlue};
     margin-left: 10px;
     margin-top: 15px;
-  }
-`;
-
-const StyledDialog = styled(Dialog)`
-  color: ${({ theme }: any) => theme.mainColorViolet};
-
-  @media (prefers-color-scheme: dark) {
-    color: ${({ theme }: any) => theme.mainColorBlue};
-    background: rgb(17, 17, 19);
   }
 `;
 

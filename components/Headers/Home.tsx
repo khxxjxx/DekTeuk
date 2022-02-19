@@ -6,8 +6,8 @@ import 'swiper/css';
 import { Pagination } from 'swiper';
 import { useRouter } from 'next/router';
 import { useSelector } from 'react-redux';
-import { UserState, ValidRounge, UserInfo } from '@interface/StoreInterface';
-import { RootReducer } from '../../store/reducer';
+import { ValidRounge } from '@interface/StoreInterface';
+import { StoreState } from '@interface/StoreInterface';
 const SwiperStyled = styled(Swiper)`
   background-color: ${({ theme }: any) => theme.mainColorViolet};
   height: 60px;
@@ -56,7 +56,7 @@ const SwiperStyled = styled(Swiper)`
 `;
 
 const HeaderHome: React.FC = () => {
-  const { user: myInfo } = useSelector((state: RootReducer) => state.user);
+  const { user: myInfo } = useSelector((state: StoreState) => state.user);
   const router = useRouter();
   const headerLinks: { url: string; title: string }[] = [];
   if (myInfo?.validRounges)

@@ -29,8 +29,10 @@ const Notification: NextPage = () => {
   if (!data[0]?.postUrl) {
     return (
       <Layout>
-        <LoadingDiv />
-        <Empty ment="아직 새로운 알림이 없습니다." />
+        <Container>
+          <LoadingDiv />
+          <Empty ment="아직 새로운 알림이 없습니다." />
+        </Container>
       </Layout>
     );
   }
@@ -43,7 +45,7 @@ const Notification: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Layout>
-        <Container>
+        <Container style={{ maxWidth: '680px' }}>
           <div style={{ marginTop: '30px' }}>
             {data.length != 0 &&
               data.map((v: NotificationData, i: number) => (

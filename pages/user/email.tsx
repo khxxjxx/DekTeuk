@@ -48,7 +48,7 @@ import FactCheckIcon from '@mui/icons-material/FactCheck';
 import { validateData, getOcrData } from '@utils/ocrDataValidation';
 import { uploadImg } from '@utils/signupForm';
 import CircularProgress from '@mui/material/CircularProgress';
-import { reg_email } from '@interface/constants';
+import { regEmail } from '@interface/constants';
 const reducer = (state: UserInputData, action: UserInputDataAction) => {
   return {
     ...state,
@@ -70,9 +70,9 @@ export default function Signup() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const [ocrData, setOcrData] = useState<OcrData>({
-    b_no: '',
-    start_dt: '',
-    p_nm: '',
+    bNo: '',
+    startDate: '',
+    pName: '',
   });
 
   const [emailSuccess, setEmailSuccess] = useState<string>('');
@@ -148,7 +148,7 @@ export default function Signup() {
     if (
       emailCheckSnap.docs.length !== 0 ||
       email.value.length < 3 ||
-      !reg_email.test(email.value)
+      !regEmail.test(email.value)
     ) {
       emailHelperText = '사용 불가능한 이메일 입니다!';
     } else {
@@ -192,8 +192,8 @@ export default function Signup() {
       alert('증명서에서 데이터를 가지고 오지 못했습니다!');
       resetOcrData();
     } else {
-      const { b_no, p_nm, start_dt } = result as OcrData;
-      const newOcrData = { b_no, p_nm, start_dt };
+      const { bNo, pName, startDate } = result as OcrData;
+      const newOcrData = { bNo, pName, startDate };
       setOcrData(newOcrData);
       setDialogOpen(true);
     }
@@ -219,7 +219,7 @@ export default function Signup() {
     }
   };
   const resetOcrData = () => {
-    const resetOcrData = { b_no: '', p_nm: '', start_dt: '' };
+    const resetOcrData = { bNo: '', pName: '', startDate: '' };
     setOcrData(resetOcrData);
   };
 
@@ -362,9 +362,8 @@ export default function Signup() {
                 onChange={onInputChange}
                 helperText={nickname.error}
               />
-              {nicknameSuccess && (
-                <StyledFormHelperText>{nicknameSuccess}</StyledFormHelperText>
-              )}
+
+              <StyledFormHelperText>{nicknameSuccess}</StyledFormHelperText>
             </WrapInput>
             <WrapImageUpload>
               <Label>증명서</Label>
@@ -453,11 +452,11 @@ export default function Signup() {
             </DialogTitle>
             <DialogContent>
               <DialogContentText id="alert-dialog-description">
-                사업자등록번호: {ocrData.b_no}
+                사업자등록번호: {ocrData.bNo}
                 <br />
-                대표자: {ocrData.p_nm}
+                대표자: {ocrData.pName}
                 <br />
-                개업년월일: {ocrData.start_dt}
+                개업년월일: {ocrData.startDate}
                 <br />
               </DialogContentText>
             </DialogContent>
