@@ -156,6 +156,7 @@ const Comment: React.FC<CommentProps> = ({
               src={enterArrow}
               width="25px"
               height="25px"
+              alt={enterArrow.src}
             />
           </ImageWrapper>
           <NestedCommentDiv isClicked={isClicked}>

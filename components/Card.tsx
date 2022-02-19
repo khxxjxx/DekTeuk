@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import { getDateTime } from '@utils/function';
 import { TopicPost, RoungePost } from '@interface/CardInterface';
 import Link from 'next/link';
-import { ForwardedRef, forwardRef } from 'react';
+import React, { ForwardedRef, forwardRef } from 'react';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ModeCommentIcon from '@mui/icons-material/ModeComment';
 import ThumbUpOutlinedIcon from '@mui/icons-material/ThumbUpOutlined';
@@ -249,131 +249,134 @@ const CardStatWrapperLike = styled(CardStatWrapper)`
   z-index: 1;
 `;
 
-export const RoungeCard = forwardRef(function RoungeCardWithRef(
-  {
-    roungeCardData,
-    isLiked = false,
-  }: {
-    roungeCardData: RoungePost;
-    isLiked: boolean;
-  },
-  ref?: ForwardedRef<any>,
-) {
-  const dispatch = useDispatch();
+export const RoungeCard = React.memo(
+  forwardRef(function RoungeCardWithRef(
+    {
+      roungeCardData,
+      isLiked = false,
+    }: {
+      roungeCardData: RoungePost;
+      isLiked: boolean;
+    },
+    ref?: ForwardedRef<any>,
+  ) {
+    const dispatch = useDispatch();
 
-  const { ref: cardRef, inView } = useInView();
-  return (
-    <Wrapper ref={cardRef}>
-      {/* <Wrapper> */}
-      <Link
-        href={`/list/rounge/${roungeCardData.rounge.url}/${roungeCardData.postId}`}
-        passHref
-      >
-        <CardWrapper>
-          {inView ? (
-            <>
-              <div ref={ref} style={{ display: 'contents' }} />
-              <RoungeCardMainStyled>
-                <RoungeCardContentWrapper>
-                  <CardTitleStyled>{roungeCardData.title}</CardTitleStyled>
-                  <br />
-                  <CardContentStyled>
-                    {roungeCardData.content}
-                  </CardContentStyled>
-                  <br />
+    const { ref: cardRef, inView } = useInView();
+    return (
+      <Wrapper ref={cardRef}>
+        {/* <Wrapper> */}
+        <Link
+          href={`/list/rounge/${roungeCardData.rounge.url}/${roungeCardData.postId}`}
+          passHref
+        >
+          <CardWrapper>
+            {inView ? (
+              <>
+                <div ref={ref} style={{ display: 'contents' }} />
+                <RoungeCardMainStyled>
+                  <RoungeCardContentWrapper>
+                    <CardTitleStyled>{roungeCardData.title}</CardTitleStyled>
+                    <br />
+                    <CardContentStyled>
+                      {roungeCardData.content}
+                    </CardContentStyled>
+                    <br />
 
-                  <CardAuthorJobSectorWrapperStyled>
-                    <CardAuthorJobSectorStyled>
-                      {roungeCardData.author.jobSector}
-                    </CardAuthorJobSectorStyled>
-                    <CardMiddleDotStyled>·</CardMiddleDotStyled>
-                    <CardAuthorNickname>
-                      {roungeCardData.author.nickname}
-                    </CardAuthorNickname>
-                  </CardAuthorJobSectorWrapperStyled>
-                </RoungeCardContentWrapper>
-                {roungeCardData.images.length !== 0 && (
-                  <ImgComponent urls={roungeCardData.images} />
-                )}
-              </RoungeCardMainStyled>
-
-              <CardDividerStyled />
-              <CardBottomWrapperStyled>
-                <CardStatWrapperLike
-                  onClick={async (e) => {
-                    e.stopPropagation();
-                    const currentUser = getAuth().currentUser;
-                    if (currentUser) {
-                      if (isLiked) {
-                        const docRef = doc(db, 'post', roungeCardData.postId);
-                        const { uid } = currentUser;
-                        const updatePressPerson =
-                          roungeCardData.pressPerson.filter(
-                            (person) => person !== uid,
-                          );
-                        await updateDoc(docRef, {
-                          pressPerson: updatePressPerson,
-                        });
-                        dispatch(
-                          unLikeViewPostAction({
-                            postId: roungeCardData.postId,
-                            userId: uid,
-                          }),
-                        );
-                      } else {
-                        const docRef = doc(db, 'post', roungeCardData.postId);
-                        const { uid } = currentUser;
-                        const updatePressPerson = [
-                          ...roungeCardData.pressPerson,
-                          uid,
-                        ];
-                        await updateDoc(docRef, {
-                          pressPerson: updatePressPerson,
-                        });
-                        dispatch(
-                          likeViewPostAction({
-                            postId: roungeCardData.postId,
-                            userId: uid,
-                          }),
-                        );
-                      }
-                    }
-                  }}
-                >
-                  {isLiked ? (
-                    <ThumbUpIconStyled />
-                  ) : (
-                    <ThumbUpOutlinedIconStyled />
+                    <CardAuthorJobSectorWrapperStyled>
+                      <CardAuthorJobSectorStyled>
+                        {roungeCardData.author.jobSector}
+                      </CardAuthorJobSectorStyled>
+                      <CardMiddleDotStyled>·</CardMiddleDotStyled>
+                      <CardAuthorNickname>
+                        {roungeCardData.author.nickname}
+                      </CardAuthorNickname>
+                    </CardAuthorJobSectorWrapperStyled>
+                  </RoungeCardContentWrapper>
+                  {roungeCardData.images.length !== 0 && (
+                    <ImgComponent urls={roungeCardData.images} />
                   )}
+                </RoungeCardMainStyled>
 
-                  {roungeCardData.likeCount === 0
-                    ? '좋아요'
-                    : roungeCardData.likeCount}
-                </CardStatWrapperLike>
-                <CardStatWrapper>
-                  <ModeCommentIconStyled />
-                  {roungeCardData.commentsCount === 0
-                    ? '댓글'
-                    : roungeCardData.commentsCount}
-                </CardStatWrapper>
-                <div style={{ marginLeft: 'auto' }}>
-                  {getDateTime(roungeCardData.createdAt)}
-                </div>
-              </CardBottomWrapperStyled>
-            </>
-          ) : (
-            <>
-              <div ref={ref} />
-              <CardSkeleton />
-            </>
-          )}
-        </CardWrapper>
-      </Link>
-    </Wrapper>
-  );
-});
+                <CardDividerStyled />
+                <CardBottomWrapperStyled>
+                  <CardStatWrapperLike
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      const currentUser = getAuth().currentUser;
+                      if (currentUser) {
+                        if (isLiked) {
+                          const docRef = doc(db, 'post', roungeCardData.postId);
+                          const { uid } = currentUser;
+                          const updatePressPerson =
+                            roungeCardData.pressPerson.filter(
+                              (person) => person !== uid,
+                            );
+                          await updateDoc(docRef, {
+                            pressPerson: updatePressPerson,
+                          });
+                          dispatch(
+                            unLikeViewPostAction({
+                              postId: roungeCardData.postId,
+                              userId: uid,
+                            }),
+                          );
+                        } else {
+                          const docRef = doc(db, 'post', roungeCardData.postId);
+                          const { uid } = currentUser;
+                          const updatePressPerson = [
+                            ...roungeCardData.pressPerson,
+                            uid,
+                          ];
+                          await updateDoc(docRef, {
+                            pressPerson: updatePressPerson,
+                          });
+                          dispatch(
+                            likeViewPostAction({
+                              postId: roungeCardData.postId,
+                              userId: uid,
+                            }),
+                          );
+                        }
+                      }
+                    }}
+                  >
+                    {isLiked ? (
+                      <ThumbUpIconStyled />
+                    ) : (
+                      <ThumbUpOutlinedIconStyled />
+                    )}
 
-const CardSkeleton = () => {
+                    {roungeCardData.likeCount === 0
+                      ? '좋아요'
+                      : roungeCardData.likeCount}
+                  </CardStatWrapperLike>
+                  <CardStatWrapper>
+                    <ModeCommentIconStyled />
+                    {roungeCardData.commentsCount === 0
+                      ? '댓글'
+                      : roungeCardData.commentsCount}
+                  </CardStatWrapper>
+                  <div style={{ marginLeft: 'auto' }}>
+                    {getDateTime(roungeCardData.createdAt)}
+                  </div>
+                </CardBottomWrapperStyled>
+              </>
+            ) : (
+              <>
+                <div ref={ref} />
+                <CardSkeleton />
+              </>
+            )}
+          </CardWrapper>
+        </Link>
+      </Wrapper>
+    );
+  }),
+);
+RoungeCard.displayName = 'RoungeCard';
+
+const CardSkeleton = React.memo(() => {
   return (
     <Wrapper>
       <CardWrapperSkeleton>
@@ -405,145 +408,152 @@ const CardSkeleton = () => {
       </CardWrapperSkeleton>
     </Wrapper>
   );
-};
+});
+CardSkeleton.displayName = 'CardSkeleton';
 
-export const TopicCard = forwardRef(function TopicCardWithRef(
-  {
-    topicCardData,
-    isLiked = false,
-  }: {
-    topicCardData: TopicPost;
-    isLiked: boolean;
-  },
-  ref?: any,
-) {
-  const dispatch = useDispatch();
-  const { ref: cardRef, inView } = useInView();
-  // @ts-ignore
-  // console.log(topicCardData.pressPerson);
-  // console.log(Object.keys(topicCardData));
-  return (
-    <Wrapper ref={cardRef}>
-      {/* <Wrapper> */}
-      <Link
-        href={`/list/topic/${topicCardData.topic.url}/${topicCardData.postId}`}
-        passHref
-      >
-        <CardWrapper>
-          {inView ? (
-            <>
-              <div ref={ref} />
-              <TopicCardMainStyled>
-                <TopicCardContentWrapper>
-                  <OneDepthNestedLink
-                    href={`/list/topic/${topicCardData.topic.url}`}
-                  >
-                    <TopicWrapperDivStyled>
-                      <div>{topicCardData.topic.title}</div>
-                    </TopicWrapperDivStyled>
-                  </OneDepthNestedLink>
-                  <CardTitleStyled>{topicCardData.title}</CardTitleStyled>
-                  <CardContentStyled>{topicCardData.content}</CardContentStyled>
+export const TopicCard = React.memo(
+  forwardRef(function TopicCardWithRef(
+    {
+      topicCardData,
+      isLiked = false,
+    }: {
+      topicCardData: TopicPost;
+      isLiked: boolean;
+    },
+    ref?: any,
+  ) {
+    const dispatch = useDispatch();
+    const { ref: cardRef, inView } = useInView();
+    // @ts-ignore
+    // console.log(topicCardData.pressPerson);
+    // console.log(Object.keys(topicCardData));
+    return (
+      <Wrapper ref={cardRef}>
+        {/* <Wrapper> */}
+        <Link
+          href={`/list/topic/${topicCardData.topic.url}/${topicCardData.postId}`}
+          passHref
+        >
+          <CardWrapper>
+            {inView ? (
+              <>
+                <div ref={ref} />
+                <TopicCardMainStyled>
+                  <TopicCardContentWrapper>
+                    <OneDepthNestedLink
+                      href={`/list/topic/${topicCardData.topic.url}`}
+                    >
+                      <TopicWrapperDivStyled>
+                        <div>{topicCardData.topic.title}</div>
+                      </TopicWrapperDivStyled>
+                    </OneDepthNestedLink>
+                    <CardTitleStyled>{topicCardData.title}</CardTitleStyled>
+                    <CardContentStyled>
+                      {topicCardData.content}
+                    </CardContentStyled>
 
-                  <div
-                    style={{
-                      fontSize: '0.8rem',
-                      color: 'rgb(78, 85, 101)',
-                      alignSelf: 'start',
-                      marginTop: '10px', // 수정
+                    <div
+                      style={{
+                        fontSize: '0.8rem',
+                        color: 'rgb(78, 85, 101)',
+                        alignSelf: 'start',
+                        marginTop: '10px', // 수정
+                      }}
+                    >
+                      토픽
+                    </div>
+                    <CardAuthorJobSectorWrapperStyled>
+                      <CardAuthorJobSectorStyled>
+                        {topicCardData.author.jobSector}
+                      </CardAuthorJobSectorStyled>
+                      <CardMiddleDotStyled>·</CardMiddleDotStyled>
+                      <CardAuthorNickname>
+                        {topicCardData.author.nickname}
+                      </CardAuthorNickname>
+                    </CardAuthorJobSectorWrapperStyled>
+                  </TopicCardContentWrapper>
+                  {topicCardData.images &&
+                    topicCardData.images.length !== 0 && (
+                      <ImgComponent urls={topicCardData.images} />
+                    )}
+                </TopicCardMainStyled>
+                <CardDividerStyled />
+                <CardBottomWrapperStyled>
+                  <CardStatWrapperLike
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      const currentUser = getAuth().currentUser;
+                      if (currentUser) {
+                        if (isLiked) {
+                          const docRef = doc(db, 'post', topicCardData.postId);
+                          const { uid } = currentUser;
+                          const updatePressPerson =
+                            topicCardData.pressPerson.filter(
+                              (person) => person !== uid,
+                            );
+                          await updateDoc(docRef, {
+                            pressPerson: updatePressPerson,
+                          });
+                          dispatch(
+                            unLikeViewPostAction({
+                              postId: topicCardData.postId,
+                              userId: uid,
+                            }),
+                          );
+                        } else {
+                          const docRef = doc(db, 'post', topicCardData.postId);
+                          const { uid } = currentUser;
+                          const updatePressPerson = [
+                            ...topicCardData.pressPerson,
+                            uid,
+                          ];
+                          await updateDoc(docRef, {
+                            pressPerson: updatePressPerson,
+                          });
+                          dispatch(
+                            likeViewPostAction({
+                              postId: topicCardData.postId,
+                              userId: uid,
+                            }),
+                          );
+                        }
+                      }
                     }}
                   >
-                    토픽
-                  </div>
-                  <CardAuthorJobSectorWrapperStyled>
-                    <CardAuthorJobSectorStyled>
-                      {topicCardData.author.jobSector}
-                    </CardAuthorJobSectorStyled>
-                    <CardMiddleDotStyled>·</CardMiddleDotStyled>
-                    <CardAuthorNickname>
-                      {topicCardData.author.nickname}
-                    </CardAuthorNickname>
-                  </CardAuthorJobSectorWrapperStyled>
-                </TopicCardContentWrapper>
-                {topicCardData.images && topicCardData.images.length !== 0 && (
-                  <ImgComponent urls={topicCardData.images} />
-                )}
-              </TopicCardMainStyled>
-              <CardDividerStyled />
-              <CardBottomWrapperStyled>
-                <CardStatWrapperLike
-                  onClick={async (e) => {
-                    e.stopPropagation();
-                    const currentUser = getAuth().currentUser;
-                    if (currentUser) {
-                      if (isLiked) {
-                        const docRef = doc(db, 'post', topicCardData.postId);
-                        const { uid } = currentUser;
-                        const updatePressPerson =
-                          topicCardData.pressPerson.filter(
-                            (person) => person !== uid,
-                          );
-                        await updateDoc(docRef, {
-                          pressPerson: updatePressPerson,
-                        });
-                        dispatch(
-                          unLikeViewPostAction({
-                            postId: topicCardData.postId,
-                            userId: uid,
-                          }),
-                        );
-                      } else {
-                        const docRef = doc(db, 'post', topicCardData.postId);
-                        const { uid } = currentUser;
-                        const updatePressPerson = [
-                          ...topicCardData.pressPerson,
-                          uid,
-                        ];
-                        await updateDoc(docRef, {
-                          pressPerson: updatePressPerson,
-                        });
-                        dispatch(
-                          likeViewPostAction({
-                            postId: topicCardData.postId,
-                            userId: uid,
-                          }),
-                        );
-                      }
-                    }
-                  }}
-                >
-                  {isLiked ? (
-                    <ThumbUpIconStyled />
-                  ) : (
-                    <ThumbUpOutlinedIconStyled />
-                  )}
+                    {isLiked ? (
+                      <ThumbUpIconStyled />
+                    ) : (
+                      <ThumbUpOutlinedIconStyled />
+                    )}
 
-                  {topicCardData.likeCount === 0
-                    ? '좋아요'
-                    : topicCardData.likeCount}
-                </CardStatWrapperLike>
-                <CardStatWrapper>
-                  <ModeCommentIconStyled />
-                  {topicCardData.commentsCount === 0
-                    ? '댓글'
-                    : topicCardData.commentsCount}
-                </CardStatWrapper>
-                <div style={{ marginLeft: 'auto' }}>
-                  {getDateTime(topicCardData.createdAt)}
-                </div>
-              </CardBottomWrapperStyled>
-            </>
-          ) : (
-            <>
-              <div ref={ref} />
-              <CardSkeleton />
-            </>
-          )}
-        </CardWrapper>
-      </Link>
-    </Wrapper>
-  );
-});
+                    {topicCardData.likeCount === 0
+                      ? '좋아요'
+                      : topicCardData.likeCount}
+                  </CardStatWrapperLike>
+                  <CardStatWrapper>
+                    <ModeCommentIconStyled />
+                    {topicCardData.commentsCount === 0
+                      ? '댓글'
+                      : topicCardData.commentsCount}
+                  </CardStatWrapper>
+                  <div style={{ marginLeft: 'auto' }}>
+                    {getDateTime(topicCardData.createdAt)}
+                  </div>
+                </CardBottomWrapperStyled>
+              </>
+            ) : (
+              <>
+                <div ref={ref} />
+                <CardSkeleton />
+              </>
+            )}
+          </CardWrapper>
+        </Link>
+      </Wrapper>
+    );
+  }),
+);
+TopicCard.displayName = 'TopicCard';
 
 export const TopicPageCard = forwardRef(function TopicCardWithRef(
   {

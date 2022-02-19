@@ -17,11 +17,9 @@ import Layout from '@layouts/Layout';
 import { RoungeCard, TopicCard } from '@components/Card';
 import NotFoundPage from '@pages/404';
 import {
-  getUser,
   setViewAction,
   resetViewAction,
   setScrollAction,
-  initialViewAction,
   setSearchValueAction,
 } from '@store/reducer';
 import wrapper from '@store/configureStore';

@@ -340,7 +340,11 @@ export default function TopicPost({
                         alignItems: 'center',
                       }}
                     >
-                      <img src={v.url} style={{ maxWidth: '100%' }} />
+                      <img
+                        src={v.url}
+                        style={{ maxWidth: '100%' }}
+                        alt={v.url}
+                      />
                       <Typography
                         sx={{ mb: 2, mt: 1 }}
                         style={{

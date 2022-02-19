@@ -1,5 +1,5 @@
 import { UserInputData } from '@interface/constants';
-import { reg_email } from '@interface/constants';
+import { regEmail } from '@interface/constants';
 
 export const userInputChangeValidation = (
   name: string,
@@ -7,7 +7,7 @@ export const userInputChangeValidation = (
   state: UserInputData,
 ) => {
   if (name === 'email') {
-    if (!reg_email.test(value)) return '이메일 형식에 맞춰 입력해 주세요!';
+    if (!regEmail.test(value)) return '이메일 형식에 맞춰 입력해 주세요!';
   } else if (name === 'password') {
     if (value.length < 6) {
       return '6자리 이상 입력해 주세요!';

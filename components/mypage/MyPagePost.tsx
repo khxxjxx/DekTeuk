@@ -43,7 +43,7 @@ const MyPagePost: React.FC<MyPagePost> = ({
   url,
 }) => {
   return (
-    <Link href={`/list/${postType}/${url.url}/${postId}`}>
+    <Link href={`/list/${postType}/${url.url}/${postId}`} passHref>
       <MyPagePostLi>
         <h4>{title}</h4>
         <div>{content}</div>
