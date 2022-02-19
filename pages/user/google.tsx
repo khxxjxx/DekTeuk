@@ -511,6 +511,7 @@ const SubmitButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-bottom: 25px;
   :hover {
     opacity: 0.8;
   }

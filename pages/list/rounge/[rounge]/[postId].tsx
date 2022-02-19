@@ -256,15 +256,16 @@ export default function RoungePost({
     };
     const id = await createChatRoom(myInfo, counterInfo);
     router.push(
-      `/chat/${id}?other=${counterInfo.nickname}&id=${counterInfo.id}`,
+      `/chat/${id}?other=${counterInfo.nickname}&id=${counterInfo.id}&mine=${myInfo.nickname}`,
+      `/chat/${id}`,
     );
   };
 
   return (
     <Layout>
-      <ContainerStyled sx={{ maxWidth: '680px' }}>
+      <ContainerStyled sx={{ maxWidth: '680px', justifyContent: 'center' }}>
         {accessPost === '' ? (
-          <Box sx={{ mt: 6 }}>
+          <Box sx={{ mt: 6, maxWidth: '680px', margin: 'auto' }}>
             <Stack spacing={2}>
               <Skeleton variant="rectangular" width="sm" height={58} />
               <Skeleton variant="circular" width={40} height={40} />
@@ -277,7 +278,7 @@ export default function RoungePost({
           </Box>
         ) : accessPost === 'noUser' ? (
           <>
-            <Box sx={{ mt: 6 }}>
+            <Box sx={{ mt: 6, maxWidth: '680px', margin: 'auto' }}>
               <Stack spacing={2}>
                 <Skeleton variant="rectangular" width="sm" height={58} />
                 <Skeleton variant="circular" width={40} height={40} />
@@ -317,7 +318,7 @@ export default function RoungePost({
           </>
         ) : accessPost === 'noAuthority' ? (
           <>
-            <Box sx={{ mt: 6 }}>
+            <Box sx={{ mt: 6, maxWidth: '680px', margin: 'auto' }}>
               <Stack spacing={2}>
                 <Skeleton variant="rectangular" width="sm" height={58} />
                 <Skeleton variant="circular" width={40} height={40} />
@@ -369,7 +370,7 @@ export default function RoungePost({
             />
           ) : (
             accessPost === 'accessAvailable' && (
-              <Box sx={{ mt: 6 }}>
+              <Box sx={{ mt: 6, maxWidth: '680px', margin: 'auto' }}>
                 <CustomSeparator menu={post} />
                 <Typography
                   variant="h5"
